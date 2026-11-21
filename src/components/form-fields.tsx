@@ -3,9 +3,9 @@
 import type { InputHTMLAttributes } from "react";
 import { useFormStatus } from "react-dom";
 import { t } from "@/i18n";
+import { inputClass } from "./styles";
 
-export const inputClass =
-  "h-12 w-full rounded-md border border-zinc-400 px-3 text-base focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-700 aria-[invalid=true]:border-red-700";
+export { inputClass };
 
 type FieldProps = InputHTMLAttributes<HTMLInputElement> & {
   name: string;

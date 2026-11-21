@@ -253,3 +253,12 @@ export async function deleteYear(principal: Principal, yearId: string): Promise<
     }),
   );
 }
+
+/** Année proposée par défaut à l'écran : l'année en cours, sinon une année en préparation. */
+export function defaultYear(years: AcademicYear[]): AcademicYear | undefined {
+  return (
+    years.find((y) => y.status === "active") ??
+    years.find((y) => y.status === "upcoming") ??
+    years[0]
+  );
+}

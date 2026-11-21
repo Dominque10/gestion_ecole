@@ -39,6 +39,7 @@ export const fr = {
     years: "Années scolaires",
     levels: "Niveaux",
     subjects: "Matières",
+    coefficients: "Coefficients",
   },
   form: {
     saving: "Enregistrement…",
@@ -247,6 +248,32 @@ export const fr = {
     deleted: "Matière supprimée.",
     nameError: "Indiquez un nom (80 caractères au plus).",
   },
+  coefficients: {
+    title: "Coefficients",
+    intro:
+      "Pour chaque niveau (et chaque série au lycée), cochez les matières enseignées et indiquez leur coefficient. Toutes les classes de ce niveau et de cette série suivent la grille.",
+    noYear: "Créez d'abord une année scolaire.",
+    noLevel: "Ajoutez d'abord les niveaux de l'école.",
+    year: "Année",
+    level: "Niveau",
+    series: "Série",
+    seriesHelp: "Lycée seulement (ex. A, C, D). Laissez vide pour les autres niveaux.",
+    show: "Afficher la grille",
+    gridTitle: "Grille : {niveau}",
+    gridTitleSeries: "Grille : {niveau} série {serie}",
+    taught: "{matiere} enseignée",
+    coefficient: "Coefficient de {matiere}",
+    noSubjects:
+      "Aucune matière pour l'instant : utilisez le bouton ci-dessous ou la page Matières.",
+    save: "Enregistrer la grille",
+    saved: "Grille enregistrée.",
+    addDefaults: "Ajouter les matières courantes (coefficient 1)",
+    addedDefaults:
+      "{n} matière(s) ajoutée(s) à la grille. Ajustez les coefficients puis enregistrez.",
+    nothingToAdd: "Les matières courantes sont déjà dans la grille.",
+    readOnly: "Année archivée : grille en consultation seulement.",
+    count: "{n} matière(s) dans la grille",
+  },
   settings: {
     errors: {
       codeTaken: "Ce code est déjà utilisé par une autre école.",
@@ -273,6 +300,10 @@ export const fr = {
       levelNotFound: "Niveau introuvable.",
       levelInUse:
         "Ce niveau est utilisé (classes ou coefficients) : il ne peut pas être supprimé. Vous pouvez le renommer.",
+      seriesInvalid:
+        "Série invalide : quelques lettres ou chiffres (ex. A, C, D), et seulement pour un niveau du lycée.",
+      gridInvalid:
+        "Grille invalide : vérifiez les matières et les coefficients (entiers de 1 à 20).",
       subjectNameTaken: "Une matière porte déjà ce nom.",
       subjectNotFound: "Matière introuvable.",
       subjectInUse:

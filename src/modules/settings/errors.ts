@@ -22,6 +22,8 @@ export type SettingsErrorCode =
   | "subjectNameTaken"
   | "subjectNotFound"
   | "subjectInUse"
+  | "seriesInvalid"
+  | "gridInvalid"
   | PeriodsProblem;
 
 export class SettingsError extends Error {

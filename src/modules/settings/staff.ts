@@ -1,6 +1,6 @@
 // Le directeur gère les comptes du personnel de son école et leurs rôles (décision D3).
 // Chaque changement de droits est tracé dans audit_logs (CLAUDE.md §6, Traçabilité).
-import { and, arrayContains, asc, eq, inArray } from "drizzle-orm";
+import { and, arrayContains, asc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import { authorize, type MembershipRole, type Principal } from "@/server/auth/permissions";
 import { withSchool, type Tx } from "@/server/db/client";
@@ -10,11 +10,19 @@ import {
   classes,
   classSubjects,
   memberships,
+  sessions,
   users,
 } from "@/server/db/schema";
+import { hashPassword } from "@/server/auth/password";
 import { findOrCreateAccount } from "./accounts";
 import { SettingsError } from "./errors";
-import { AddStaffSchema, STAFF_ROLES, StaffRolesSchema, type AddStaffInput } from "./schemas";
+import {
+  AddStaffSchema,
+  STAFF_ROLES,
+  StaffRolesSchema,
+  TemporaryPasswordSchema,
+  type AddStaffInput,
+} from "./schemas";
 
 const isStaffRole = (role: MembershipRole) => (STAFF_ROLES as readonly string[]).includes(role);
 
@@ -218,6 +226,54 @@ export async function removeStaff(principal: Principal, userId: string): Promise
       entityId: userId,
       before: { roles: existing.roles },
       after: { roles: remaining },
+    });
+  });
+}
+
+/**
+ * Mot de passe oublié (décision D5, H9) : le directeur remet un mot de passe provisoire à un membre
+ * du personnel, qui devra le changer à la connexion. Refusé si le compte appartient aussi à une
+ * autre école (le super-admin s'en charge alors), et pour son propre compte. Les sessions ouvertes
+ * de la personne sont fermées ; le blocage après 5 essais est levé. Tracé dans le journal.
+ */
+export async function resetStaffPassword(
+  principal: Principal,
+  userId: string,
+  temporaryPassword: string,
+): Promise<void> {
+  const ctx = schoolContext(principal);
+  const password = TemporaryPasswordSchema.parse(temporaryPassword);
+  if (userId === principal.userId) throw new SettingsError("cannotResetSelf");
+  const passwordHash = await hashPassword(password);
+  await withSchool(ctx, async (tx) => {
+    const existing = await lockMembership(tx, ctx.schoolId, userId);
+    if (!existing || !existing.roles.some(isStaffRole)) throw new SettingsError("notMember");
+    const found = await tx.execute<{ other: boolean }>(
+      sql`select app.user_in_other_school(${userId}) as other`,
+    );
+    if (found.rows[0]?.other) throw new SettingsError("otherSchoolAccount");
+    const [target] = await tx
+      .select({ isSuperadmin: users.isSuperadmin })
+      .from(users)
+      .where(eq(users.id, userId));
+    if (!target || target.isSuperadmin) throw new SettingsError("platformAccount");
+    await tx
+      .update(users)
+      .set({
+        passwordHash,
+        mustChangePassword: true,
+        failedLoginCount: 0,
+        lockedUntil: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+    await tx.delete(sessions).where(eq(sessions.userId, userId));
+    await tx.insert(auditLogs).values({
+      schoolId: ctx.schoolId,
+      actorUserId: principal.userId,
+      action: "staff.password_reset",
+      entityType: "user",
+      entityId: userId,
     });
   });
 }

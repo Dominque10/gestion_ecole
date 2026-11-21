@@ -21,9 +21,10 @@ Contraintes du terrain à garder en tête en permanence :
 ## 2. État actuel (À METTRE À JOUR)
 
 - Version en cours : **V1**
-- Phase en cours : **Phase 1 – Fondations** — tout est codé, **en attente de validation du jalon** par le porteur
-- Module en cours : **M1 Paramétrage terminé** (prochain après validation : Phase 2, M2 + M3 ensemble)
-- Dernier jalon validé : **Phase 0**, validée par le porteur du projet le 2026-11-21 (décision D1)
+- Phase en cours : **Phase 2 – Élèves et caisse** (M2 + M3 ensemble, décision A3) — **plan à valider avant tout code**
+- Module en cours : **aucun** (prochain : M2 + M3)
+- Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
+  avec les hypothèses H1 à H37 de `docs/hypotheses.md`
 - **Pas d'école pilote pour l'instant (D1)** : les règles qui dépendaient des écoles sont des hypothèses
   par défaut, paramétrables, à revoir dès qu'une école sera contactée. Paiement et SMS : faux prestataire
   de test derrière l'interface interne. Toujours signaler quand un choix est une hypothèse.
@@ -40,7 +41,6 @@ Contraintes du terrain à garder en tête en permanence :
     - ✅ 4d – Niveaux, matières, grille des coefficients (niveau + série, D4), classes, affectations
     - ✅ 4e – Créneaux simples et grille tarifaire (frais par niveau, tranches en FCFA entiers)
     - ✅ 4f – Copie de structure d'une année à l'autre + assistant de démarrage
-  - Avant la Phase 2 : revoir avec le porteur les hypothèses de `docs/hypotheses.md` (H1 à H37).
 - Next.js 16.4 : lire `node_modules/next/dist/docs/` avant d'utiliser une API (voir `AGENTS.md`).
   `middleware` s'appelle `proxy`, API de requête asynchrones, `cacheComponents` activé.
 
@@ -121,6 +121,8 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
     se fait sous un `<Suspense>` (Next 16 + cacheComponents).
   - Hypothèses : verrouillage 15 min après 5 échecs ; session de 12 h. Rôles relus à chaque requête.
   - Message de connexion identique pour compte inconnu / mauvais mot de passe / autre école.
+  - Mot de passe oublié (D5) : le directeur remet un mot de passe provisoire si le compte n'est dans
+    aucune autre école (`app.user_in_other_school`) ; sinon `pnpm password:reset --identifier ...`.
   - Premier super-admin : `pnpm superadmin:create --email ... --name "..."` (mot de passe demandé au clavier, masqué ; relancer la commande change le mot de passe).
   - Comptes créés par le super-admin ou le directeur : mot de passe provisoire, à changer à la première
     connexion (`users.must_change_password`, page `/mot-de-passe`). Un compte existant (autre école) garde

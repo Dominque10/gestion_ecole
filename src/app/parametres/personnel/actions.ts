@@ -4,7 +4,12 @@ import { refresh } from "next/cache";
 import { t } from "@/i18n";
 import type { FormState } from "@/lib/form-state";
 import { AddStaffSchema } from "@/modules/settings/schemas";
-import { addStaff, removeStaff, updateStaffRoles } from "@/modules/settings/staff";
+import {
+  addStaff,
+  removeStaff,
+  resetStaffPassword,
+  updateStaffRoles,
+} from "@/modules/settings/staff";
 import { PASSWORD_MIN_LENGTH } from "@/server/auth/password";
 import { requireAction } from "@/server/auth/session";
 import { invalidForm, readFields, refusalMessage } from "@/server/forms";
@@ -71,6 +76,25 @@ export async function removeStaffAction(_prev: FormState, formData: FormData): P
     await removeStaff(principal, String(formData.get("userId") ?? ""));
     refresh();
     return success(t("staff.removed"));
+  } catch (error) {
+    return failure(refusalMessage(error));
+  }
+}
+
+export async function resetPasswordAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("staff:manage");
+  const password = String(formData.get("password") ?? "");
+  const name = String(formData.get("name") ?? "");
+  if (password.length < PASSWORD_MIN_LENGTH) {
+    return failure(t("staff.errors.password", { min: PASSWORD_MIN_LENGTH }));
+  }
+  try {
+    await resetStaffPassword(principal, String(formData.get("userId") ?? ""), password);
+    refresh();
+    return success(t("staff.resetDone", { nom: name }));
   } catch (error) {
     return failure(refusalMessage(error));
   }

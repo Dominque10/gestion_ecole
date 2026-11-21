@@ -6,7 +6,12 @@ import { t } from "@/i18n";
 import { idleFormState } from "@/lib/form-state";
 import { STAFF_ROLES } from "@/modules/settings/roles";
 import type { StaffMember } from "@/modules/settings/staff";
-import { addStaffAction, removeStaffAction, updateRolesAction } from "./actions";
+import {
+  addStaffAction,
+  removeStaffAction,
+  resetPasswordAction,
+  updateRolesAction,
+} from "./actions";
 
 function RoleCheckboxes({
   idPrefix,
@@ -79,8 +84,17 @@ export function AddStaffForm({ minLength }: { minLength: number }) {
   );
 }
 
-export function StaffMemberCard({ member }: { member: StaffMember }) {
+export function StaffMemberCard({
+  member,
+  isSelf,
+  minLength,
+}: {
+  member: StaffMember;
+  isSelf: boolean;
+  minLength: number;
+}) {
   const [rolesState, rolesAction] = useActionState(updateRolesAction, idleFormState);
+  const [resetState, resetAction] = useActionState(resetPasswordAction, idleFormState);
   const [removeState, removeAction] = useActionState(removeStaffAction, idleFormState);
   const contact = member.phone ?? member.email;
   return (
@@ -111,6 +125,33 @@ export function StaffMemberCard({ member }: { member: StaffMember }) {
         <FormMessage status={removeState.status} message={removeState.message} />
         <SubmitButton label={t("staff.remove")} variant="danger" />
       </form>
+      {!isSelf && (
+        <details className="rounded-md bg-zinc-50 p-3">
+          <summary className="min-h-11 cursor-pointer content-center font-medium">
+            {t("staff.resetTitle")}
+          </summary>
+          <form
+            key={resetState.status === "success" ? resetState.message : "form"}
+            action={resetAction}
+            className="mt-3 flex flex-col gap-3"
+            noValidate
+          >
+            <input type="hidden" name="userId" value={member.userId} />
+            <input type="hidden" name="name" value={member.name} />
+            <Field
+              id={`reset-${member.userId}`}
+              name="password"
+              type="text"
+              autoComplete="off"
+              label={t("staff.resetPassword", { nom: member.name })}
+              help={t("staff.resetHelp", { min: minLength })}
+              required
+            />
+            <FormMessage status={resetState.status} message={resetState.message} />
+            <SubmitButton label={t("staff.resetSubmit")} variant="secondary" />
+          </form>
+        </details>
+      )}
     </li>
   );
 }

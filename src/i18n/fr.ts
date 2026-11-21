@@ -115,6 +115,12 @@ export const fr = {
       "{nom} avait déjà un compte (autre école) : la personne garde son mot de passe actuel.",
     rolesSaved: "Rôles enregistrés.",
     removed: "La personne a été retirée du personnel.",
+    resetTitle: "Mot de passe oublié ?",
+    resetPassword: "Nouveau mot de passe provisoire pour {nom}",
+    resetHelp:
+      "Au moins {min} caractères. Communiquez-le à la personne : elle devra le changer à la connexion.",
+    resetSubmit: "Remettre le mot de passe",
+    resetDone: "Mot de passe provisoire enregistré pour {nom}.",
     errors: {
       name: "Indiquez le nom et le prénom.",
       identifier: "Téléphone ou email invalide (ex. 06 123 45 67).",
@@ -443,6 +449,10 @@ export const fr = {
       notMember: "Cette personne ne fait pas partie du personnel de l'école.",
       lastDirector: "L'école doit garder au moins un directeur.",
       cannotRemoveSelf: "Vous ne pouvez pas vous retirer vous-même.",
+      cannotResetSelf:
+        "Pour votre propre mot de passe, utilisez « Choisir votre mot de passe » après connexion.",
+      otherSchoolAccount:
+        "Ce compte sert aussi dans une autre école : demandez à l'administrateur de la plateforme de remettre le mot de passe.",
       notFound: "École introuvable.",
       imageMissing: "Choisissez une image.",
       imageTooLarge: "Image trop lourde, même après réduction. Essayez une photo plus petite.",

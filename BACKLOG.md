@@ -20,4 +20,4 @@
 
 ## Idées notées en cours de route
 
-_(vide)_
+- 2026-11-21 — Outil super-admin de réouverture exceptionnelle d'une année archivée, tracé dans le journal (décision D5, H16). À construire seulement le jour où le cas se présente. — Claude — à décider

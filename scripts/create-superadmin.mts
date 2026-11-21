@@ -6,6 +6,7 @@ import { existsSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { hash } from "@node-rs/argon2";
 import pg from "pg";
+import { askHidden } from "./lib/ask-hidden.mts";
 
 if (existsSync(".env")) process.loadEnvFile(".env");
 
@@ -17,45 +18,6 @@ const adminUrl = process.env.DATABASE_ADMIN_URL;
 if (!email || !name || !adminUrl) {
   console.error('Usage : pnpm superadmin:create --email ... --name "..."');
   process.exit(1);
-}
-
-const ENTER = ["\r", "\n"];
-const CTRL_C = "\u0003";
-const BACKSPACE = ["\b", "\u007f"];
-
-/** Lit une saisie au clavier sans l'afficher (une étoile par caractère). */
-function askHidden(question: string): Promise<string> {
-  return new Promise((resolve) => {
-    const stdin = process.stdin;
-    process.stdout.write(question);
-    let value = "";
-    stdin.setRawMode?.(true);
-    stdin.resume();
-    stdin.setEncoding("utf8");
-    const onData = (chunk: string) => {
-      for (const char of chunk) {
-        if (ENTER.includes(char)) {
-          stdin.setRawMode?.(false);
-          stdin.pause();
-          stdin.off("data", onData);
-          process.stdout.write("\n");
-          resolve(value);
-          return;
-        }
-        if (char === CTRL_C) process.exit(130);
-        if (BACKSPACE.includes(char)) {
-          if (value.length > 0) {
-            value = value.slice(0, -1);
-            process.stdout.write("\b \b");
-          }
-        } else {
-          value += char;
-          process.stdout.write("*");
-        }
-      }
-    };
-    stdin.on("data", onData);
-  });
 }
 
 let password = process.env.SUPERADMIN_PASSWORD ?? "";

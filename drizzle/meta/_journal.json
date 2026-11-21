@@ -78,6 +78,13 @@
       "when": 1795266034909,
       "tag": "0010_time_slots_fees_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795271393110,
+      "tag": "0011_password_reset",
+      "breakpoints": true
     }
   ]
 }

@@ -6,7 +6,13 @@ import { closeDb, withPlatform } from "@/server/db/client";
 import { auditLogs } from "@/server/db/schema";
 import { SettingsError } from "@/modules/settings/errors";
 import { createSchool, listSchools } from "@/modules/settings/schools";
-import { addStaff, listStaff, removeStaff, updateStaffRoles } from "@/modules/settings/staff";
+import {
+  addStaff,
+  listStaff,
+  removeStaff,
+  resetStaffPassword,
+  updateStaffRoles,
+} from "@/modules/settings/staff";
 import { adminQuery, createSchoolWithDirector, createSuperadmin, resetDatabase } from "./helpers";
 
 const TEMP_PASSWORD = "Provisoire-2026";
@@ -347,5 +353,101 @@ describe("Directeur : comptes du personnel", () => {
 
   it("refuse un identifiant de compte invalide sans erreur de base", async () => {
     await expectSettingsError(removeStaff(director, "pas-un-uuid"), "notMember");
+  });
+});
+
+describe("Mot de passe oublié (décision D5, H9)", () => {
+  let a: { schoolId: string; directorId: string };
+  let b: { schoolId: string; directorId: string };
+  let director: Principal;
+  let secretaryId: string;
+  let sharedId: string;
+
+  beforeAll(async () => {
+    a = await createSchoolWithDirector(platform.userId, "oublia");
+    b = await createSchoolWithDirector(platform.userId, "oublib");
+    director = inSchool(a.schoolId, a.directorId, "director");
+    secretaryId = (
+      await addStaff(director, {
+        name: "Secrétaire",
+        identifier: "05 333 44 01",
+        password: TEMP_PASSWORD,
+        roles: ["secretary"],
+      })
+    ).userId;
+    sharedId = (
+      await addStaff(director, {
+        name: "Enseignant partagé",
+        identifier: "05 333 44 02",
+        password: TEMP_PASSWORD,
+        roles: ["teacher"],
+      })
+    ).userId;
+    await addStaff(inSchool(b.schoolId, b.directorId, "director"), {
+      name: "Enseignant partagé",
+      identifier: "05 333 44 02",
+      password: TEMP_PASSWORD,
+      roles: ["teacher"],
+    });
+  });
+
+  it("le directeur remet un mot de passe provisoire : anciennes sessions fermées, blocage levé", async () => {
+    const before = await login({
+      schoolCode: "oublia",
+      identifier: "053334401",
+      password: TEMP_PASSWORD,
+    });
+    if (!before.ok) throw new Error("connexion attendue");
+    await adminQuery(
+      "update users set failed_login_count = 4, locked_until = now() + interval '1 hour' where id = $1",
+      [secretaryId],
+    );
+
+    await resetStaffPassword(director, secretaryId, "Nouveau-provisoire-1");
+
+    expect(await validateSession(before.token)).toBeNull();
+    const after = await login({
+      schoolCode: "oublia",
+      identifier: "053334401",
+      password: "Nouveau-provisoire-1",
+    });
+    expect(after.ok).toBe(true);
+    if (after.ok) expect((await validateSession(after.token))?.mustChangePassword).toBe(true);
+    const { rows } = await adminQuery(
+      "select action from audit_logs where school_id = $1 and entity_id = $2 and action = 'staff.password_reset'",
+      [a.schoolId, secretaryId],
+    );
+    expect(rows).toHaveLength(1);
+  });
+
+  it("refuse pour un compte partagé avec une autre école, sans dire laquelle", async () => {
+    await expectSettingsError(
+      resetStaffPassword(director, sharedId, "Nouveau-provisoire-2"),
+      "otherSchoolAccount",
+    );
+  });
+
+  it("refuse pour soi-même, un mot de passe trop court, une personne d'une autre école", async () => {
+    await expectSettingsError(
+      resetStaffPassword(director, a.directorId, "Nouveau-provisoire-3"),
+      "cannotResetSelf",
+    );
+    await expect(resetStaffPassword(director, secretaryId, "court")).rejects.toThrow();
+    await expectSettingsError(
+      resetStaffPassword(director, b.directorId, "Nouveau-provisoire-4"),
+      "notMember",
+    );
+  });
+
+  it("seul le directeur remet un mot de passe", async () => {
+    for (const role of ["secretary", "accountant", "teacher", "support"] as const) {
+      await expect(
+        resetStaffPassword(
+          inSchool(a.schoolId, a.directorId, role),
+          secretaryId,
+          "Nouveau-provisoire-6",
+        ),
+      ).rejects.toBeInstanceOf(ForbiddenError);
+    }
   });
 });

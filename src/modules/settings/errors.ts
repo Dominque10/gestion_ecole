@@ -9,6 +9,8 @@ export type SettingsErrorCode =
   | "notMember"
   | "lastDirector"
   | "cannotRemoveSelf"
+  | "cannotResetSelf"
+  | "otherSchoolAccount"
   | "notFound"
   | "imageMissing"
   | "imageTooLarge"

@@ -31,7 +31,12 @@ async function Content() {
     <>
       <ul className="flex flex-col gap-4">
         {staff.map((member) => (
-          <StaffMemberCard key={member.userId} member={member} />
+          <StaffMemberCard
+            key={member.userId}
+            member={member}
+            isSelf={member.userId === principal.userId}
+            minLength={PASSWORD_MIN_LENGTH}
+          />
         ))}
       </ul>
       <h2 className="text-xl font-semibold">{t("staff.addTitle")}</h2>

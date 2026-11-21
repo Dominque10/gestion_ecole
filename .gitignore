@@ -1,0 +1,38 @@
+# Dépendances
+node_modules/
+.pnpm-store/
+
+# Next.js / build
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# Tests
+coverage/
+test-results/
+playwright-report/
+blob-report/
+
+# Secrets — ne jamais committer
+.env
+.env.*
+!.env.example
+
+# Logs et divers
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Éditeurs
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Sauvegardes de base locales
+*.dump
+*.sql.gz

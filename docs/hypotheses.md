@@ -91,6 +91,11 @@
 | H46 | Réinscription groupée : crée des **préinscriptions** (validées ensuite comme les autres, au paiement des frais d'inscription) ; niveau suivant proposé (CM2 → 6e, 3e → 2nde), redoublement possible ; après la Tle, « ne revient pas » par défaut | 2b | ⏳ |
 | H47 | Un enseignant voit les élèves des classes où il enseigne ou dont il est professeur principal, pour les années non archivées | 2b | ⏳ |
 | H48 | Le départ d'un élève n'est pas réversible dans l'application (une erreur se corrige par une nouvelle inscription) | 2b | ⏳ |
+| H49 | Échéances créées dès la **préinscription** (le paiement des frais d'inscription validera l'inscription) ; recalculées si le niveau change avant validation | 2c | ⏳ |
+| H50 | Frais obligatoires créés automatiquement ; frais facultatifs ajoutés élève par élève | 2c | ⏳ |
+| H51 | Fratrie : frères et sœurs = un responsable en commun ; s'applique aux enfants inscrits **après** le premier la même année ; non recalculée si l'aîné part ensuite ; arrondi au franc inférieur | 2c | ⏳ |
+| H52 | Bourse = % sur les échéances de scolarité **encore ouvertes** ; remise exceptionnelle = montant sur une échéance ; les réductions se cumulent sur le montant d'origine, sans jamais le dépasser ; directeur seul, motif obligatoire | 2c | ⏳ |
+| H53 | L'enseignant ne voit pas les comptes (échéances, paiements) de ses élèves | 2c | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

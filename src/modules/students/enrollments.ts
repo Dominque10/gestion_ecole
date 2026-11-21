@@ -13,6 +13,11 @@ import {
   levels,
   students,
 } from "@/server/db/schema";
+import {
+  cancelInvoicesAfter,
+  generateMandatoryInvoices,
+  regenerateInvoices,
+} from "@/modules/finance/invoices";
 import { StudentError } from "./errors";
 import { assertVisibleStudent, readContext, teacherStudentsFilter } from "./students";
 
@@ -149,6 +154,9 @@ export async function preEnroll(
         entryDate: todayInBrazzaville(),
       })
       .returning({ id: enrollments.id });
+    // Échéances obligatoires créées tout de suite : le paiement des frais d'inscription validera
+    // l'inscription (décision A3).
+    await generateMandatoryInvoices(tx, ctx.schoolId, row.id);
     return row.id;
   });
 }
@@ -168,6 +176,7 @@ export async function changeEnrollmentLevel(
       .update(enrollments)
       .set({ levelId, updatedAt: new Date() })
       .where(eq(enrollments.id, enrollmentId));
+    await regenerateInvoices(tx, ctx.schoolId, enrollmentId);
   });
 }
 
@@ -314,6 +323,12 @@ export async function recordDeparture(
         updatedAt: new Date(),
       })
       .where(eq(enrollments.id, enrollmentId));
+    const cancelled = await cancelInvoicesAfter(tx, {
+      enrollmentId,
+      exitDate: data.date,
+      userId: ctx.userId,
+      reason: `Départ (${data.reason})`,
+    });
     await tx.insert(auditLogs).values({
       schoolId: ctx.schoolId,
       actorUserId: ctx.userId,
@@ -321,7 +336,7 @@ export async function recordDeparture(
       entityType: "enrollment",
       entityId: enrollmentId,
       before: { status: row.status, classId: row.classId },
-      after: data,
+      after: { ...data, cancelledInvoices: cancelled },
     });
   });
 }
@@ -445,8 +460,10 @@ export async function reEnrollClass(
         })
         .onConflictDoNothing({ target: [enrollments.studentId, enrollments.academicYearId] })
         .returning({ id: enrollments.id });
-      if (inserted.length > 0) created++;
-      else alreadyEnrolled++;
+      if (inserted.length > 0) {
+        await generateMandatoryInvoices(tx, ctx.schoolId, inserted[0].id);
+        created++;
+      } else alreadyEnrolled++;
     }
     return { created, alreadyEnrolled };
   });

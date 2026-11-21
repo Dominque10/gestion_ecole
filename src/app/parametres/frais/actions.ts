@@ -6,6 +6,7 @@ import { t } from "@/i18n";
 import type { FormState } from "@/lib/form-state";
 import { parseXAF } from "@/lib/money";
 import { deleteFee, FEE_KINDS, saveFee, type FeeKind } from "@/modules/settings/fees";
+import { setSiblingDiscount } from "@/modules/finance/invoices";
 import { requireAction } from "@/server/auth/session";
 import { refusalMessage } from "@/server/forms";
 
@@ -86,6 +87,24 @@ export async function deleteFeeAction(_prev: FormState, formData: FormData): Pro
     );
     refresh();
     return result("success", t("fees.deleted"));
+  } catch (error) {
+    return result("error", refusalMessage(error));
+  }
+}
+
+export async function siblingDiscountAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("settings:write");
+  const percent = Number(formData.get("percent") ?? "");
+  if (!Number.isInteger(percent) || percent < 0 || percent > 100) {
+    return result("error", t("finance.errors.siblingPercent"));
+  }
+  try {
+    await setSiblingDiscount(principal, percent);
+    refresh();
+    return result("success", t("finance.siblingSaved", { n: percent }));
   } catch (error) {
     return result("error", refusalMessage(error));
   }

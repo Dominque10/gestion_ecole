@@ -25,7 +25,8 @@ Contraintes du terrain à garder en tête en permanence :
 - Plan : `docs/plan-phase-2.md` (validé, décision D6) — sous-étapes 2a → 2g
   - ✅ 2a – Fiche élève, responsables, données médicales, pièces jointes, recherche
   - ✅ 2b – Inscription (préinscription → validée → classe), réinscription groupée, départs
-  - ⏳ 2c – Échéances (grille + réductions fratrie, bourse, remise)
+  - ✅ 2c – Échéances (grille + réductions fratrie, bourse, remise)
+  - ⏳ 2d – Encaissement, reçus, annulation, validation automatique de l'inscription (A3)
 - Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`

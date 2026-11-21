@@ -5,12 +5,13 @@ import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
 import { formatDay } from "@/lib/dates";
 import { formatXAF } from "@/lib/money";
+import { getSiblingDiscount } from "@/modules/finance/invoices";
 import { defaultDueDates, listFees } from "@/modules/settings/fees";
 import { listLevels } from "@/modules/settings/levels";
 import { defaultYear, listYears } from "@/modules/settings/years";
 import { can } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
-import { DeleteFeeButton, FeeForm } from "./fee-forms";
+import { DeleteFeeButton, FeeForm, SiblingDiscountForm } from "./fee-forms";
 
 export const metadata: Metadata = { title: t("fees.title") };
 
@@ -40,9 +41,10 @@ async function Content({ searchParams }: Props) {
 
   const wanted = Array.isArray(query.annee) ? query.annee[0] : query.annee;
   const year = years.find((y) => y.id === wanted) ?? defaultYear(years)!;
-  const [fees, dueDates] = await Promise.all([
+  const [fees, dueDates, siblingPercent] = await Promise.all([
     listFees(principal, year.id),
     defaultDueDates(principal, year.id),
+    getSiblingDiscount(principal),
   ]);
   const canEdit = can(principal, "settings:write") && year.status !== "archived";
 
@@ -71,6 +73,8 @@ async function Content({ searchParams }: Props) {
           {t("fees.show")}
         </button>
       </form>
+
+      <SiblingDiscountForm percent={siblingPercent} canEdit={can(principal, "settings:write")} />
 
       {year.status === "archived" && (
         <p className="rounded-md bg-zinc-100 p-3">{t("fees.readOnly")}</p>

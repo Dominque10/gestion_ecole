@@ -7,7 +7,7 @@ import { t } from "@/i18n";
 import { idleFormState, type FormState } from "@/lib/form-state";
 import { formatXAF, parseXAF } from "@/lib/money";
 import { MAX_INSTALLMENTS, proposeInstallments } from "@/modules/settings/fees-logic";
-import { deleteFeeAction, saveFeeAction } from "./actions";
+import { deleteFeeAction, saveFeeAction, siblingDiscountAction } from "./actions";
 
 type Kind = "registration" | "tuition" | "other";
 type Level = { id: string; name: string };
@@ -294,6 +294,29 @@ export function DeleteFeeButton({
         {t("fees.delete")}
       </button>
       <FormMessage status={state.status} message={state.message} />
+    </form>
+  );
+}
+
+export function SiblingDiscountForm({ percent, canEdit }: { percent: number; canEdit: boolean }) {
+  const [state, formAction] = useActionState(siblingDiscountAction, idleFormState);
+  return (
+    <form action={formAction} className="flex flex-col gap-3 rounded-md border border-zinc-300 p-4">
+      <h2 className="text-lg font-semibold">{t("finance.siblingTitle")}</h2>
+      <p className="text-sm">{t("finance.siblingHelp")}</p>
+      <Field
+        id="sibling-percent"
+        name="percent"
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={100}
+        label={t("finance.siblingPercent")}
+        defaultValue={String(percent)}
+        disabled={!canEdit}
+      />
+      <FormMessage status={state.status} message={state.message} />
+      {canEdit && <SubmitButton label={t("finance.siblingSave")} variant="secondary" />}
     </form>
   );
 }

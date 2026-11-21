@@ -5,6 +5,8 @@ import { ImageUploadForm } from "@/components/image-upload-form";
 import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
 import { formatDay, todayInBrazzaville } from "@/lib/dates";
+import { formatXAF } from "@/lib/money";
+import { listInvoices, optionalFees, type Invoice } from "@/modules/finance/invoices";
 import { listLevels } from "@/modules/settings/levels";
 import { listYears } from "@/modules/settings/years";
 import {
@@ -14,10 +16,16 @@ import {
 } from "@/modules/students/enrollments";
 import { DOCUMENT_KINDS, listStudentDocuments } from "@/modules/students/media";
 import { getMedical } from "@/modules/students/medical";
-import { getStudent } from "@/modules/students/students";
+import { getStudent, seesAllStudents } from "@/modules/students/students";
 import { can, type Principal } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
 import { uploadDocumentAction, uploadPhotoAction } from "../actions";
+import {
+  AddMissingFeesButton,
+  DiscountForm,
+  OptionalFeeForm,
+  ScholarshipForm,
+} from "../invoice-forms";
 import {
   AssignClassForm,
   DepartureForm,
@@ -307,6 +315,13 @@ async function EnrollmentSection({
                 options={options[i]}
               />
             )}
+            {seesAllStudents(principal) && (
+              <InvoicesBlock
+                principal={principal}
+                enrollmentId={r.id}
+                editable={r.yearStatus !== "archived" && r.status !== "left"}
+              />
+            )}
             {editable && <DepartureForm enrollmentId={r.id} today={todayInBrazzaville()} />}
           </article>
         );
@@ -319,5 +334,90 @@ async function EnrollmentSection({
         />
       )}
     </section>
+  );
+}
+
+const invoiceLabel = (i: Invoice) =>
+  i.installmentCount > 1
+    ? t("finance.installment", {
+        frais: i.feeName,
+        n: i.installmentNumber,
+        total: i.installmentCount,
+      })
+    : t("finance.single", { frais: i.feeName });
+
+/** Échéances d'une inscription, avec les actions de la caisse et du directeur. */
+async function InvoicesBlock({
+  principal,
+  enrollmentId,
+  editable,
+}: {
+  principal: Principal;
+  enrollmentId: string;
+  editable: boolean;
+}) {
+  const rows = await listInvoices(principal, enrollmentId);
+  const canManage = editable && can(principal, "invoices:manage");
+  const canDiscount = editable && can(principal, "invoices:discount");
+  const optional = canManage ? await optionalFees(principal, enrollmentId) : [];
+  const open = rows.filter((r) => r.status === "open");
+  const total = open.reduce((sum, r) => sum + r.due, 0);
+  return (
+    <div className="flex flex-col gap-3 border-t border-zinc-200 pt-3">
+      <h4 className="font-semibold">{t("finance.invoicesTitle")}</h4>
+      {rows.length === 0 ? (
+        <p className="text-sm text-zinc-600">{t("finance.noInvoices")}</p>
+      ) : (
+        <>
+          <ul className="flex flex-col divide-y divide-zinc-200 text-sm">
+            {rows.map((i) => (
+              <li
+                key={i.id}
+                className={`flex flex-col gap-0.5 py-2 ${i.status === "cancelled" ? "text-zinc-500" : ""}`}
+              >
+                <span className="flex flex-wrap justify-between gap-2">
+                  <span className="font-medium">
+                    {invoiceLabel(i)}
+                    {!i.mandatory && ` · ${t("finance.optionalBadge")}`}
+                  </span>
+                  <span className={i.status === "cancelled" ? "line-through" : "font-semibold"}>
+                    {formatXAF(i.due)}
+                  </span>
+                </span>
+                <span>{t("finance.dueBy", { date: formatDay(i.dueDate) })}</span>
+                {i.discountAmount > 0 && (
+                  <span>
+                    {t("finance.discount", {
+                      montant: formatXAF(i.discountAmount),
+                      motif: i.discountNote ?? "",
+                    })}
+                  </span>
+                )}
+                {i.status === "cancelled" && (
+                  <span>{t("finance.cancelled", { motif: i.cancelReason ?? "" })}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="font-semibold">{t("finance.totalDue", { montant: formatXAF(total) })}</p>
+        </>
+      )}
+      {canManage && <AddMissingFeesButton enrollmentId={enrollmentId} />}
+      {canManage && optional.length > 0 && (
+        <OptionalFeeForm enrollmentId={enrollmentId} fees={optional} />
+      )}
+      {canDiscount && open.some((r) => r.kind === "tuition") && (
+        <ScholarshipForm enrollmentId={enrollmentId} />
+      )}
+      {canDiscount && open.length > 0 && (
+        <DiscountForm
+          enrollmentId={enrollmentId}
+          invoices={open.map((i) => ({
+            id: i.id,
+            label: `${invoiceLabel(i)} — ${formatXAF(i.due)}`,
+          }))}
+        />
+      )}
+    </div>
   );
 }

@@ -4,6 +4,13 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { t } from "@/i18n";
 import type { FormState } from "@/lib/form-state";
+import { parseXAF } from "@/lib/money";
+import {
+  addMissingMandatoryFees,
+  addOptionalFee,
+  grantExceptionalDiscount,
+  grantScholarship,
+} from "@/modules/finance/invoices";
 import {
   addStudentDocument,
   deleteStudentDocument,
@@ -310,5 +317,77 @@ export async function reEnrollAction(_prev: FormState, formData: FormData): Prom
     );
   } catch (error) {
     return result("error", refusalMessage(error));
+  }
+}
+
+// --- Échéances (2c) ---------------------------------------------------------------------------
+
+export async function addMissingFeesAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("invoices:manage");
+  try {
+    const n = await addMissingMandatoryFees(principal, String(formData.get("enrollmentId") ?? ""));
+    refresh();
+    return result(
+      "success",
+      n > 0 ? t("finance.addedMissing", { n }) : t("finance.nothingMissing"),
+    );
+  } catch (error) {
+    return result("error", refusalMessage(error));
+  }
+}
+
+export async function addOptionalFeeAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("invoices:manage");
+  try {
+    await addOptionalFee(
+      principal,
+      String(formData.get("enrollmentId") ?? ""),
+      String(formData.get("feeName") ?? ""),
+    );
+    refresh();
+    return result("success", t("finance.optionalAdded"));
+  } catch (error) {
+    return result("error", refusalMessage(error));
+  }
+}
+
+export async function scholarshipAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { principal } = await requireAction("invoices:discount");
+  const values = readFields(formData, ["percent", "reason"]);
+  const percent = Number(values.percent);
+  if (!Number.isInteger(percent) || percent < 1 || percent > 100) {
+    return result("error", t("finance.errors.percent"), values);
+  }
+  if (values.reason.trim().length < 3) return result("error", t("finance.errors.reason"), values);
+  try {
+    const n = await grantScholarship(principal, String(formData.get("enrollmentId") ?? ""), {
+      percent,
+      reason: values.reason,
+    });
+    refresh();
+    return result("success", t("finance.scholarshipGranted", { n }));
+  } catch (error) {
+    return result("error", refusalMessage(error), values);
+  }
+}
+
+export async function discountAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { principal } = await requireAction("invoices:discount");
+  const values = readFields(formData, ["invoiceId", "amount", "reason"]);
+  const amount = parseXAF(values.amount);
+  if (amount === null) return result("error", t("finance.errors.amount"), values);
+  if (values.reason.trim().length < 3) return result("error", t("finance.errors.reason"), values);
+  try {
+    await grantExceptionalDiscount(principal, values.invoiceId, { amount, reason: values.reason });
+    refresh();
+    return result("success", t("finance.discountGranted"));
+  } catch (error) {
+    return result("error", refusalMessage(error), values);
   }
 }

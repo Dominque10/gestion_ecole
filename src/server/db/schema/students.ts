@@ -219,6 +219,7 @@ export const enrollments = pgTable(
     }),
     unique("enrollments_student_year").on(t.studentId, t.academicYearId),
     unique("enrollments_id_school").on(t.id, t.schoolId),
+    unique("enrollments_id_year_school").on(t.id, t.academicYearId, t.schoolId),
     index("enrollments_class_idx").on(t.classId),
     index("enrollments_school_year_idx").on(t.schoolId, t.academicYearId),
     check(

@@ -33,6 +33,8 @@ export const schools = pgTable("schools", {
   matriculePrefix: text("matricule_prefix").notNull(),
   /** Dernier numéro d'ordre de matricule attribué (continu, jamais réutilisé, décision A6). */
   lastMatriculeNumber: integer("last_matricule_number").notNull().default(0),
+  /** Réduction fratrie en % sur la scolarité, dès le 2e enfant inscrit (décision D6). 0 = aucune. */
+  siblingDiscountPercent: integer("sibling_discount_percent").notNull().default(0),
   subdomain: text("subdomain").unique(),
   address: text("address"),
   phone: text("phone"),

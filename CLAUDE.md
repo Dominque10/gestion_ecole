@@ -112,7 +112,7 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
     se fait sous un `<Suspense>` (Next 16 + cacheComponents).
   - Hypothèses : verrouillage 15 min après 5 échecs ; session de 12 h. Rôles relus à chaque requête.
   - Message de connexion identique pour compte inconnu / mauvais mot de passe / autre école.
-  - Premier super-admin : `SUPERADMIN_PASSWORD=... pnpm superadmin:create --email ... --name "..."`.
+  - Premier super-admin : `pnpm superadmin:create --email ... --name "..."` (mot de passe demandé au clavier, masqué ; relancer la commande change le mot de passe).
   - Comptes créés par le super-admin ou le directeur : mot de passe provisoire, à changer à la première
     connexion (`users.must_change_password`, page `/mot-de-passe`). Un compte existant (autre école) garde
     son mot de passe (hypothèse). L'école garde toujours au moins un directeur.

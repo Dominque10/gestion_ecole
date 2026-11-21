@@ -30,7 +30,7 @@ Contraintes du terrain à garder en tête en permanence :
 - Plan de la Phase 1 : `docs/plan-phase-1.md` (validé).
   - ✅ Étape 1 – Socle technique (Next.js 16.4, Vitest, Playwright, Prettier, CI, Docker Compose)
   - ✅ Étape 2 – Base de données et isolation (RLS) : 4 tables plateforme, garde-fou générique au vert
-  - ⏳ Étape 3 – Comptes, connexion, rôles
+  - ✅ Étape 3 – Comptes, connexion, rôles (module maison D2, tableau des droits, accès Support)
   - ⏳ Étape 4 – M1 Paramétrage
 - Next.js 16.4 : lire `node_modules/next/dist/docs/` avant d'utiliser une API (voir `AGENTS.md`).
   `middleware` s'appelle `proxy`, API de requête asynchrones, `cacheComponents` activé.
@@ -65,7 +65,7 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - **Next.js** (App Router) : interface + API (Route Handlers, Server Actions). API REST versionnée sous `/api/v1`.
 - **PostgreSQL 16** + **Drizzle ORM** (migrations versionnées, jamais de modification manuelle du schéma en prod).
 - **Zod** pour toute validation (formulaires, API, worker) — schémas partagés.
-- **Better Auth** (ou Auth.js), sessions en base ; parents : téléphone + OTP SMS.
+- **Authentification : module maison** (décision D2, `src/server/auth/`) : Argon2id, sessions en base ; parents : téléphone + OTP SMS (M6).
 - **Tailwind CSS + shadcn/ui**.
 - **PWA** : Serwist (service worker) + Dexie (IndexedDB) pour le hors-ligne.
 - **Worker Node + pg-boss** pour les tâches de fond (SMS, webhooks paiement, PDF).
@@ -90,7 +90,8 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
     en utilisant `app.current_school_id()`.
   - Le test `tests/integration/rls.test.ts` échoue si une table a `school_id` sans RLS forcée, ou n'a pas
     `school_id` sans figurer dans `TABLES_WITHOUT_SCHOOL_ID`. Toute exception y est justifiée par un commentaire.
-  - Tests d'intégration sur une base séparée `<base>_test`, jamais sur la base de développement.
+  - Tests d'intégration sur une base séparée `<base>_test`, E2E sur `<base>_e2e`, jamais sur la base de développement.
+  - Seule table avec `school_id` exemptée de RLS : `sessions` (liste `TABLES_EXEMPT_FROM_RLS`, justifiée).
 
 ### Argent
 - Montants en **entiers FCFA (XAF)**, jamais de `float`/`decimal` côté JS.
@@ -102,6 +103,14 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 
 ### Droits
 - Contrôle des droits **côté serveur sur chaque action**, jamais seulement dans l'UI.
+- **Mise en œuvre (étape 3) :**
+  - Tableau des droits unique : `src/server/auth/permissions.ts` (`can`, `authorize`), testé ligne par ligne.
+    Toute nouvelle action y est ajoutée ET dans le tableau de référence de `permissions.test.ts`.
+  - Pages et actions serveur : `requireAction(action)` (`src/server/auth/session.ts`) ; la lecture de session
+    se fait sous un `<Suspense>` (Next 16 + cacheComponents).
+  - Hypothèses : verrouillage 15 min après 5 échecs ; session de 12 h. Rôles relus à chaque requête.
+  - Message de connexion identique pour compte inconnu / mauvais mot de passe / autre école.
+  - Premier super-admin : `SUPERADMIN_PASSWORD=... pnpm superadmin:create --email ... --name "..."`.
 - Rôles : super-admin, directeur, secrétaire/surveillant, comptable/caissier, enseignant, parent.
   Un utilisateur peut cumuler plusieurs rôles (`memberships.roles[]`).
 - Un parent ne voit que ses enfants ; un enseignant que ses classes/matières.

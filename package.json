@@ -15,9 +15,11 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate",
     "db:setup": "node scripts/db-setup.mts",
-    "db:migrate": "node scripts/db-setup.mts"
+    "db:migrate": "node scripts/db-setup.mts",
+    "superadmin:create": "node scripts/create-superadmin.mts"
   },
   "dependencies": {
+    "@node-rs/argon2": "^2.2.2",
     "drizzle-orm": "0.45.4",
     "next": "16.4.6",
     "pg": "^8.23.1",

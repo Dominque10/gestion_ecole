@@ -55,6 +55,23 @@ export async function withPlatform<T>(userId: string, fn: (tx: Tx) => Promise<T>
   });
 }
 
+/**
+ * Réservé au module d'authentification (src/server/auth) : transaction SANS école de session,
+ * pour lire users et sessions avant de connaître l'école. Ne jamais l'utiliser ailleurs.
+ */
+export async function withAuth<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
+  return getDb().transaction(fn);
+}
+
+/** Fixe l'école de session à l'intérieur d'une transaction déjà ouverte (module d'auth). */
+export async function setSchoolContext(tx: Tx, ctx: SchoolContext): Promise<void> {
+  const schoolId = uuid.parse(ctx.schoolId);
+  const userId = uuid.parse(ctx.userId);
+  await tx.execute(
+    sql`select set_config('app.current_school_id', ${schoolId}, true), set_config('app.current_user_id', ${userId}, true)`,
+  );
+}
+
 /** Fermeture du pool (tests, arrêt propre du worker). */
 export async function closeDb(): Promise<void> {
   await globalForDb.__pool?.end();

@@ -46,7 +46,10 @@ export async function createSchoolWithDirector(
       .returning({ id: schools.id });
     const [director] = await tx
       .insert(users)
-      .values({ name: `Directeur ${code}`, phone: `+24206${Math.floor(Math.random() * 1e7)}` })
+      .values({
+        name: `Directeur ${code}`,
+        phone: `+24206${String(Math.floor(Math.random() * 1e7)).padStart(7, "0")}`,
+      })
       .returning({ id: users.id });
     await tx
       .insert(memberships)

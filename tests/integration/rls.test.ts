@@ -11,6 +11,14 @@ const TABLES_WITHOUT_SCHOOL_ID = new Set([
   "users", // compte commun à la plateforme (cahier des charges §8)
 ]);
 
+/**
+ * Tables avec school_id exemptées de RLS (justifiées une par une). À garder aussi court que possible.
+ * Elles ne doivent être lues que par le module d'authentification (withAuth).
+ */
+const TABLES_EXEMPT_FROM_RLS = new Set([
+  "sessions", // lue AVANT de connaître l'école, uniquement par empreinte SHA-256 du jeton
+]);
+
 /** Politiques autorisées à ne PAS dépendre de l'école de session (justifiées une par une). */
 const POLICIES_WITHOUT_SCHOOL = new Set([
   "schools_insert", // seule la plateforme crée une école : il n'existe pas encore d'école de session
@@ -75,10 +83,11 @@ describe("Garde-fou générique : structure de la base", () => {
       from pg_class c
       join pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
       where c.relkind = 'r'
+        and c.relname <> all($2::text[])
         and (c.relname = 'schools' or exists (
           select 1 from information_schema.columns col
           where col.table_schema = 'public' and col.table_name = c.relname and col.column_name = 'school_id'))`,
-      [[...POLICIES_WITHOUT_SCHOOL]],
+      [[...POLICIES_WITHOUT_SCHOOL], [...TABLES_EXEMPT_FROM_RLS]],
     );
     expect(rows.length).toBeGreaterThan(0);
     const problems = rows

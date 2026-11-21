@@ -3,6 +3,7 @@ import {
   boolean,
   check,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -53,6 +54,11 @@ export const users = pgTable(
     phone: text("phone").unique(),
     isSuperadmin: boolean("is_superadmin").notNull().default(false),
     status: userStatus("status").notNull().default("active"),
+    /** Argon2id. Nul pour un compte sans mot de passe (parent : connexion par code SMS, M6). */
+    passwordHash: text("password_hash"),
+    failedLoginCount: integer("failed_login_count").notNull().default(0),
+    lockedUntil: timestamp("locked_until", { withTimezone: true }),
+    lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
     ...timestamps,
   },
   (t) => [check("users_email_or_phone", sql`${t.email} is not null or ${t.phone} is not null`)],
@@ -90,6 +96,26 @@ export const memberships = pgTable(
     check("memberships_roles_not_empty", sql`cardinality(${t.roles}) > 0`),
     index("memberships_user_idx").on(t.userId),
   ],
+);
+
+/**
+ * Sessions de connexion. Seule l'empreinte SHA-256 du jeton est stockée (le jeton reste dans le cookie).
+ * Exemptée de RLS : lue avant de connaître l'école, uniquement par empreinte de jeton (voir rls.test.ts).
+ */
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    tokenHash: text("token_hash").notNull().unique(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** École choisie à la connexion (code école). Nul = session de plateforme (super-admin). */
+    schoolId: uuid("school_id").references(() => schools.id),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("sessions_user_idx").on(t.userId)],
 );
 
 /** Journal d'audit en ajout seul (ni UPDATE ni DELETE, garanti par la base). */

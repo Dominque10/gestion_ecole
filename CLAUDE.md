@@ -31,7 +31,9 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ Étape 1 – Socle technique (Next.js 16.4, Vitest, Playwright, Prettier, CI, Docker Compose)
   - ✅ Étape 2 – Base de données et isolation (RLS) : 4 tables plateforme, garde-fou générique au vert
   - ✅ Étape 3 – Comptes, connexion, rôles (module maison D2, tableau des droits, accès Support)
-  - ⏳ Étape 4 – M1 Paramétrage
+  - ⏳ Étape 4 – M1 Paramétrage (6 sous-étapes 4a→4f, choix du M1 : décision D3)
+    - ✅ 4a – Création d'école par le super-admin, comptes du personnel, mot de passe provisoire
+    - ⏳ 4b – Fiche école + stockage de fichiers
 - Next.js 16.4 : lire `node_modules/next/dist/docs/` avant d'utiliser une API (voir `AGENTS.md`).
   `middleware` s'appelle `proxy`, API de requête asynchrones, `cacheComponents` activé.
 
@@ -111,6 +113,10 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   - Hypothèses : verrouillage 15 min après 5 échecs ; session de 12 h. Rôles relus à chaque requête.
   - Message de connexion identique pour compte inconnu / mauvais mot de passe / autre école.
   - Premier super-admin : `SUPERADMIN_PASSWORD=... pnpm superadmin:create --email ... --name "..."`.
+  - Comptes créés par le super-admin ou le directeur : mot de passe provisoire, à changer à la première
+    connexion (`users.must_change_password`, page `/mot-de-passe`). Un compte existant (autre école) garde
+    son mot de passe (hypothèse). L'école garde toujours au moins un directeur.
+  - Code du domaine : `src/modules/<module>/` ; refus métier = `SettingsError` (texte i18n `settings.errors.*`).
 - Rôles : super-admin, directeur, secrétaire/surveillant, comptable/caissier, enseignant, parent.
   Un utilisateur peut cumuler plusieurs rôles (`memberships.roles[]`).
 - Un parent ne voit que ses enfants ; un enseignant que ses classes/matières.

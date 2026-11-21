@@ -2,7 +2,7 @@
 import { hash } from "@node-rs/argon2";
 import pg from "pg";
 import { ensureDatabase, runMigrations } from "../../src/server/db/setup.ts";
-import { e2eDatabaseUrls, E2E_ACCOUNT } from "./env.ts";
+import { e2eDatabaseUrls, E2E_ACCOUNT, E2E_SUPERADMIN } from "./env.ts";
 
 export default async function setup(): Promise<void> {
   const { app, admin } = e2eDatabaseUrls();
@@ -28,6 +28,10 @@ export default async function setup(): Promise<void> {
     await client.query(
       "insert into memberships (school_id, user_id, roles) values ($1, $2, '{director,teacher}')",
       [school.rows[0].id, user.rows[0].id],
+    );
+    await client.query(
+      "insert into users (name, email, is_superadmin, password_hash) values ('Admin Plateforme', $1, true, $2)",
+      [E2E_SUPERADMIN.email, await hash(E2E_SUPERADMIN.password)],
     );
   } finally {
     await client.end();

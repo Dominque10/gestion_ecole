@@ -22,6 +22,7 @@ const platformAdmin: Principal = { userId: "x", schoolId: null, roles: [], isSup
 const MATRIX: Record<SchoolAction, MembershipRole[]> = {
   "settings:read": ["director", "support"],
   "settings:write": ["director"],
+  "staff:manage": ["director"],
   "students:read": ["director", "secretary", "accountant", "teacher", "support"],
   "students:write": ["director", "secretary"],
   "students:medical": ["director"],

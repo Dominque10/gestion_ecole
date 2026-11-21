@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { t } from "@/i18n";
@@ -37,5 +38,7 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     return { error, values };
   }
   await setSessionCookie(result.token, result.expiresAt);
+  // Nouvelle session : les pages gardées en cache par le navigateur ne sont plus valables.
+  revalidatePath("/", "layout");
   redirect("/accueil");
 }

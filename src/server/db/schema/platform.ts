@@ -56,6 +56,8 @@ export const users = pgTable(
     status: userStatus("status").notNull().default("active"),
     /** Argon2id. Nul pour un compte sans mot de passe (parent : connexion par code SMS, M6). */
     passwordHash: text("password_hash"),
+    /** Mot de passe provisoire (donné par le super-admin ou le directeur) : à changer à la connexion. */
+    mustChangePassword: boolean("must_change_password").notNull().default(false),
     failedLoginCount: integer("failed_login_count").notNull().default(0),
     lockedUntil: timestamp("locked_until", { withTimezone: true }),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),

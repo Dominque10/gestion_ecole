@@ -1,9 +1,9 @@
 // Cœur de l'authentification, indépendant de Next.js (testable directement).
 import { createHash, randomBytes } from "node:crypto";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 import { setSchoolContext, withAuth, type Tx } from "@/server/db/client";
 import { memberships, sessions, users } from "@/server/db/schema";
-import { verifyDummyPassword, verifyPassword } from "./password";
+import { hashPassword, PASSWORD_MIN_LENGTH, verifyDummyPassword, verifyPassword } from "./password";
 import type { MembershipRole, Principal } from "./permissions";
 import { parseIdentifier } from "./phone";
 
@@ -20,7 +20,13 @@ export type LoginResult =
   | { ok: false; reason: "invalid" }
   | { ok: false; reason: "locked"; lockedUntil: Date };
 
-export type SessionInfo = { principal: Principal; userName: string; expiresAt: Date };
+export type SessionInfo = {
+  principal: Principal;
+  userName: string;
+  expiresAt: Date;
+  /** Mot de passe provisoire : l'utilisateur doit le changer avant tout le reste. */
+  mustChangePassword: boolean;
+};
 
 export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -136,6 +142,7 @@ export async function validateSession(
         userName: users.name,
         status: users.status,
         isSuperadmin: users.isSuperadmin,
+        mustChangePassword: users.mustChangePassword,
       })
       .from(sessions)
       .innerJoin(users, eq(users.id, sessions.userId))
@@ -166,6 +173,7 @@ export async function validateSession(
       },
       userName: row.userName,
       expiresAt: row.expiresAt,
+      mustChangePassword: row.mustChangePassword,
     };
   });
 }
@@ -174,4 +182,46 @@ export async function validateSession(
 export async function logout(token: string | undefined): Promise<void> {
   if (!token) return;
   await withAuth((tx) => tx.delete(sessions).where(eq(sessions.tokenHash, hashToken(token))));
+}
+
+export type ChangePasswordResult =
+  | { ok: true }
+  | { ok: false; reason: "invalid-session" | "wrong-password" | "too-short" | "same-password" };
+
+/**
+ * Changement de mot de passe par l'utilisateur connecté (obligatoire après un mot de passe provisoire).
+ * Les autres sessions de l'utilisateur sont fermées ; la session en cours est conservée.
+ */
+export async function changePassword(
+  token: string | undefined,
+  currentPassword: string,
+  newPassword: string,
+  now = new Date(),
+): Promise<ChangePasswordResult> {
+  if (!token) return { ok: false, reason: "invalid-session" };
+  if (newPassword.length < PASSWORD_MIN_LENGTH) return { ok: false, reason: "too-short" };
+  if (newPassword === currentPassword) return { ok: false, reason: "same-password" };
+  return withAuth(async (tx) => {
+    const [row] = await tx
+      .select({ sessionId: sessions.id, userId: users.id, passwordHash: users.passwordHash })
+      .from(sessions)
+      .innerJoin(users, eq(users.id, sessions.userId))
+      .where(and(eq(sessions.tokenHash, hashToken(token)), sql`${sessions.expiresAt} > ${now}`));
+    if (!row?.passwordHash) return { ok: false, reason: "invalid-session" } as const;
+    if (!(await verifyPassword(row.passwordHash, currentPassword))) {
+      return { ok: false, reason: "wrong-password" } as const;
+    }
+    await tx
+      .update(users)
+      .set({
+        passwordHash: await hashPassword(newPassword),
+        mustChangePassword: false,
+        updatedAt: now,
+      })
+      .where(eq(users.id, row.userId));
+    await tx
+      .delete(sessions)
+      .where(and(eq(sessions.userId, row.userId), ne(sessions.id, row.sessionId)));
+    return { ok: true } as const;
+  });
 }

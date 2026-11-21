@@ -49,6 +49,17 @@
 
 Tables créées sans écran (modèle de données uniquement) : `staff`.
 
+Découpage validé le 2026-11-21 (un commit par sous-étape, choix du M1 : décision D3) :
+
+| # | Contenu |
+|---|---|
+| 4a | Super-admin : créer une école et son premier directeur ; le directeur gère les comptes du personnel et leurs rôles ; changement du mot de passe provisoire à la première connexion |
+| 4b | Fiche école (adresse, téléphone, logo, cachet, signature) + stockage de fichiers |
+| 4c | Années scolaires et périodes (une seule active, archives en lecture seule) |
+| 4d | Cycles, niveaux (valeurs congolaises par défaut), séries, classes, matières, coefficients, affectations ; `staff` sans écran |
+| 4e | Créneaux simples (A8) et grille tarifaire avec échéancier (frais obligatoires ou facultatifs) |
+| 4f | Copie de structure d'une année à l'autre + assistant de démarrage |
+
 ## Hypothèses à valider
 
 1. **Connexion des parents par code SMS → reportée au M6.** Les parents n'ont pas de compte avant

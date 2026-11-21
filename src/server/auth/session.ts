@@ -35,10 +35,16 @@ export const getSession = cache(async (): Promise<SessionInfo | null> => {
   return validateSession(token);
 });
 
-/** Exige une session ; sinon renvoie vers la page de connexion. */
-export async function requireSession(): Promise<SessionInfo> {
+/**
+ * Exige une session ; sinon renvoie vers la page de connexion.
+ * Un mot de passe provisoire doit être changé avant toute autre page (sauf `allowPasswordChange`).
+ */
+export async function requireSession(
+  options: { allowPasswordChange?: boolean } = {},
+): Promise<SessionInfo> {
   const session = await getSession();
   if (!session) redirect("/connexion");
+  if (session.mustChangePassword && !options.allowPasswordChange) redirect("/mot-de-passe");
   return session;
 }
 

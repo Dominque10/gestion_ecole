@@ -20,6 +20,8 @@ const PLATFORM_ACTIONS = ["school:create", "school:subscription", "dashboard:glo
 const SCHOOL_ACTIONS = {
   "settings:read": ["director", "support"],
   "settings:write": ["director"],
+  /** Comptes du personnel et leurs rôles (décision D3). */
+  "staff:manage": ["director"],
   "students:read": ["director", "secretary", "accountant", "teacher", "support"],
   "students:write": ["director", "secretary"],
   "students:medical": ["director"],

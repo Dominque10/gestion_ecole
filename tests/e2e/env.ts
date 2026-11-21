@@ -8,6 +8,12 @@ export const E2E_ACCOUNT = {
   password: "Mot-de-passe-e2e-2026",
 } as const;
 
+/** Super-admin de la plateforme (connexion sans code école). */
+export const E2E_SUPERADMIN = {
+  email: "admin@plateforme.test",
+  password: "Super-admin-e2e-2026",
+} as const;
+
 export function e2eDatabaseUrls(): { app: string; admin: string } {
   if (existsSync(".env")) process.loadEnvFile(".env");
   const app = process.env.DATABASE_URL;

@@ -64,6 +64,20 @@
       "when": 1795246578037,
       "tag": "0008_pedagogical_structure_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795266033398,
+      "tag": "0009_time_slots_fees",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795266034909,
+      "tag": "0010_time_slots_fees_rls",
+      "breakpoints": true
     }
   ]
 }

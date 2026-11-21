@@ -54,6 +54,18 @@
 | H26 | Retirer le rôle Enseignant (ou retirer la personne) libère ses affectations et son rôle de professeur principal dans les années non archivées | `src/modules/settings/staff.ts` | ⏳ |
 | H27 | Changer le niveau ou la série d'une classe : ses matières suivent la nouvelle grille ; les enseignants des matières retirées sont perdus | `src/modules/settings/classes.ts` | ⏳ |
 
+## Créneaux et frais (4e)
+
+| # | Hypothèse | Où dans le code | Statut |
+|---|---|---|---|
+| H28 | Créneaux valables pour toute l'école et toutes les années ; chevauchements permis (demi-journées et heures peuvent coexister) | `src/modules/settings/time-slots.ts` | ⏳ |
+| H29 | Frais fixés **par niveau** (pas par classe ni par série) et par année | schéma `settings.ts` (`fee_items`) | ⏳ |
+| H30 | Tranches proposées égales, **arrondies à 100 FCFA**, le reste sur la dernière ; échéances aux débuts de période | `src/modules/settings/fees-logic.ts` | ⏳ |
+| H31 | 1 à 12 tranches par frais ; montant d'une tranche ou d'un frais plafonné à 100 millions FCFA (garde-fou) | `src/modules/settings/fees-logic.ts`, `src/lib/money.ts` | ⏳ |
+| H32 | **Un seul frais d'inscription par niveau et par année** (il servira à valider l'inscription au paiement, A3) | `src/modules/settings/fees.ts` | ⏳ |
+| H33 | Échéance libre (peut tomber avant la rentrée, ex. inscription en septembre) ; les échéances d'un frais se suivent | `src/modules/settings/fees-logic.ts` | ⏳ |
+| H34 | Modifier la grille ne changera pas les échéances déjà émises aux élèves (règle à appliquer au M3) | — (M3) | ⏳ |
+
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 
 Voir `docs/cadrage.md` §B : modèle de bulletin (B2), règles de calcul (B3), prestataire de paiement (B4),

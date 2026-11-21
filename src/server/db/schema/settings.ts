@@ -7,7 +7,9 @@ import {
   integer,
   pgEnum,
   pgTable,
+  boolean,
   text,
+  time,
   timestamp,
   unique,
   uniqueIndex,
@@ -258,4 +260,72 @@ export const staff = pgTable(
     ...timestamps,
   },
   (t) => [index("staff_school_idx").on(t.schoolId)],
+);
+
+// --- Créneaux et frais (4e) ------------------------------------------------------------------
+
+/**
+ * Créneau simple défini par l'école (décisions A1, A8) : libellé et horaires, utilisé par l'appel (M5).
+ * Ce n'est pas un emploi du temps (ni classe, ni jour, ni salle).
+ */
+export const timeSlots = pgTable(
+  "time_slots",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    label: text("label").notNull(),
+    startTime: time("start_time").notNull(),
+    endTime: time("end_time").notNull(),
+    ...timestamps,
+  },
+  (t) => [
+    unique("time_slots_school_label").on(t.schoolId, t.label),
+    check("time_slots_times", sql`${t.startTime} < ${t.endTime}`),
+  ],
+);
+
+/** Nature d'un frais : l'inscription servira à valider l'inscription au paiement (décision A3). */
+export const feeKind = pgEnum("fee_kind", ["registration", "tuition", "other"]);
+
+/**
+ * Grille tarifaire : une ligne par tranche d'un frais, pour une année et un niveau.
+ * Un frais = (année, niveau, nom) ; ses tranches sont numérotées à partir de 1.
+ * Montants en francs CFA entiers (jamais de décimales).
+ */
+export const feeItems = pgTable(
+  "fee_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    academicYearId: uuid("academic_year_id").notNull(),
+    levelId: uuid("level_id").notNull(),
+    kind: feeKind("kind").notNull(),
+    name: text("name").notNull(),
+    mandatory: boolean("mandatory").notNull().default(true),
+    installmentNumber: integer("installment_number").notNull(),
+    amount: integer("amount").notNull(),
+    dueDate: date("due_date", { mode: "string" }).notNull(),
+    ...timestamps,
+  },
+  (t) => [
+    foreignKey({
+      name: "fee_items_year_fk",
+      columns: [t.academicYearId, t.schoolId],
+      foreignColumns: [academicYears.id, academicYears.schoolId],
+    }),
+    foreignKey({
+      name: "fee_items_level_fk",
+      columns: [t.levelId, t.schoolId],
+      foreignColumns: [levels.id, levels.schoolId],
+    }),
+    unique("fee_items_unique").on(t.academicYearId, t.levelId, t.name, t.installmentNumber),
+    unique("fee_items_id_school").on(t.id, t.schoolId),
+    check("fee_items_installment", sql`${t.installmentNumber} between 1 and 12`),
+    check("fee_items_amount", sql`${t.amount} between 1 and 100000000`),
+    index("fee_items_school_idx").on(t.schoolId),
+  ],
 );

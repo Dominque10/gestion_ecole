@@ -24,6 +24,8 @@ const MENU: { href: string; label: MessageKey; action: Action }[] = [
   { href: "/parametres/matieres", label: "nav.subjects", action: "settings:read" },
   { href: "/parametres/coefficients", label: "nav.coefficients", action: "settings:read" },
   { href: "/parametres/classes", label: "nav.classes", action: "settings:read" },
+  { href: "/parametres/creneaux", label: "nav.timeSlots", action: "settings:read" },
+  { href: "/parametres/frais", label: "nav.fees", action: "settings:read" },
   { href: "/parametres/personnel", label: "nav.staff", action: "staff:manage" },
 ];
 

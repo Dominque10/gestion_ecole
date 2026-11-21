@@ -38,7 +38,8 @@ Contraintes du terrain à garder en tête en permanence :
     - ✅ 4b – Fiche école + stockage de fichiers (`src/server/storage/`, disque local, `STORAGE_DIR`)
     - ✅ 4c – Années scolaires et périodes (en préparation → active → archivée, garde-fous en base)
     - ✅ 4d – Niveaux, matières, grille des coefficients (niveau + série, D4), classes, affectations
-    - ⏳ 4e – Créneaux simples et grille tarifaire
+    - ✅ 4e – Créneaux simples et grille tarifaire (frais par niveau, tranches en FCFA entiers)
+    - ⏳ 4f – Copie de structure d'une année à l'autre + assistant de démarrage
 - Next.js 16.4 : lire `node_modules/next/dist/docs/` avant d'utiliser une API (voir `AGENTS.md`).
   `middleware` s'appelle `proxy`, API de requête asynchrones, `cacheComponents` activé.
 

@@ -1,3 +1,4 @@
+import type { FeeProblem } from "./fees-logic";
 import type { PeriodsProblem } from "./periods-logic";
 
 /** Refus métier du paramétrage. Le code correspond à un texte `settings.errors.<code>` (i18n). */
@@ -28,6 +29,13 @@ export type SettingsErrorCode =
   | "classNotFound"
   | "classInUse"
   | "notTeacher"
+  | "timeSlotLabelTaken"
+  | "timeSlotNotFound"
+  | "timeSlotInUse"
+  | "feeNameTaken"
+  | "feeNotFound"
+  | "registrationExists"
+  | FeeProblem
   | PeriodsProblem;
 
 export class SettingsError extends Error {

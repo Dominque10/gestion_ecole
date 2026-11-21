@@ -1,6 +1,6 @@
 # Plan — Phase 2 : Élèves et caisse (M2 + M3, décision A3)
 
-> Statut : **proposé le 2026-11-21, à valider**.
+> Statut : **validé le 2026-11-21** (décision D6), 2 tables supplémentaires comprises.
 > Jalon de sortie (cahier des charges §5) : importer 1 000 élèves depuis un fichier en moins de 2 minutes,
 > avec rapport d'erreurs ligne par ligne ; la somme des reçus d'une journée égale toujours la clôture de caisse.
 

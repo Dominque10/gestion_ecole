@@ -21,8 +21,10 @@ Contraintes du terrain à garder en tête en permanence :
 ## 2. État actuel (À METTRE À JOUR)
 
 - Version en cours : **V1**
-- Phase en cours : **Phase 2 – Élèves et caisse** (M2 + M3 ensemble, décision A3) — **plan à valider avant tout code**
-- Module en cours : **aucun** (prochain : M2 + M3)
+- Phase en cours : **Phase 2 – Élèves et caisse** (M2 + M3 ensemble, décision A3)
+- Plan : `docs/plan-phase-2.md` (validé, décision D6) — sous-étapes 2a → 2g
+  - ⏳ 2a – Fiche élève, responsables, données médicales, pièces jointes, recherche
+- Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`
 - **Pas d'école pilote pour l'instant (D1)** : les règles qui dépendaient des écoles sont des hypothèses
@@ -175,7 +177,7 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 `class_subjects`, `level_subjects`, `time_slots`, `staff`, `students`, `student_medical`, `guardians`,
 `student_guardians`, `enrollments`, `fee_items`, `invoices` (échéances), `payments`,
 `payment_allocations`, `assessments`, `grades`, `report_cards`, `attendance`,
-`notifications`, `audit_logs` (27 tables).
+`notifications`, `audit_logs`, `student_documents`, `cash_closures` (29 tables, décision D6).
 
 - Matricule (décision A6) : `CODE-AA-NNNNN` (ex. `SJB-26-00042`), préfixe stocké dans `schools`,
   numéro d'ordre continu par école, attribué une fois, jamais modifié ni réutilisé.

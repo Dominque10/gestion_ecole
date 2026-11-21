@@ -76,6 +76,18 @@
 | H36 | Copie : professeurs principaux et enseignants repris seulement s'ils ont encore le rôle Enseignant ; échéances décalées du nombre d'années entre les rentrées | `src/modules/settings/structure-copy.ts` | ✅ |
 | H37 | Assistant : fiche « faite » dès qu'une adresse ou un téléphone est saisi ; personnel « fait » dès qu'une personne s'ajoute au directeur | `src/modules/settings/setup-status.ts` | ✅ |
 
+## Phase 2 — Élèves et caisse (plan validé, décision D6)
+
+| # | Hypothèse | Où dans le code | Statut |
+|---|---|---|---|
+| H38 | Matricule : « AA » = année de début de l'année scolaire de travail (en cours, sinon en préparation) au moment de la création de la fiche ; numéro d'ordre jamais réutilisé | 2a | ⏳ |
+| H39 | Affectation d'un paiement : échéance la plus ancienne d'abord ; à date égale, obligatoire avant facultatif | 2d | ⏳ |
+| H40 | Départ d'un élève : échéances à venir non payées annulées (jamais supprimées) ; le déjà payé reste acquis | 2b / 2c | ⏳ |
+| H41 | Annulation d'un paiement : tant que le directeur n'a pas validé, le paiement compte normalement | 2d | ⏳ |
+| H42 | Après sa clôture, un caissier ne peut plus encaisser ce jour-là (réouverture par le directeur, tracée) | 2e | ⏳ |
+| H43 | Une fiche élève n'est jamais supprimée (le départ se gère par l'inscription) | 2a | ⏳ |
+| H44 | Pièces jointes : photos uniquement (pas de PDF), réduites dans le téléphone (1 600 px max) | 2a | ⏳ |
+
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 
 Voir `docs/cadrage.md` §B : modèle de bulletin (B2), règles de calcul (B3), prestataire de paiement (B4),

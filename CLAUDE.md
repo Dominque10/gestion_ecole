@@ -22,7 +22,8 @@ Contraintes du terrain à garder en tête en permanence :
 - Phase en cours : **Phase 0 – Cadrage** (voir §4)
 - Module en cours : **aucun** (prochain : fondations puis M1)
 - Dernier jalon validé : —
-- Fait en phase 0 : dépôt Git initialisé, CLAUDE.md, BACKLOG.md, `docs/cadrage.md`.
+- Fait en phase 0 : dépôt Git initialisé, CLAUDE.md, BACKLOG.md, `docs/cadrage.md` ;
+  décisions A1, A2, A5 prises (voir `docs/cadrage.md` §C).
   Aucun code applicatif pour l'instant.
 
 ## 3. Règles de périmètre — à respecter strictement
@@ -84,6 +85,13 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - Rôles : super-admin, directeur, secrétaire/surveillant, comptable/caissier, enseignant, parent.
   Un utilisateur peut cumuler plusieurs rôles (`memberships.roles[]`).
 - Un parent ne voit que ses enfants ; un enseignant que ses classes/matières.
+- **Parent multi-écoles** (décision A2) : un seul compte parent, une `membership` « parent » par école.
+  Une unique fonction SQL dédiée (testée) liste ses enfants toutes écoles confondues, en ne renvoyant
+  que nom, classe et école. Choisir un enfant bascule la session sur l'école de l'enfant ; ensuite tout
+  passe par la RLS, avec une politique qui limite le parent à ses propres enfants.
+- **Super-admin** (décision A5) : aucun accès permanent aux données d'une école. Accès uniquement via
+  une session de support (école, motif obligatoire, expiration 1 h), limitée au paramétrage et aux
+  fiches élèves ; jamais paiements, notes ni bulletins. Ouverture et actions tracées dans `audit_logs`.
 
 ### Hors-ligne
 - Saisie des notes et de l'appel possible hors ligne (file locale IndexedDB, synchro au retour du réseau).
@@ -117,7 +125,12 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 `schools`, `users`, `memberships`, `academic_years`, `periods`, `levels`, `classes`, `subjects`,
 `class_subjects`, `students`, `guardians`, `student_guardians`, `enrollments`, `fee_items`,
 `invoices` (échéances), `payments`, `payment_allocations`, `assessments`, `grades`,
-`report_cards`, `attendance`, `notifications`, `audit_logs`.
+`report_cards`, `attendance`, `time_slots`, `staff`, `notifications`, `audit_logs` (25 tables).
+
+- `time_slots` (décision A1) : créneaux nommés définis par chaque école (demi-journées ou heures),
+  utilisés par l'appel en M5. **Pas un emploi du temps** (hors V1).
+- `staff` (décision A1) : table minimale (nom, fonction, `user_id` facultatif), **aucun écran en V1** ;
+  prépare la paie/RH de la V2.
 
 `enrollments` (inscription d'un élève dans une classe pour une année) est le **pivot** :
 notes, absences, échéances et bulletins s'y rattachent.

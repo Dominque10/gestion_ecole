@@ -105,6 +105,8 @@
 | H60 | Le comptable voit ses propres clôtures ; le directeur voit et rouvre toutes les clôtures | 2e | ⏳ |
 | H61 | Les PDF ne sont pas conservés sur le serveur : produits à la demande, récupérables 1 h par la seule personne qui les a demandés | 2f | ⏳ |
 | H62 | La page publique de vérification d'un reçu (QR code) affiche école, numéro, date, montant et validité, **jamais l'élève** | 2f | ⏳ |
+| H63 | Liste de classe : direction, secrétariat, comptabilité, et l'enseignant pour ses classes ; cartes scolaires et certificats : direction et secrétariat | 2f | ⏳ |
+| H64 | Cartes scolaires au format carte bancaire (85,6 × 54 mm), 8 par page A4, avec photo ; certificats avec cachet et signature de l'école, textes accordés au sexe de l'élève | 2f | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

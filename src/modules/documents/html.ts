@@ -19,7 +19,7 @@ export type PageFormat = "A4" | "A5" | "ticket";
 const PAGE_CSS: Record<PageFormat, string> = {
   A4: "@page { size: A4; margin: 15mm; }",
   A5: "@page { size: A5; margin: 10mm; }",
-  ticket: "@page { size: 80mm auto; margin: 3mm; } body { width: 74mm; font-size: 11px; }",
+  ticket: "body { width: 74mm; font-size: 11px; }",
 };
 
 /** Document HTML complet, autonome (aucune ressource externe : le worker n'a pas d'accès réseau). */

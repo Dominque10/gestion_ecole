@@ -19,7 +19,8 @@ export type StudentErrorCode =
   | "classWrongLevel"
   | "classFull"
   | "alreadyLeft"
-  | "exitBeforeEntry";
+  | "exitBeforeEntry"
+  | "notLeft";
 
 export class StudentError extends Error {
   constructor(readonly code: StudentErrorCode) {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { t } from "@/i18n";
 import { getClass, listTeachers } from "@/modules/settings/classes";
 import { listLevels } from "@/modules/settings/levels";
@@ -61,6 +62,20 @@ async function Content({ params }: Props) {
             ? t("enrollments.rosterTitleCapacity", { n: roster.length, max: schoolClass.capacity })
             : t("enrollments.rosterTitle", { n: roster.length })}
         </h2>
+        {roster.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <DownloadPdfButton
+              request={{ kind: "class_list", classId: schoolClass.id }}
+              label={t("documents.classList")}
+              variant="secondary"
+            />
+            <DownloadPdfButton
+              request={{ kind: "student_cards", classId: schoolClass.id }}
+              label={t("documents.studentCards")}
+              variant="secondary"
+            />
+          </div>
+        )}
         {roster.length === 0 ? (
           <p className="text-zinc-600">{t("enrollments.rosterEmpty")}</p>
         ) : (

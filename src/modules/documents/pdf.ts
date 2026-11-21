@@ -26,13 +26,16 @@ export async function htmlToPdf(html: string, format: PageFormat): Promise<Uint8
   try {
     const page = await context.newPage();
     if (format === "ticket") {
-      // Ticket de caisse : largeur fixe de 80 mm, hauteur ajustée au contenu.
-      await page.setViewportSize({ width: Math.round(80 * MM_TO_PX), height: 600 });
+      // Ticket de caisse : largeur fixe de 80 mm, hauteur ajustée au contenu (pas de papier perdu).
+      await page.setViewportSize({ width: Math.round(74 * MM_TO_PX), height: 200 });
       await page.setContent(html, { waitUntil: "load" });
-      const height = await page.evaluate(() => document.documentElement.scrollHeight);
+      const contentHeight = await page.evaluate(() =>
+        Math.ceil(document.body.getBoundingClientRect().height),
+      );
       return await page.pdf({
         width: "80mm",
-        height: `${height + Math.round(6 * MM_TO_PX)}px`,
+        height: `${contentHeight + Math.round(8 * MM_TO_PX)}px`,
+        margin: { top: "3mm", bottom: "3mm", left: "3mm", right: "3mm" },
         printBackground: true,
       });
     }

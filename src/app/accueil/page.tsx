@@ -31,6 +31,7 @@ const MENU: {
     action: "students:read",
     visible: canBrowseStudents,
   },
+  { href: "/listes", label: "nav.lists", action: "students:read", visible: canBrowseStudents },
   { href: "/caisse", label: "nav.cash", action: "payments:collect" },
   { href: "/caisse/cloture", label: "nav.closure", action: "cash:close" },
   { href: "/impayes", label: "nav.arrears", action: "dashboard:finance" },

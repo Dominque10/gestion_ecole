@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { ImageUploadForm } from "@/components/image-upload-form";
 import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
@@ -322,6 +323,20 @@ async function EnrollmentSection({
                 principal={principal}
                 enrollmentId={r.id}
                 editable={r.yearStatus !== "archived" && r.status !== "left"}
+              />
+            )}
+            {canEdit && r.status === "enrolled" && (
+              <DownloadPdfButton
+                request={{ kind: "certificate", enrollmentId: r.id, type: "schooling" }}
+                label={t("documents.certificateSchooling")}
+                variant="secondary"
+              />
+            )}
+            {canEdit && r.status === "left" && (
+              <DownloadPdfButton
+                request={{ kind: "certificate", enrollmentId: r.id, type: "radiation" }}
+                label={t("documents.certificateRadiation")}
+                variant="secondary"
               />
             )}
             {editable && <DepartureForm enrollmentId={r.id} today={todayInBrazzaville()} />}

@@ -12,6 +12,7 @@ import {
   enrollments,
   levels,
   students,
+  users,
 } from "@/server/db/schema";
 import {
   cancelInvoicesAfter,
@@ -466,5 +467,172 @@ export async function reEnrollClass(
       } else alreadyEnrolled++;
     }
     return { created, alreadyEnrolled };
+  });
+}
+
+// --- Classes et listes pour les documents (2f) --------------------------------------------------
+
+export type VisibleClass = {
+  id: string;
+  name: string;
+  levelName: string;
+  yearLabel: string;
+  count: number;
+};
+
+/**
+ * Classes des années non archivées ayant au moins un élève inscrit, visibles du lecteur (toutes pour
+ * la direction et le secrétariat ; les siennes pour un enseignant).
+ */
+export async function visibleClasses(principal: Principal): Promise<VisibleClass[]> {
+  const ctx = readContext(principal);
+  return withSchool(ctx, (tx) =>
+    tx
+      .select({
+        id: classes.id,
+        name: classes.name,
+        levelName: levels.name,
+        yearLabel: academicYears.label,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(enrollments)
+      .innerJoin(classes, eq(classes.id, enrollments.classId))
+      .innerJoin(levels, eq(levels.id, classes.levelId))
+      .innerJoin(academicYears, eq(academicYears.id, enrollments.academicYearId))
+      .innerJoin(students, eq(students.id, enrollments.studentId))
+      .where(
+        and(
+          eq(enrollments.schoolId, ctx.schoolId),
+          eq(enrollments.status, "enrolled"),
+          ne(academicYears.status, "archived"),
+          ctx.teacherOnly ? teacherStudentsFilter(ctx.userId) : undefined,
+        ),
+      )
+      .groupBy(
+        classes.id,
+        classes.name,
+        levels.name,
+        levels.position,
+        academicYears.label,
+        academicYears.startDate,
+      )
+      .orderBy(desc(academicYears.startDate), asc(levels.position), asc(classes.name)),
+  );
+}
+
+export type ClassRoster = {
+  classId: string;
+  className: string;
+  levelName: string;
+  yearLabel: string;
+  headTeacherName: string | null;
+  students: {
+    studentId: string;
+    matricule: string;
+    lastName: string;
+    firstNames: string;
+    sex: "M" | "F";
+    birthDate: string | null;
+    photoKey: string | null;
+  }[];
+};
+
+/** Élèves inscrits d'une classe, par ordre alphabétique (lecteur limité à ses élèves s'il enseigne). */
+export async function getClassRoster(principal: Principal, classId: string): Promise<ClassRoster> {
+  const ctx = readContext(principal);
+  if (!isUuid(classId)) throw new StudentError("classNotFound");
+  return withSchool(ctx, async (tx) => {
+    const [info] = await tx
+      .select({
+        className: classes.name,
+        levelName: levels.name,
+        yearLabel: academicYears.label,
+        headTeacherName: users.name,
+      })
+      .from(classes)
+      .innerJoin(levels, eq(levels.id, classes.levelId))
+      .innerJoin(academicYears, eq(academicYears.id, classes.academicYearId))
+      .leftJoin(users, eq(users.id, classes.headTeacherId))
+      .where(and(eq(classes.schoolId, ctx.schoolId), eq(classes.id, classId)));
+    if (!info) throw new StudentError("classNotFound");
+    const rows = await tx
+      .select({
+        studentId: students.id,
+        matricule: students.matricule,
+        lastName: students.lastName,
+        firstNames: students.firstNames,
+        sex: students.sex,
+        birthDate: students.birthDate,
+        photoKey: students.photoKey,
+      })
+      .from(enrollments)
+      .innerJoin(students, eq(students.id, enrollments.studentId))
+      .where(
+        and(
+          eq(enrollments.classId, classId),
+          eq(enrollments.status, "enrolled"),
+          ctx.teacherOnly ? teacherStudentsFilter(ctx.userId) : undefined,
+        ),
+      )
+      .orderBy(asc(students.lastName), asc(students.firstNames));
+    // Un enseignant qui n'a aucun élève visible dans cette classe ne la voit pas.
+    if (ctx.teacherOnly && rows.length === 0) throw new StudentError("classNotFound");
+    return { classId, ...info, students: rows };
+  });
+}
+
+export type CertificateData = {
+  status: EnrollmentStatus;
+  student: {
+    matricule: string;
+    lastName: string;
+    firstNames: string;
+    sex: "M" | "F";
+    birthDate: string | null;
+    birthPlace: string | null;
+  };
+  yearLabel: string;
+  levelName: string;
+  className: string | null;
+  entryDate: string;
+  exitDate: string | null;
+  exitReason: ExitReason | null;
+};
+
+/** Données d'un certificat (scolarité ou radiation) : réservé à la direction et au secrétariat. */
+export async function getCertificateData(
+  principal: Principal,
+  enrollmentId: string,
+): Promise<CertificateData> {
+  authorize(principal, "students:write");
+  if (!isUuid(enrollmentId)) throw new StudentError("enrollmentNotFound");
+  const ctx = { schoolId: principal.schoolId as string, userId: principal.userId };
+  return withSchool(ctx, async (tx) => {
+    const [row] = await tx
+      .select({
+        status: enrollments.status,
+        matricule: students.matricule,
+        lastName: students.lastName,
+        firstNames: students.firstNames,
+        sex: students.sex,
+        birthDate: students.birthDate,
+        birthPlace: students.birthPlace,
+        yearLabel: academicYears.label,
+        levelName: levels.name,
+        className: classes.name,
+        entryDate: enrollments.entryDate,
+        exitDate: enrollments.exitDate,
+        exitReason: enrollments.exitReason,
+      })
+      .from(enrollments)
+      .innerJoin(students, eq(students.id, enrollments.studentId))
+      .innerJoin(academicYears, eq(academicYears.id, enrollments.academicYearId))
+      .innerJoin(levels, eq(levels.id, enrollments.levelId))
+      .leftJoin(classes, eq(classes.id, enrollments.classId))
+      .where(and(eq(enrollments.schoolId, ctx.schoolId), eq(enrollments.id, enrollmentId)));
+    if (!row) throw new StudentError("enrollmentNotFound");
+    const { status, yearLabel, levelName, className, entryDate, exitDate, exitReason, ...student } =
+      row;
+    return { status, student, yearLabel, levelName, className, entryDate, exitDate, exitReason };
   });
 }

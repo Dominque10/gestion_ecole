@@ -28,7 +28,8 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 2c – Échéances (grille + réductions fratrie, bourse, remise)
   - ✅ 2d – Encaissement, reçus, annulation (D7), validation automatique de l'inscription (A3)
   - ✅ 2e – Clôture de caisse journalière et liste des impayés (jalon « clôture = somme des reçus » testé)
-  - ⏳ 2f – Documents PDF (worker pg-boss + Playwright) : ✅ reçu + QR ; ⏳ listes de classe, cartes, certificats
+  - ✅ 2f – Documents PDF (worker pg-boss + Playwright) : reçu + QR, listes de classe, cartes, certificats
+  - ⏳ 2g – Import Excel/CSV des élèves (1 000 élèves en moins de 2 minutes)
 - Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`
@@ -231,7 +232,8 @@ notes, absences, échéances et bulletins s'y rattachent.
 ```bash
 pnpm install          # dépendances
 pnpm dev              # serveur de développement
-pnpm worker           # worker des tâches de fond
+pnpm worker           # worker des tâches de fond (documents PDF) — à lancer avec pnpm dev
+node --import tsx scripts/sample-documents.mts <dossier>  # exemples de PDF pour vérifier le rendu
 pnpm test             # tests unitaires et d'intégration
 pnpm test:e2e         # tests Playwright
 pnpm lint             # types générés Next + ESLint + typecheck

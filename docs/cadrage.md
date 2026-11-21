@@ -22,12 +22,12 @@
 | # | Point | Bloque | Décision |
 |---|---|---|---|
 | B1 | Nom du produit et nom de domaine (.cg ou autre) | Mise en ligne | _à décider_ |
-| B2 | Modèle de bulletin exact de chaque école pilote | M4 | _à décider_ |
-| B3 | Règles de calcul : arrondis, matières facultatives, compositions vs interrogations, rang ex æquo | M4 | _à décider_ |
-| B4 | Agrégateur de paiement retenu, frais, délai du compte marchand | M3 / M6 | _à décider_ |
-| B5 | Prestataire SMS local et coût ; accès API WhatsApp Business | Phase 1 (OTP), M5, M6 | _à décider_ |
+| B2 | Modèle de bulletin exact de chaque école pilote | M4 | Hypothèse : modèle standard modifiable par école (D1) |
+| B3 | Règles de calcul : arrondis, matières facultatives, compositions vs interrogations, rang ex æquo | M4 | Hypothèse : valeurs par défaut paramétrables, proposées une par une avant M4 (D1) |
+| B4 | Agrégateur de paiement retenu, frais, délai du compte marchand | M3 / M6 | Hypothèse : faux prestataire derrière l’interface interne (D1) |
+| B5 | Prestataire SMS local et coût ; accès API WhatsApp Business | Phase 1 (OTP), M5, M6 | Hypothèse : faux prestataire derrière l’interface interne (D1) |
 | B6 | Hébergement : à l'étranger ou au Congo (loi données personnelles, latence) | Déploiement | _à décider_ |
-| B7 | Blocage du bulletin en cas d'impayé : autorisé et souhaité ? | M3 / M4 | _à décider_ |
+| B7 | Blocage du bulletin en cas d'impayé : autorisé et souhaité ? | M3 / M4 | Hypothèse : option désactivée par défaut (D1) |
 | B8 | Prix de l'abonnement (après entretiens avec au moins 10 directeurs) | Commercialisation | _à décider_ |
 
 ## C. Décisions prises
@@ -43,3 +43,5 @@
 | 2026-11-21 | **A6** — Matricule `CODE-AA-NNNNN` (ex. `SJB-26-00042`) : préfixe paramétrable par école (`schools`), deux chiffres de l'année de première inscription, numéro d'ordre continu par école. Attribué une fois, jamais modifié ni réutilisé. Format du Claude Doc retenu (année sur 2 chiffres). | Porteur du projet |
 | 2026-11-21 | **A7 (remplace A5)** — Support en **lecture seule**, uniquement **après autorisation du directeur**, durée limitée (**24 h par défaut**). Chaque ouverture et chaque consultation tracées dans `audit_logs`. Agir à la place d'un utilisateur : reporté en V2. Stockage : une `membership` avec le rôle `support`, une date d'expiration et l'identité du directeur qui l'a accordée (pas de nouvelle table, 26 tables). | Porteur du projet |
 | 2026-11-21 | **A8 (confirme A1)** — `time_slots` = créneaux simples définis par l'école (libellé, heure de début, heure de fin ; ex. « Matin 7h30-12h »), saisis dans un petit écran du M1. **Pas d'emploi du temps** (ni classe-matière, ni jour, ni salle). Pour l'appel par cours, `attendance` reçoit une colonne facultative `class_subject_id`. | Porteur du projet |
+| 2026-11-21 | **D1 — Pas d'école pilote pour l'instant.** La Phase 0 est validée par le porteur du projet. Les points qui dépendaient des écoles deviennent des hypothèses par défaut, toutes paramétrables : bulletin standard modifiable (B2), règles de calcul par défaut proposées une par une avant M4 (B3), blocage du bulletin désactivé par défaut (B7). Paiement et SMS codés derrière l'interface interne avec un faux prestataire de test (B4, B5). Les critères d'acceptation qui citent une école pilote utilisent des cas de référence préparés par le porteur. Dès qu'une école est contactée, ses retours peuvent modifier ces hypothèses. | Porteur du projet |
+| 2026-11-21 | **Jalon Phase 0 validé** par le porteur du projet. Passage en Phase 1 – Fondations (plan à valider avant tout code). | Porteur du projet |

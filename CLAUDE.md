@@ -19,9 +19,12 @@ Contraintes du terrain à garder en tête en permanence :
 ## 2. État actuel (À METTRE À JOUR)
 
 - Version en cours : **V1**
-- Phase en cours : **Phase 0 – Cadrage** (voir §4)
+- Phase en cours : **Phase 1 – Fondations** (plan à valider avant tout code)
 - Module en cours : **aucun** (prochain : fondations puis M1)
-- Dernier jalon validé : —
+- Dernier jalon validé : **Phase 0**, validée par le porteur du projet le 2026-11-21 (décision D1)
+- **Pas d'école pilote pour l'instant (D1)** : les règles qui dépendaient des écoles sont des hypothèses
+  par défaut, paramétrables, à revoir dès qu'une école sera contactée. Paiement et SMS : faux prestataire
+  de test derrière l'interface interne. Toujours signaler quand un choix est une hypothèse.
 - Fait en phase 0 : dépôt Git initialisé, CLAUDE.md, BACKLOG.md, `docs/cadrage.md` ;
   décisions A1 à A8 prises (voir `docs/cadrage.md` §C).
   Aucun code applicatif pour l'instant.
@@ -41,11 +44,11 @@ Contraintes du terrain à garder en tête en permanence :
 
 | Phase | Contenu | Jalon de sortie |
 |---|---|---|
-| 0 – Cadrage | Validation avec écoles pilotes, choix agrégateur paiement + SMS, maquettes | Cahier des charges validé |
+| 0 – Cadrage | Correction du cahier des charges, décisions de cadrage (`docs/cadrage.md`) | Cahier des charges validé par le porteur ✅ |
 | 1 – Fondations | Auth, rôles, multi-établissement (RLS), CI, tests ; **M1 Paramétrage** | Tests d'isolation entre écoles au vert |
 | 2 – Élèves et caisse | **M2 Inscriptions/fiches élèves**, **M3 Frais, paiements, reçus, impayés** | Clôture de caisse = somme des reçus |
-| 3 – Pédagogie | **M4 Notes et bulletins**, **M5 Absences** | Moyennes = calcul de référence d'une école |
-| 4 – Parents et pilote | **M6 Espace parents + paiement mobile + notifications**, **M7 Tableau de bord** | Bilan pilote positif |
+| 3 – Pédagogie | **M4 Notes et bulletins**, **M5 Absences** | Moyennes = cas de référence préparés par le porteur |
+| 4 – Parents et pilote | **M6 Espace parents + paiement mobile + notifications**, **M7 Tableau de bord** | Bilan pilote positif (dès qu'une école est disponible) |
 
 Hors V1 (ne pas coder) : emploi du temps, cahier de textes, paie/RH, comptabilité,
 LMD/universités, cantine, transport, bibliothèque, application mobile native.

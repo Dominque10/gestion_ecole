@@ -37,9 +37,12 @@ export const fr = {
     staff: "Personnel de l'école",
     schoolProfile: "Fiche de l'école",
     years: "Années scolaires",
+    levels: "Niveaux",
+    subjects: "Matières",
   },
   form: {
     saving: "Enregistrement…",
+    save: "Enregistrer",
     forbidden: "Vous n'avez pas le droit de faire cette action.",
     invalid: "Vérifiez les champs signalés.",
   },
@@ -198,6 +201,52 @@ export const fr = {
       endDate: "La fin d'année doit être une date valide, après la rentrée.",
     },
   },
+  cycles: {
+    preschool: "Préscolaire",
+    primary: "Primaire",
+    college: "Collège",
+    lycee: "Lycée",
+  },
+  levels: {
+    title: "Niveaux",
+    intro:
+      "Les niveaux de votre école (CP1, 6e, 1re…). Ajoutez ceux de vos cycles en un clic, puis renommez ou complétez si besoin.",
+    empty: "Aucun niveau pour l'instant.",
+    addDefaults: "Ajouter les niveaux du {cycle}",
+    addedDefaults: "{n} niveau(x) ajouté(s).",
+    nothingToAdd: "Tous les niveaux de ce cycle sont déjà là.",
+    addTitle: "Ajouter un autre niveau",
+    cycle: "Cycle",
+    name: "Nom du niveau",
+    nameHelp: "Exemple : CI, CM2 bis…",
+    add: "Ajouter",
+    added: "Niveau ajouté.",
+    rename: "Renommer",
+    renamed: "Nom enregistré.",
+    newName: "Nouveau nom pour {nom}",
+    delete: "Supprimer",
+    deleteConfirm: "Supprimer le niveau {nom} ?",
+    deleted: "Niveau supprimé.",
+    nameError: "Indiquez un nom (40 caractères au plus).",
+  },
+  subjects: {
+    title: "Matières",
+    intro:
+      "Les matières enseignées dans votre école. Les coefficients se règlent ensuite par niveau et série.",
+    empty:
+      "Aucune matière pour l'instant. Elles peuvent aussi être ajoutées depuis la grille des coefficients.",
+    addTitle: "Ajouter une matière",
+    name: "Nom de la matière",
+    add: "Ajouter",
+    added: "Matière ajoutée.",
+    rename: "Renommer",
+    renamed: "Nom enregistré.",
+    newName: "Nouveau nom pour {nom}",
+    delete: "Supprimer",
+    deleteConfirm: "Supprimer la matière {nom} ?",
+    deleted: "Matière supprimée.",
+    nameError: "Indiquez un nom (80 caractères au plus).",
+  },
   settings: {
     errors: {
       codeTaken: "Ce code est déjà utilisé par une autre école.",
@@ -220,6 +269,14 @@ export const fr = {
       periodsOverlap:
         "Deux périodes se chevauchent. Chaque période doit commencer après la précédente.",
       periodLabel: "Chaque période doit avoir un nom.",
+      levelNameTaken: "Un niveau porte déjà ce nom.",
+      levelNotFound: "Niveau introuvable.",
+      levelInUse:
+        "Ce niveau est utilisé (classes ou coefficients) : il ne peut pas être supprimé. Vous pouvez le renommer.",
+      subjectNameTaken: "Une matière porte déjà ce nom.",
+      subjectNotFound: "Matière introuvable.",
+      subjectInUse:
+        "Cette matière est utilisée (coefficients ou classes) : elle ne peut pas être supprimée. Vous pouvez la renommer.",
     },
   },
   roles: {

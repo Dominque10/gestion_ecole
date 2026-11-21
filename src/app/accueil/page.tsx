@@ -20,6 +20,8 @@ const MENU: { href: string; label: MessageKey; action: Action }[] = [
   { href: "/plateforme/ecoles", label: "nav.schools", action: "school:create" },
   { href: "/parametres/ecole", label: "nav.schoolProfile", action: "settings:read" },
   { href: "/parametres/annees", label: "nav.years", action: "settings:read" },
+  { href: "/parametres/niveaux", label: "nav.levels", action: "settings:read" },
+  { href: "/parametres/matieres", label: "nav.subjects", action: "settings:read" },
   { href: "/parametres/personnel", label: "nav.staff", action: "staff:manage" },
 ];
 

@@ -16,6 +16,12 @@ export type SettingsErrorCode =
   | "yearNotFound"
   | "yearArchived"
   | "yearNotUpcoming"
+  | "levelNameTaken"
+  | "levelNotFound"
+  | "levelInUse"
+  | "subjectNameTaken"
+  | "subjectNotFound"
+  | "subjectInUse"
   | PeriodsProblem;
 
 export class SettingsError extends Error {
@@ -41,4 +47,10 @@ export function dbGuardCode(error: unknown): string | null {
   const e = error as { code?: string; cause?: { code?: string } };
   const code = e?.code ?? e?.cause?.code;
   return code?.startsWith("GS") ? code : null;
+}
+
+/** Violation de clé étrangère : la ligne est encore utilisée ailleurs (ex. niveau qui a des classes). */
+export function isForeignKeyViolation(error: unknown): boolean {
+  const e = error as { code?: string; cause?: { code?: string } };
+  return e?.code === "23503" || e?.cause?.code === "23503";
 }

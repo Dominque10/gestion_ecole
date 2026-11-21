@@ -13,9 +13,9 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
-import { schools } from "./platform";
+import { schools, users } from "./platform";
 
-// Paramétrage de l'école (M1). Règles RLS et déclencheurs : migration SQL « settings_rls ».
+// Paramétrage de l'école (M1). Règles RLS et déclencheurs : migrations SQL personnalisées (*_rls).
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -86,4 +86,176 @@ export const periods = pgTable(
     check("periods_dates", sql`${t.startDate} <= ${t.endDate}`),
     index("periods_school_idx").on(t.schoolId),
   ],
+);
+
+// --- Structure pédagogique (4d) -------------------------------------------------------------
+
+export const cycle = pgEnum("cycle", ["preschool", "primary", "college", "lycee"]);
+
+/** Niveau d'enseignement (CP1, 6e, 1re…), propre à l'école, valable d'une année sur l'autre. */
+export const levels = pgTable(
+  "levels",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    cycle: cycle("cycle").notNull(),
+    name: text("name").notNull(),
+    /** Ordre d'affichage (CP1 avant CP2…). */
+    position: integer("position").notNull(),
+    ...timestamps,
+  },
+  (t) => [
+    unique("levels_school_name").on(t.schoolId, t.name),
+    unique("levels_id_school").on(t.id, t.schoolId),
+  ],
+);
+
+/** Matière enseignée, propre à l'école. */
+export const subjects = pgTable(
+  "subjects",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    name: text("name").notNull(),
+    ...timestamps,
+  },
+  (t) => [
+    unique("subjects_school_name").on(t.schoolId, t.name),
+    unique("subjects_id_school").on(t.id, t.schoolId),
+  ],
+);
+
+/**
+ * Grille des coefficients (décision D4) : pour une année, un niveau et une série, les matières
+ * enseignées et leur coefficient. Toutes les classes de ce niveau + série partagent la grille.
+ * Série vide ('') = pas de série (primaire, collège).
+ */
+export const levelSubjects = pgTable(
+  "level_subjects",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    academicYearId: uuid("academic_year_id").notNull(),
+    levelId: uuid("level_id").notNull(),
+    series: text("series").notNull().default(""),
+    subjectId: uuid("subject_id").notNull(),
+    coefficient: integer("coefficient").notNull(),
+    ...timestamps,
+  },
+  (t) => [
+    foreignKey({
+      name: "level_subjects_year_fk",
+      columns: [t.academicYearId, t.schoolId],
+      foreignColumns: [academicYears.id, academicYears.schoolId],
+    }),
+    foreignKey({
+      name: "level_subjects_level_fk",
+      columns: [t.levelId, t.schoolId],
+      foreignColumns: [levels.id, levels.schoolId],
+    }),
+    foreignKey({
+      name: "level_subjects_subject_fk",
+      columns: [t.subjectId, t.schoolId],
+      foreignColumns: [subjects.id, subjects.schoolId],
+    }),
+    unique("level_subjects_unique").on(t.academicYearId, t.levelId, t.series, t.subjectId),
+    check("level_subjects_coefficient", sql`${t.coefficient} between 1 and 20`),
+    index("level_subjects_school_idx").on(t.schoolId),
+  ],
+);
+
+/** Classe d'une année (ex. « 1re C1 »). */
+export const classes = pgTable(
+  "classes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    academicYearId: uuid("academic_year_id").notNull(),
+    levelId: uuid("level_id").notNull(),
+    series: text("series").notNull().default(""),
+    name: text("name").notNull(),
+    /** Effectif maximal (facultatif). */
+    capacity: integer("capacity"),
+    /** Professeur principal (compte d'un enseignant de l'école). */
+    headTeacherId: uuid("head_teacher_id").references(() => users.id),
+    ...timestamps,
+  },
+  (t) => [
+    foreignKey({
+      name: "classes_year_fk",
+      columns: [t.academicYearId, t.schoolId],
+      foreignColumns: [academicYears.id, academicYears.schoolId],
+    }),
+    foreignKey({
+      name: "classes_level_fk",
+      columns: [t.levelId, t.schoolId],
+      foreignColumns: [levels.id, levels.schoolId],
+    }),
+    unique("classes_year_name").on(t.academicYearId, t.name),
+    unique("classes_id_year_school").on(t.id, t.academicYearId, t.schoolId),
+    check("classes_capacity", sql`${t.capacity} is null or ${t.capacity} between 1 and 500`),
+    index("classes_school_idx").on(t.schoolId),
+  ],
+);
+
+/**
+ * Matière enseignée dans une classe, avec l'enseignant affecté. Les lignes suivent la grille du
+ * niveau + série de la classe (le coefficient se lit dans level_subjects).
+ */
+export const classSubjects = pgTable(
+  "class_subjects",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    /** Recopié de la classe (contrôlé par la clé composite) : protège les années archivées. */
+    academicYearId: uuid("academic_year_id").notNull(),
+    classId: uuid("class_id").notNull(),
+    subjectId: uuid("subject_id").notNull(),
+    teacherId: uuid("teacher_id").references(() => users.id),
+    ...timestamps,
+  },
+  (t) => [
+    foreignKey({
+      name: "class_subjects_class_fk",
+      columns: [t.classId, t.academicYearId, t.schoolId],
+      foreignColumns: [classes.id, classes.academicYearId, classes.schoolId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "class_subjects_subject_fk",
+      columns: [t.subjectId, t.schoolId],
+      foreignColumns: [subjects.id, subjects.schoolId],
+    }),
+    unique("class_subjects_unique").on(t.classId, t.subjectId),
+    index("class_subjects_school_idx").on(t.schoolId),
+    index("class_subjects_teacher_idx").on(t.teacherId),
+  ],
+);
+
+/**
+ * Personnel (décision A1) : table minimale, sans écran en V1. Prépare la paie / RH de la V2.
+ */
+export const staff = pgTable(
+  "staff",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    name: text("name").notNull(),
+    /** Fonction (ex. « Enseignant de mathématiques », « Gardien »). */
+    jobTitle: text("job_title"),
+    userId: uuid("user_id").references(() => users.id),
+    ...timestamps,
+  },
+  (t) => [index("staff_school_idx").on(t.schoolId)],
 );

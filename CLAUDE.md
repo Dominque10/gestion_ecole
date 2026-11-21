@@ -167,14 +167,16 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 ## 8. Modèle de données (tables principales)
 
 `schools`, `users`, `memberships`, `academic_years`, `periods`, `levels`, `classes`, `subjects`,
-`class_subjects`, `time_slots`, `staff`, `students`, `student_medical`, `guardians`,
+`class_subjects`, `level_subjects`, `time_slots`, `staff`, `students`, `student_medical`, `guardians`,
 `student_guardians`, `enrollments`, `fee_items`, `invoices` (échéances), `payments`,
 `payment_allocations`, `assessments`, `grades`, `report_cards`, `attendance`,
-`notifications`, `audit_logs` (26 tables).
+`notifications`, `audit_logs` (27 tables).
 
 - Matricule (décision A6) : `CODE-AA-NNNNN` (ex. `SJB-26-00042`), préfixe stocké dans `schools`,
   numéro d'ordre continu par école, attribué une fois, jamais modifié ni réutilisé.
 - `enrollments` porte un « mode de validation » (manuel / paiement) — décision A3.
+- `level_subjects` (décision D4) : grille des coefficients par année, niveau, série et matière ; les
+  classes d'un même niveau + série partagent la grille. `class_subjects` porte l'enseignant affecté.
 
 - `time_slots` (décisions A1, A8) : créneaux simples définis par chaque école (libellé, heure de début,
   heure de fin), saisis dans un petit écran du M1, utilisés par l'appel en M5.

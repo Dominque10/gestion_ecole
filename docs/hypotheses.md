@@ -41,6 +41,15 @@
 | H18 | Seule une année encore en préparation peut être supprimée | migration `0006` | ⏳ |
 | H19 | Découpage par défaut en mois entiers (oct.-déc., janv.-mars, avr.-juin) ; trous permis entre périodes (vacances) | `src/modules/settings/periods-logic.ts` | ⏳ |
 
+## Structure pédagogique (4d)
+
+| # | Hypothèse | Où dans le code | Statut |
+|---|---|---|---|
+| H20 | Niveaux par défaut : Petite/Moyenne/Grande section ; CP1 à CM2 ; 6e à 3e ; 2nde, 1re, Tle | `src/modules/settings/defaults.ts` | ⏳ |
+| H21 | Listes de matières courantes par cycle (ex. collège : Français, Mathématiques, Anglais, Histoire-Géographie, ECM, SVT, Physique-Chimie, EPS ; lycée : + Philosophie), coefficient 1 à ajuster | `src/modules/settings/defaults.ts` | ⏳ |
+| H22 | Niveaux et matières valent pour toute la vie de l'école ; classes et grille des coefficients sont propres à chaque année | schéma `settings.ts` | ⏳ |
+| H23 | Coefficients entiers de 1 à 20 | schéma `settings.ts` | ⏳ |
+
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 
 Voir `docs/cadrage.md` §B : modèle de bulletin (B2), règles de calcul (B3), prestataire de paiement (B4),

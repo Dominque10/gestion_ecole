@@ -119,3 +119,11 @@ export const PeriodsSchema = z
   )
   .max(3);
 export type PeriodsInput = z.input<typeof PeriodsSchema>;
+
+export const LevelSchema = z.object({
+  cycle: z.enum(["preschool", "primary", "college", "lycee"]),
+  name: z.string().trim().min(1).max(40),
+});
+export type LevelInput = z.input<typeof LevelSchema>;
+
+export const NameSchema = z.string().trim().min(1).max(80);

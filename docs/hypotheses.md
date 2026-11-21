@@ -49,6 +49,10 @@
 | H21 | Listes de matières courantes par cycle (ex. collège : Français, Mathématiques, Anglais, Histoire-Géographie, ECM, SVT, Physique-Chimie, EPS ; lycée : + Philosophie), coefficient 1 à ajuster | `src/modules/settings/defaults.ts` | ⏳ |
 | H22 | Niveaux et matières valent pour toute la vie de l'école ; classes et grille des coefficients sont propres à chaque année | schéma `settings.ts` | ⏳ |
 | H23 | Coefficients entiers de 1 à 20 | schéma `settings.ts` | ⏳ |
+| H24 | La série ne s'utilise qu'au lycée (2nde comprise) ; saisie libre, A, C, D proposées | `src/modules/settings/coefficients.ts` | ⏳ |
+| H25 | Un seul enseignant par matière et par classe | schéma `settings.ts` (`class_subjects`) | ⏳ |
+| H26 | Retirer le rôle Enseignant (ou retirer la personne) libère ses affectations et son rôle de professeur principal dans les années non archivées | `src/modules/settings/staff.ts` | ⏳ |
+| H27 | Changer le niveau ou la série d'une classe : ses matières suivent la nouvelle grille ; les enseignants des matières retirées sont perdus | `src/modules/settings/classes.ts` | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

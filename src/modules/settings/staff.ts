@@ -1,10 +1,17 @@
 // Le directeur gère les comptes du personnel de son école et leurs rôles (décision D3).
 // Chaque changement de droits est tracé dans audit_logs (CLAUDE.md §6, Traçabilité).
-import { and, arrayContains, asc, eq } from "drizzle-orm";
+import { and, arrayContains, asc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 import { authorize, type MembershipRole, type Principal } from "@/server/auth/permissions";
 import { withSchool, type Tx } from "@/server/db/client";
-import { auditLogs, memberships, users } from "@/server/db/schema";
+import {
+  academicYears,
+  auditLogs,
+  classes,
+  classSubjects,
+  memberships,
+  users,
+} from "@/server/db/schema";
 import { findOrCreateAccount } from "./accounts";
 import { SettingsError } from "./errors";
 import { AddStaffSchema, STAFF_ROLES, StaffRolesSchema, type AddStaffInput } from "./schemas";
@@ -69,6 +76,42 @@ async function lockMembership(tx: Tx, schoolId: string, userId: string) {
   return m;
 }
 
+/**
+ * Une personne qui n'est plus enseignante dans l'école perd ses affectations (matières, professeur
+ * principal) dans les années non archivées. Les années archivées gardent leur historique.
+ */
+async function releaseTeaching(tx: Tx, schoolId: string, userId: string): Promise<void> {
+  const openYears = tx
+    .select({ id: academicYears.id })
+    .from(academicYears)
+    .where(
+      and(
+        eq(academicYears.schoolId, schoolId),
+        inArray(academicYears.status, ["upcoming", "active"]),
+      ),
+    );
+  await tx
+    .update(classSubjects)
+    .set({ teacherId: null, updatedAt: new Date() })
+    .where(
+      and(
+        eq(classSubjects.schoolId, schoolId),
+        eq(classSubjects.teacherId, userId),
+        inArray(classSubjects.academicYearId, openYears),
+      ),
+    );
+  await tx
+    .update(classes)
+    .set({ headTeacherId: null, updatedAt: new Date() })
+    .where(
+      and(
+        eq(classes.schoolId, schoolId),
+        eq(classes.headTeacherId, userId),
+        inArray(classes.academicYearId, openYears),
+      ),
+    );
+}
+
 export type AddedStaff = { userId: string; existingAccount: boolean };
 
 /**
@@ -131,6 +174,7 @@ export async function updateStaffRoles(
       .update(memberships)
       .set({ roles, updatedAt: new Date() })
       .where(eq(memberships.id, existing.id));
+    if (!roles.includes("teacher")) await releaseTeaching(tx, ctx.schoolId, userId);
     await tx.insert(auditLogs).values({
       schoolId: ctx.schoolId,
       actorUserId: principal.userId,
@@ -157,6 +201,7 @@ export async function removeStaff(principal: Principal, userId: string): Promise
     if (!existing || !existing.roles.some(isStaffRole)) throw new SettingsError("notMember");
     if (directors.length === 1 && directors[0] === userId) throw new SettingsError("lastDirector");
     const remaining = existing.roles.filter((r) => !isStaffRole(r));
+    await releaseTeaching(tx, ctx.schoolId, userId);
     if (remaining.length > 0) {
       await tx
         .update(memberships)

@@ -4,13 +4,26 @@ import { Suspense } from "react";
 import { ImageUploadForm } from "@/components/image-upload-form";
 import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
-import { formatDay } from "@/lib/dates";
+import { formatDay, todayInBrazzaville } from "@/lib/dates";
+import { listLevels } from "@/modules/settings/levels";
+import { listYears } from "@/modules/settings/years";
+import {
+  classOptions,
+  listStudentEnrollments,
+  type Enrollment,
+} from "@/modules/students/enrollments";
 import { DOCUMENT_KINDS, listStudentDocuments } from "@/modules/students/media";
 import { getMedical } from "@/modules/students/medical";
 import { getStudent } from "@/modules/students/students";
-import { can } from "@/server/auth/permissions";
+import { can, type Principal } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
 import { uploadDocumentAction, uploadPhotoAction } from "../actions";
+import {
+  AssignClassForm,
+  DepartureForm,
+  PreEnrollForm,
+  ValidateEnrollmentButton,
+} from "../enrollment-forms";
 import {
   AddGuardianForm,
   DeleteDocumentButton,
@@ -78,6 +91,8 @@ async function Content({ params, searchParams }: Props) {
             : t("students.created", { matricule: student.matricule })}
         </p>
       )}
+
+      <EnrollmentSection principal={principal} studentId={student.id} />
 
       <section className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold">{t("students.guardiansTitle")}</h2>
@@ -214,5 +229,95 @@ async function Content({ params, searchParams }: Props) {
         )}
       </section>
     </>
+  );
+}
+
+const STATUS_STYLE: Record<Enrollment["status"], string> = {
+  pre_enrolled: "bg-amber-100 text-amber-900",
+  enrolled: "bg-green-100 text-green-900",
+  left: "bg-zinc-200 text-zinc-800",
+};
+
+/** Scolarité de l'élève : une inscription par année, avec les actions possibles selon son état. */
+async function EnrollmentSection({
+  principal,
+  studentId,
+}: {
+  principal: Principal;
+  studentId: string;
+}) {
+  const canEdit = can(principal, "students:write");
+  const canValidate = can(principal, "enrollments:validate");
+  const rows = await listStudentEnrollments(principal, studentId);
+  const [years, levels] = canEdit
+    ? await Promise.all([listYears(principal), listLevels(principal)])
+    : [[], []];
+  const openYears = years.filter(
+    (y) => y.status !== "archived" && !rows.some((r) => r.academicYearId === y.id),
+  );
+  const options = await Promise.all(
+    rows.map((r) =>
+      canEdit && r.status === "enrolled" && r.yearStatus !== "archived"
+        ? classOptions(principal, r.academicYearId, r.levelId)
+        : Promise.resolve(null),
+    ),
+  );
+
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-xl font-semibold">{t("enrollments.title")}</h2>
+      {rows.length === 0 && <p className="text-zinc-600">{t("enrollments.none")}</p>}
+      {rows.map((r, i) => {
+        const editable = canEdit && r.yearStatus !== "archived" && r.status !== "left";
+        return (
+          <article key={r.id} className="flex flex-col gap-3 rounded-md border border-zinc-300 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="font-semibold">
+                {r.yearLabel} · {r.levelName}
+              </h3>
+              <span className={`rounded px-2 py-0.5 text-sm font-medium ${STATUS_STYLE[r.status]}`}>
+                {t(`enrollments.status.${r.status}`)}
+              </span>
+            </div>
+            <p className="text-sm text-zinc-700">
+              {r.className
+                ? t("enrollments.classLine", { classe: r.className })
+                : t("enrollments.noClass")}
+              {" · "}
+              {t("enrollments.entry", { date: formatDay(r.entryDate) })}
+              {r.validationMode === "manual" && ` · ${t("enrollments.validatedManual")}`}
+              {r.validationMode === "payment" && ` · ${t("enrollments.validatedPayment")}`}
+            </p>
+            {r.status === "left" && r.exitReason && r.exitDate && (
+              <p className="text-sm text-zinc-700">
+                {t("enrollments.exitLine", {
+                  motif: t(`enrollments.exitReasons.${r.exitReason}`),
+                  date: formatDay(r.exitDate),
+                })}
+                {r.exitNote && ` · ${r.exitNote}`}
+              </p>
+            )}
+            {editable && r.status === "pre_enrolled" && canValidate && (
+              <ValidateEnrollmentButton enrollmentId={r.id} />
+            )}
+            {editable && r.status === "enrolled" && options[i] && (
+              <AssignClassForm
+                enrollmentId={r.id}
+                currentClassId={r.classId}
+                options={options[i]}
+              />
+            )}
+            {editable && <DepartureForm enrollmentId={r.id} today={todayInBrazzaville()} />}
+          </article>
+        );
+      })}
+      {canEdit && openYears.length > 0 && levels.length > 0 && (
+        <PreEnrollForm
+          studentId={studentId}
+          years={openYears.map((y) => ({ id: y.id, label: y.label }))}
+          levels={levels.map((l) => ({ id: l.id, label: l.name }))}
+        />
+      )}
+    </section>
   );
 }

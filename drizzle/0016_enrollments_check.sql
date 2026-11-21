@@ -1,0 +1,2 @@
+ALTER TABLE "enrollments" DROP CONSTRAINT "enrollments_validated";--> statement-breakpoint
+ALTER TABLE "enrollments" ADD CONSTRAINT "enrollments_validated" CHECK ("enrollments"."status" <> 'enrolled' or ("enrollments"."validation_mode" is not null and "enrollments"."validated_at" is not null));

@@ -10,20 +10,62 @@ import { StudentError } from "./errors";
 import { formatMatricule, searchKey } from "./identity";
 import { GuardianSchema, StudentSchema, type GuardianInput, type StudentInput } from "./schemas";
 
-/**
- * Rôles qui voient tous les élèves de l'école. L'enseignant ne verra que ses classes (2b, avec les
- * inscriptions) ; en attendant, il ne voit aucune fiche.
- */
+/** Rôles qui voient tous les élèves de l'école. */
 const ALL_STUDENTS_ROLES = ["director", "secretary", "accountant", "support"] as const;
 
 export function seesAllStudents(principal: Principal): boolean {
   return principal.roles.some((r) => (ALL_STUDENTS_ROLES as readonly string[]).includes(r));
 }
 
-function readContext(principal: Principal) {
+/** Peut ouvrir la liste des élèves : toute l'école, ou ses propres élèves pour un enseignant. */
+export function canBrowseStudents(principal: Principal): boolean {
+  return seesAllStudents(principal) || principal.roles.includes("teacher");
+}
+
+export type ReadContext = { schoolId: string; userId: string; teacherOnly: boolean };
+
+/**
+ * Lecture des fiches : la direction, le secrétariat, la comptabilité et le Support voient toute
+ * l'école ; un enseignant ne voit que les élèves de ses classes (CLAUDE.md §6, Droits).
+ */
+export function readContext(principal: Principal): ReadContext {
   authorize(principal, "students:read");
-  if (!seesAllStudents(principal)) throw new StudentError("notFound");
-  return { schoolId: principal.schoolId as string, userId: principal.userId };
+  if (!canBrowseStudents(principal)) throw new StudentError("notFound");
+  return {
+    schoolId: principal.schoolId as string,
+    userId: principal.userId,
+    teacherOnly: !seesAllStudents(principal),
+  };
+}
+
+/**
+ * Élèves d'un enseignant : inscrits (non partis) dans une année non archivée, dans une classe dont il
+ * est professeur principal ou où il enseigne une matière.
+ */
+export function teacherStudentsFilter(userId: string) {
+  return sql`"students"."id" in (
+    select e.student_id from enrollments e
+    join academic_years y on y.id = e.academic_year_id
+    where e.status <> 'left' and y.status <> 'archived'
+      and e.class_id in (
+        select c.id from classes c where c.head_teacher_id = ${userId}
+        union select cs.class_id from class_subjects cs where cs.teacher_id = ${userId}))`;
+}
+
+/** Vérifie qu'un élève existe et est visible pour ce lecteur. */
+export async function assertVisibleStudent(tx: Tx, ctx: ReadContext, studentId: string) {
+  if (!isUuid(studentId)) throw new StudentError("notFound");
+  const [row] = await tx
+    .select({ id: students.id })
+    .from(students)
+    .where(
+      and(
+        eq(students.schoolId, ctx.schoolId),
+        eq(students.id, studentId),
+        ctx.teacherOnly ? teacherStudentsFilter(ctx.userId) : undefined,
+      ),
+    );
+  if (!row) throw new StudentError("notFound");
 }
 
 function writeContext(principal: Principal) {
@@ -187,7 +229,13 @@ export async function getStudent(principal: Principal, studentId: string): Promi
     const [row] = await tx
       .select()
       .from(students)
-      .where(and(eq(students.schoolId, ctx.schoolId), eq(students.id, studentId)));
+      .where(
+        and(
+          eq(students.schoolId, ctx.schoolId),
+          eq(students.id, studentId),
+          ctx.teacherOnly ? teacherStudentsFilter(ctx.userId) : undefined,
+        ),
+      );
     if (!row) throw new StudentError("notFound");
     return {
       id: row.id,
@@ -250,7 +298,13 @@ export async function searchStudents(
           where sg.student_id = "students"."id" and sg.is_primary limit 1)`,
       })
       .from(students)
-      .where(and(eq(students.schoolId, ctx.schoolId), text === "" ? undefined : or(...conditions)))
+      .where(
+        and(
+          eq(students.schoolId, ctx.schoolId),
+          ctx.teacherOnly ? teacherStudentsFilter(ctx.userId) : undefined,
+          text === "" ? undefined : or(...conditions),
+        ),
+      )
       .orderBy(
         text === "" ? desc(students.createdAt) : asc(students.lastName),
         asc(students.firstNames),

@@ -25,6 +25,8 @@ const SCHOOL_ACTIONS = {
   "students:read": ["director", "secretary", "accountant", "teacher", "support"],
   "students:write": ["director", "secretary"],
   "students:medical": ["director"],
+  /** Validation manuelle d'une inscription (A3) ; réservée au directeur quand la caisse existera (2d). */
+  "enrollments:validate": ["director", "secretary"],
   "payments:collect": ["accountant"],
   "payments:cancel:request": ["accountant"],
   "payments:cancel:approve": ["director"],

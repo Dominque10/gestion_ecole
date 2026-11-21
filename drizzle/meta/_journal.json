@@ -99,6 +99,27 @@
       "when": 1795272649599,
       "tag": "0013_students_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795273468377,
+      "tag": "0014_enrollments",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1795273470692,
+      "tag": "0015_enrollments_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795273549416,
+      "tag": "0016_enrollments_check",
+      "breakpoints": true
     }
   ]
 }

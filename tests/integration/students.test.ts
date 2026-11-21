@@ -310,8 +310,8 @@ describe("Droits et isolation", () => {
     await expect(getStudent(as(a, "support"), first.id)).resolves.toMatchObject({ id: first.id });
   });
 
-  it("un enseignant ne voit encore aucune fiche (ses classes arriveront avec les inscriptions)", async () => {
-    await expectStudentError(searchStudents(as(a, "teacher"), ""), "notFound");
+  it("un enseignant sans classe ne voit aucune fiche", async () => {
+    expect(await searchStudents(as(a, "teacher"), "")).toEqual([]);
     await expectStudentError(getStudent(as(a, "teacher"), first.id), "notFound");
   });
 

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { t, type MessageKey } from "@/i18n";
 import { getSetupStatus } from "@/modules/settings/setup-status";
-import { seesAllStudents } from "@/modules/students/students";
+import { canBrowseStudents } from "@/modules/students/students";
 import { can, type Action, type Principal } from "@/server/auth/permissions";
 import { requireSession } from "@/server/auth/session";
 import { logoutAction } from "./actions";
@@ -24,8 +24,7 @@ const MENU: {
   action: Action;
   visible?: (p: Principal) => boolean;
 }[] = [
-  // L'enseignant ne verra ses élèves qu'avec les inscriptions (2b) : pas de lien pour lui d'ici là.
-  { href: "/eleves", label: "nav.students", action: "students:read", visible: seesAllStudents },
+  { href: "/eleves", label: "nav.students", action: "students:read", visible: canBrowseStudents },
   { href: "/plateforme/ecoles", label: "nav.schools", action: "school:create" },
   { href: "/parametres/demarrage", label: "nav.setup", action: "settings:write" },
   { href: "/parametres/ecole", label: "nav.schoolProfile", action: "settings:read" },

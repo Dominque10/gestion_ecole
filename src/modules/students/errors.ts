@@ -7,7 +7,19 @@ export type StudentErrorCode =
   | "documentNotFound"
   | "imageMissing"
   | "imageTooLarge"
-  | "imageType";
+  | "imageType"
+  | "yearNotFound"
+  | "yearArchived"
+  | "levelNotFound"
+  | "enrollmentNotFound"
+  | "alreadyEnrolled"
+  | "notPreEnrolled"
+  | "notEnrolled"
+  | "classNotFound"
+  | "classWrongLevel"
+  | "classFull"
+  | "alreadyLeft"
+  | "exitBeforeEntry";
 
 export class StudentError extends Error {
   constructor(readonly code: StudentErrorCode) {

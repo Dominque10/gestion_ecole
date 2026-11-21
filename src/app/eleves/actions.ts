@@ -11,6 +11,13 @@ import {
   setStudentPhoto,
   type DocumentKind,
 } from "@/modules/students/media";
+import {
+  assignClass,
+  DepartureSchema,
+  preEnroll,
+  recordDeparture,
+  validateEnrollment,
+} from "@/modules/students/enrollments";
 import { saveMedical } from "@/modules/students/medical";
 import { GuardianSchema, MedicalSchema, StudentSchema } from "@/modules/students/schemas";
 import {
@@ -221,5 +228,62 @@ export async function deleteDocumentAction(
     return result("success", t("students.documentDeleted"));
   } catch (error) {
     return result("error", refusalMessage(error));
+  }
+}
+
+// --- Inscriptions (2b) ------------------------------------------------------------------------
+
+export async function preEnrollAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { principal } = await requireAction("students:write");
+  try {
+    await preEnroll(principal, {
+      studentId: String(formData.get("studentId") ?? ""),
+      academicYearId: String(formData.get("yearId") ?? ""),
+      levelId: String(formData.get("levelId") ?? ""),
+    });
+    refresh();
+    return result("success", t("enrollments.preEnrolled"));
+  } catch (error) {
+    return result("error", refusalMessage(error));
+  }
+}
+
+export async function validateEnrollmentAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("enrollments:validate");
+  try {
+    await validateEnrollment(principal, String(formData.get("enrollmentId") ?? ""));
+    refresh();
+    return result("success", t("enrollments.validated"));
+  } catch (error) {
+    return result("error", refusalMessage(error));
+  }
+}
+
+export async function assignClassAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { principal } = await requireAction("students:write");
+  const classId = String(formData.get("classId") ?? "");
+  try {
+    await assignClass(principal, String(formData.get("enrollmentId") ?? ""), classId || null);
+    refresh();
+    return result("success", t("enrollments.classAssigned"));
+  } catch (error) {
+    return result("error", refusalMessage(error));
+  }
+}
+
+export async function departureAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { principal } = await requireAction("students:write");
+  const values = readFields(formData, ["reason", "date", "note"]);
+  const parsed = DepartureSchema.safeParse(values);
+  if (!parsed.success) return result("error", t("enrollments.errors.departure"), values);
+  try {
+    await recordDeparture(principal, String(formData.get("enrollmentId") ?? ""), values);
+    refresh();
+    return result("success", t("enrollments.left"));
+  } catch (error) {
+    return result("error", refusalMessage(error), values);
   }
 }

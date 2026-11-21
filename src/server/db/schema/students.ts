@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   date,
   foreignKey,
   index,
@@ -13,6 +14,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { schools, users } from "./platform";
+import { academicYears, classes, levels } from "./settings";
 
 // Élèves (M2). Règles RLS : migration SQL personnalisée « students_rls ».
 
@@ -157,5 +159,75 @@ export const studentDocuments = pgTable(
       foreignColumns: [students.id, students.schoolId],
     }),
     index("student_documents_student_idx").on(t.studentId),
+  ],
+);
+
+// --- Inscriptions (2b) ------------------------------------------------------------------------
+
+/** Préinscrit → inscrit (validé) → parti. */
+export const enrollmentStatus = pgEnum("enrollment_status", ["pre_enrolled", "enrolled", "left"]);
+/** Mode de validation (décision A3) : manuelle, ou automatique au paiement des frais d'inscription. */
+export const validationMode = pgEnum("validation_mode", ["manual", "payment"]);
+export const exitReason = pgEnum("exit_reason", ["transfer", "dropout", "expulsion"]);
+
+/**
+ * Inscription d'un élève pour une année : le pivot des notes, absences, échéances et bulletins.
+ * Une seule par élève et par année.
+ */
+export const enrollments = pgTable(
+  "enrollments",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    studentId: uuid("student_id").notNull(),
+    academicYearId: uuid("academic_year_id").notNull(),
+    levelId: uuid("level_id").notNull(),
+    classId: uuid("class_id"),
+    status: enrollmentStatus("status").notNull().default("pre_enrolled"),
+    validationMode: validationMode("validation_mode"),
+    validatedAt: timestamp("validated_at", { withTimezone: true }),
+    validatedBy: uuid("validated_by").references(() => users.id),
+    entryDate: date("entry_date", { mode: "string" }).notNull(),
+    exitDate: date("exit_date", { mode: "string" }),
+    exitReason: exitReason("exit_reason"),
+    exitNote: text("exit_note"),
+    ...timestamps,
+  },
+  (t) => [
+    foreignKey({
+      name: "enrollments_student_fk",
+      columns: [t.studentId, t.schoolId],
+      foreignColumns: [students.id, students.schoolId],
+    }),
+    foreignKey({
+      name: "enrollments_year_fk",
+      columns: [t.academicYearId, t.schoolId],
+      foreignColumns: [academicYears.id, academicYears.schoolId],
+    }),
+    foreignKey({
+      name: "enrollments_level_fk",
+      columns: [t.levelId, t.schoolId],
+      foreignColumns: [levels.id, levels.schoolId],
+    }),
+    // La classe appartient forcément à la même année et à la même école.
+    foreignKey({
+      name: "enrollments_class_fk",
+      columns: [t.classId, t.academicYearId, t.schoolId],
+      foreignColumns: [classes.id, classes.academicYearId, classes.schoolId],
+    }),
+    unique("enrollments_student_year").on(t.studentId, t.academicYearId),
+    unique("enrollments_id_school").on(t.id, t.schoolId),
+    index("enrollments_class_idx").on(t.classId),
+    index("enrollments_school_year_idx").on(t.schoolId, t.academicYearId),
+    check(
+      "enrollments_validated",
+      sql`${t.status} <> 'enrolled' or (${t.validationMode} is not null and ${t.validatedAt} is not null)`,
+    ),
+    check(
+      "enrollments_left",
+      sql`${t.status} <> 'left' or (${t.exitDate} is not null and ${t.exitReason} is not null)`,
+    ),
   ],
 );

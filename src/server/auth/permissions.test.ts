@@ -26,6 +26,7 @@ const MATRIX: Record<SchoolAction, MembershipRole[]> = {
   "students:read": ["director", "secretary", "accountant", "teacher", "support"],
   "students:write": ["director", "secretary"],
   "students:medical": ["director"],
+  "enrollments:validate": ["director", "secretary"],
   "payments:collect": ["accountant"],
   "payments:cancel:request": ["accountant"],
   "payments:cancel:approve": ["director"],

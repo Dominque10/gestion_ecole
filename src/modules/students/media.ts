@@ -13,7 +13,7 @@ import {
   type ImageType,
 } from "@/server/storage/images";
 import { StudentError } from "./errors";
-import { seesAllStudents } from "./students";
+import { assertVisibleStudent, readContext } from "./students";
 
 /** Photo d'identité : petite. Document : plus grand, pour rester lisible (acte de naissance). */
 export const MAX_PHOTO_BYTES = 300 * 1024;
@@ -53,12 +53,6 @@ function writeContext(principal: Principal) {
   return { schoolId: principal.schoolId as string, userId: principal.userId };
 }
 
-function readContext(principal: Principal) {
-  authorize(principal, "students:read");
-  if (!seesAllStudents(principal)) throw new StudentError("notFound");
-  return { schoolId: principal.schoolId as string, userId: principal.userId };
-}
-
 export async function setStudentPhoto(
   principal: Principal,
   studentId: string,
@@ -94,12 +88,16 @@ export async function readStudentPhoto(
 ): Promise<{ bytes: Uint8Array; type: ImageType } | null> {
   const ctx = readContext(principal);
   if (!z.uuid().safeParse(studentId).success) return null;
-  const [row] = await withSchool(ctx, (tx) =>
-    tx
+  const [row] = await withSchool(ctx, async (tx) => {
+    await assertVisibleStudent(tx, ctx, studentId);
+    return tx
       .select({ key: students.photoKey })
       .from(students)
-      .where(and(eq(students.schoolId, ctx.schoolId), eq(students.id, studentId))),
-  );
+      .where(and(eq(students.schoolId, ctx.schoolId), eq(students.id, studentId)));
+  }).catch((error: unknown) => {
+    if (error instanceof StudentError) return [];
+    throw error;
+  });
   if (!row?.key) return null;
   const type = imageTypeFromKey(row.key);
   const bytes = await getStorage().get(row.key);
@@ -147,8 +145,9 @@ export async function listStudentDocuments(
 ): Promise<StudentDocument[]> {
   const ctx = readContext(principal);
   if (!z.uuid().safeParse(studentId).success) throw new StudentError("notFound");
-  return withSchool(ctx, (tx) =>
-    tx
+  return withSchool(ctx, async (tx) => {
+    await assertVisibleStudent(tx, ctx, studentId);
+    return tx
       .select({
         id: studentDocuments.id,
         kind: studentDocuments.kind,
@@ -159,8 +158,8 @@ export async function listStudentDocuments(
       .where(
         and(eq(studentDocuments.schoolId, ctx.schoolId), eq(studentDocuments.studentId, studentId)),
       )
-      .orderBy(desc(studentDocuments.createdAt)),
-  );
+      .orderBy(desc(studentDocuments.createdAt));
+  });
 }
 
 export async function readStudentDocument(
@@ -171,11 +170,17 @@ export async function readStudentDocument(
   if (!z.uuid().safeParse(documentId).success) return null;
   const [row] = await withSchool(ctx, (tx) =>
     tx
-      .select({ key: studentDocuments.fileKey })
+      .select({ key: studentDocuments.fileKey, studentId: studentDocuments.studentId })
       .from(studentDocuments)
       .where(and(eq(studentDocuments.schoolId, ctx.schoolId), eq(studentDocuments.id, documentId))),
   );
   if (!row) return null;
+  if (ctx.teacherOnly) {
+    const visible = await withSchool(ctx, (tx) => assertVisibleStudent(tx, ctx, row.studentId))
+      .then(() => true)
+      .catch(() => false);
+    if (!visible) return null;
+  }
   const type = imageTypeFromKey(row.key);
   const bytes = await getStorage().get(row.key);
   return type && bytes ? { bytes, type } : null;

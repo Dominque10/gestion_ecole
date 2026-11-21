@@ -8,6 +8,9 @@ on:
 jobs:
   qualite:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgres://app_user:ci-app-password@localhost:5434/gestion_scolaire
+      DATABASE_ADMIN_URL: postgres://postgres:postgres@localhost:5434/gestion_scolaire
     services:
       db:
         image: postgres:16-alpine

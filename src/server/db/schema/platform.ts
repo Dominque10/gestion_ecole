@@ -1,0 +1,111 @@
+import { sql } from "drizzle-orm";
+import {
+  boolean,
+  check,
+  index,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+  uuid,
+} from "drizzle-orm/pg-core";
+
+// Règles RLS : voir la migration SQL « rls » (drizzle/). Ce fichier ne décrit que la structure.
+
+const timestamps = {
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+};
+
+export const schoolStatus = pgEnum("school_status", ["active", "suspended"]);
+export const subscriptionPlan = pgEnum("subscription_plan", ["essential", "complete"]);
+
+/** Établissement. Pas de school_id : c'est l'école elle-même (RLS sur id). */
+export const schools = pgTable("schools", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  /** Code saisi à la connexion, en minuscules (ex. « sjb »). */
+  code: text("code").notNull().unique(),
+  /** Préfixe des matricules élèves (ex. « SJB » → SJB-26-00042). */
+  matriculePrefix: text("matricule_prefix").notNull(),
+  subdomain: text("subdomain").unique(),
+  address: text("address"),
+  phone: text("phone"),
+  logoKey: text("logo_key"),
+  stampKey: text("stamp_key"),
+  signatureKey: text("signature_key"),
+  plan: subscriptionPlan("plan").notNull().default("essential"),
+  status: schoolStatus("status").notNull().default("active"),
+  ...timestamps,
+});
+
+export const userStatus = pgEnum("user_status", ["active", "disabled"]);
+
+/** Compte commun à toute la plateforme (pas de school_id, pas de RLS). */
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    email: text("email").unique(),
+    phone: text("phone").unique(),
+    isSuperadmin: boolean("is_superadmin").notNull().default(false),
+    status: userStatus("status").notNull().default("active"),
+    ...timestamps,
+  },
+  (t) => [check("users_email_or_phone", sql`${t.email} is not null or ${t.phone} is not null`)],
+);
+
+export const membershipRole = pgEnum("membership_role", [
+  "director",
+  "secretary",
+  "accountant",
+  "teacher",
+  "parent",
+  "support",
+]);
+
+/** Appartenance d'un utilisateur à une école, avec un ou plusieurs rôles. */
+export const memberships = pgTable(
+  "memberships",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    roles: membershipRole("roles").array().notNull(),
+    /** Accès Support (décision A7) : date de fin de l'autorisation. */
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    /** Accès Support : directeur qui a accordé l'accès. */
+    grantedBy: uuid("granted_by").references(() => users.id),
+    ...timestamps,
+  },
+  (t) => [
+    unique("memberships_school_user").on(t.schoolId, t.userId),
+    check("memberships_roles_not_empty", sql`cardinality(${t.roles}) > 0`),
+    index("memberships_user_idx").on(t.userId),
+  ],
+);
+
+/** Journal d'audit en ajout seul (ni UPDATE ni DELETE, garanti par la base). */
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    /** Nul uniquement pour les actions de plateforme (ex. création d'une école). */
+    schoolId: uuid("school_id").references(() => schools.id),
+    actorUserId: uuid("actor_user_id").references(() => users.id),
+    action: text("action").notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id"),
+    before: jsonb("before"),
+    after: jsonb("after"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("audit_logs_school_created_idx").on(t.schoolId, t.createdAt)],
+);

@@ -29,7 +29,7 @@ Contraintes du terrain à garder en tête en permanence :
   décisions A1 à A8 prises (voir `docs/cadrage.md` §C).
 - Plan de la Phase 1 : `docs/plan-phase-1.md` (validé).
   - ✅ Étape 1 – Socle technique (Next.js 16.4, Vitest, Playwright, Prettier, CI, Docker Compose)
-  - ⏳ Étape 2 – Base de données et isolation (RLS)
+  - ✅ Étape 2 – Base de données et isolation (RLS) : 4 tables plateforme, garde-fou générique au vert
   - ⏳ Étape 3 – Comptes, connexion, rôles
   - ⏳ Étape 4 – M1 Paramétrage
 - Next.js 16.4 : lire `node_modules/next/dist/docs/` avant d'utiliser une API (voir `AGENTS.md`).
@@ -81,6 +81,16 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - Chaque transaction commence par `SET LOCAL app.current_school_id = '<id>'`.
 - Ne jamais filtrer par école « à la main » comme seule protection : la RLS est le garde-fou.
 - Chaque nouvelle table métier = politique RLS + test prouvant qu'une école ne voit pas les données d'une autre.
+- **Mise en œuvre (étape 2) :**
+  - Toute donnée d'école passe par `withSchool({ schoolId, userId }, tx => …)` (`src/server/db/client.ts`).
+    Les actions de plateforme du super-admin passent par `withPlatform` (aucun accès aux données métier).
+  - L'application se connecte avec le rôle `app_user` (ni superutilisateur, ni BYPASSRLS, propriétaire
+    d'aucune table) ; les migrations avec `DATABASE_ADMIN_URL`.
+  - Les politiques RLS s'écrivent dans une migration SQL personnalisée (`pnpm db:generate --custom --name=…`),
+    en utilisant `app.current_school_id()`.
+  - Le test `tests/integration/rls.test.ts` échoue si une table a `school_id` sans RLS forcée, ou n'a pas
+    `school_id` sans figurer dans `TABLES_WITHOUT_SCHOOL_ID`. Toute exception y est justifiée par un commentaire.
+  - Tests d'intégration sur une base séparée `<base>_test`, jamais sur la base de développement.
 
 ### Argent
 - Montants en **entiers FCFA (XAF)**, jamais de `float`/`decimal` côté JS.

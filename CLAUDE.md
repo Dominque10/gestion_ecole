@@ -23,7 +23,7 @@ Contraintes du terrain à garder en tête en permanence :
 - Module en cours : **aucun** (prochain : fondations puis M1)
 - Dernier jalon validé : —
 - Fait en phase 0 : dépôt Git initialisé, CLAUDE.md, BACKLOG.md, `docs/cadrage.md` ;
-  décisions A1 à A6 prises (voir `docs/cadrage.md` §C). Écarts A7 et A8 avec le Claude Doc à trancher.
+  décisions A1 à A8 prises (voir `docs/cadrage.md` §C).
   Aucun code applicatif pour l'instant.
 
 ## 3. Règles de périmètre — à respecter strictement
@@ -92,9 +92,10 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   Une unique fonction SQL dédiée (testée) liste ses enfants toutes écoles confondues, en ne renvoyant
   que nom, classe et école. Choisir un enfant bascule la session sur l'école de l'enfant ; ensuite tout
   passe par la RLS, avec une politique qui limite le parent à ses propres enfants.
-- **Super-admin** (décision A5) : aucun accès permanent aux données d'une école. Accès uniquement via
-  une session de support (école, motif obligatoire, expiration 1 h), limitée au paramétrage et aux
-  fiches élèves ; jamais paiements, notes ni bulletins. Ouverture et actions tracées dans `audit_logs`.
+- **Super-admin / Support** (décision A7, remplace A5) : aucun accès permanent aux données d'une école.
+  Accès en **lecture seule**, uniquement après **autorisation du directeur**, pour 24 h par défaut
+  (`membership` avec rôle `support`, date d'expiration, directeur qui l'a accordée). Chaque ouverture
+  et chaque consultation tracées dans `audit_logs`. Agir à la place d'un utilisateur : V2, ne pas coder.
 
 ### Hors-ligne
 - Saisie des notes et de l'appel possible hors ligne (file locale IndexedDB, synchro au retour du réseau).
@@ -135,8 +136,10 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   numéro d'ordre continu par école, attribué une fois, jamais modifié ni réutilisé.
 - `enrollments` porte un « mode de validation » (manuel / paiement) — décision A3.
 
-- `time_slots` (décision A1) : créneaux nommés définis par chaque école (demi-journées ou heures),
-  utilisés par l'appel en M5. **Pas un emploi du temps** (hors V1).
+- `time_slots` (décisions A1, A8) : créneaux simples définis par chaque école (libellé, heure de début,
+  heure de fin), saisis dans un petit écran du M1, utilisés par l'appel en M5.
+  **Pas un emploi du temps** (ni classe-matière, ni jour, ni salle — hors V1).
+- `attendance` : `time_slot_id` + `class_subject_id` facultatif (appel par cours).
 - `staff` (décision A1) : table minimale (nom, fonction, `user_id` facultatif), **aucun écran en V1** ;
   prépare la paie/RH de la V2.
 

@@ -20,6 +20,7 @@ import {
 } from "@/server/db/schema";
 import { isUniqueViolation } from "@/modules/settings/errors";
 import { readContext } from "@/modules/students/students";
+import { assertCashOpen } from "./closures";
 import { FinanceError } from "./errors";
 import { amountDue } from "./invoice-logic";
 import { paidOnInvoice } from "./invoices";
@@ -163,6 +164,8 @@ export async function collectPayment(
         .for("update", { of: enrollments });
       if (!enrollment) throw new FinanceError("enrollmentNotFound");
       if (enrollment.yearStatus === "archived") throw new FinanceError("yearArchived");
+      // Caisse ouverte aujourd'hui (et verrou partagé avec la clôture du jour).
+      await assertCashOpen(tx, ctx.schoolId, ctx.userId);
 
       const open = await openInvoices(tx, enrollment.id);
       if (open.every((i) => i.remaining <= 0)) throw new FinanceError("nothingDue");

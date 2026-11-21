@@ -18,7 +18,9 @@ export type FinanceErrorCode =
   | "alreadyReversed"
   | "cancellationPending"
   | "cancellationNotFound"
-  | "cashClosed";
+  | "cashClosed"
+  | "alreadyClosed"
+  | "closureNotFound";
 
 export class FinanceError extends Error {
   constructor(

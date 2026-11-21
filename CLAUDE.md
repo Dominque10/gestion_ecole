@@ -27,7 +27,8 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 2b – Inscription (préinscription → validée → classe), réinscription groupée, départs
   - ✅ 2c – Échéances (grille + réductions fratrie, bourse, remise)
   - ✅ 2d – Encaissement, reçus, annulation (D7), validation automatique de l'inscription (A3)
-  - ⏳ 2e – Clôture de caisse journalière et liste des impayés
+  - ✅ 2e – Clôture de caisse journalière et liste des impayés (jalon « clôture = somme des reçus » testé)
+  - ⏳ 2f – Documents PDF (worker pg-boss + Playwright) : reçu + QR, listes de classe, cartes, certificats
 - Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`

@@ -148,6 +148,20 @@
       "when": 1795275255110,
       "tag": "0020_payments_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1795276641612,
+      "tag": "0021_cash_closures",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1795276643290,
+      "tag": "0022_cash_closures_rls",
+      "breakpoints": true
     }
   ]
 }

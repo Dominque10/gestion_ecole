@@ -11,7 +11,9 @@ test.beforeEach(async () => {
   const client = new pg.Client({ connectionString: e2eDatabaseUrls().admin });
   await client.connect();
   try {
-    await client.query("truncate students, guardians, levels, subjects, academic_years cascade");
+    await client.query(
+      "truncate students, guardians, levels, subjects, academic_years, cash_closures cascade",
+    );
     const school = (
       await client.query<{ id: string }>("select id from schools where code = $1", [
         E2E_ACCOUNT.schoolCode,
@@ -83,7 +85,7 @@ test("le comptable encaisse et édite le reçu ; le directeur valide une annulat
 }) => {
   // 1. Le comptable retrouve l'élève et encaisse 30 000 FCFA en espèces.
   await login(page, E2E_ACCOUNTANT.phoneLocal, E2E_ACCOUNTANT.password);
-  await page.getByRole("link", { name: "Caisse" }).click();
+  await page.getByRole("link", { name: "Caisse", exact: true }).click();
   await page.getByRole("searchbox", { name: "Rechercher l'élève" }).fill("ngoma");
   await page.getByRole("button", { name: "Rechercher" }).click();
   await page.getByRole("link", { name: "Encaisser" }).click();
@@ -130,4 +132,50 @@ test("le comptable encaisse et édite le reçu ; le directeur valide une annulat
   const after = page.getByRole("article").filter({ hasText: "2026-2027 · 6e" });
   await expect(after.getByText("Annulé", { exact: true })).toBeVisible();
   await expect(after).toContainText("Reste à payer : 125 000 FCFA");
+});
+
+test("clôture de caisse avec écart, encaissement bloqué, réouverture par le directeur ; impayés", async ({
+  page,
+}) => {
+  await login(page, E2E_ACCOUNTANT.phoneLocal, E2E_ACCOUNTANT.password);
+  await page.goto(`/caisse?eleve=${studentId}`);
+  await page.getByRole("textbox", { name: "Montant reçu (FCFA)" }).fill("30 000");
+  await page.getByRole("button", { name: "Encaisser et éditer le reçu" }).click();
+  await expect(page.getByRole("heading", { name: /Reçu n° SJB-2026-/ })).toBeVisible();
+
+  // Clôture : 30 000 attendus en espèces, 29 500 comptés → écart de −500.
+  await page.goto("/caisse/cloture");
+  await expect(page.getByText("Total des reçus : 30 000 FCFA")).toBeVisible();
+  await expect(page.getByText("Espèces attendues dans la caisse : 30 000 FCFA")).toBeVisible();
+  await page.getByRole("textbox", { name: "Espèces comptées (FCFA)" }).fill("29 500");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Clôturer la caisse" }).click();
+  await expect(page.getByText("Clôturée", { exact: true })).toBeVisible();
+  await expect(page.getByText("Écart : -500 FCFA").first()).toBeVisible();
+
+  // Plus d'encaissement aujourd'hui.
+  await page.goto(`/caisse?eleve=${studentId}`);
+  await page.getByRole("textbox", { name: "Montant reçu (FCFA)" }).fill("1 000");
+  await page.getByRole("button", { name: "Encaisser et éditer le reçu" }).click();
+  await expect(
+    page.getByRole("alert").filter({ hasText: "clôturée pour aujourd'hui" }),
+  ).toBeVisible();
+  await page.goto("/accueil");
+  await page.getByRole("button", { name: "Se déconnecter" }).click();
+
+  // Le directeur voit la clôture et la rouvre, avec un motif ; il consulte les impayés.
+  await login(page, E2E_ACCOUNT.phoneLocal, E2E_ACCOUNT.password);
+  await page.getByRole("link", { name: "Clôtures de caisse" }).click();
+  await expect(page.getByText(/· Jean Comptable/)).toBeVisible();
+  await page.getByText("Rouvrir cette caisse").click();
+  await page.getByRole("textbox", { name: "Motif de la réouverture" }).fill("Encaissement oublié");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Rouvrir" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Caisse rouverte." })).toBeVisible();
+
+  await page.getByRole("link", { name: "Accueil" }).click();
+  await page.getByRole("link", { name: "Impayés" }).click();
+  // Inscription soldée, 1re tranche (due le 1er octobre) : 45 000 restant en retard.
+  await expect(page.getByText("Total en retard : 45 000 FCFA (1 élève(s))")).toBeVisible();
+  await expect(page.getByRole("link", { name: "NGOMA Paul" })).toBeVisible();
 });

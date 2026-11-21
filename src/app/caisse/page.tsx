@@ -24,6 +24,12 @@ export default function CashPage({ searchParams }: Props) {
         {t("nav.home")}
       </Link>
       <h1 className="text-2xl font-semibold">{t("cash.title")}</h1>
+      <Link
+        href="/caisse/cloture"
+        className="flex h-12 items-center justify-center rounded-md border border-zinc-400 px-4 font-medium"
+      >
+        {t("nav.closure")}
+      </Link>
       <p>{t("cash.intro")}</p>
       <Suspense fallback={<p>{t("session.loading")}</p>}>
         <Content searchParams={searchParams} />

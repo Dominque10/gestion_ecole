@@ -212,3 +212,58 @@ export const paymentCancellations = pgTable(
     index("payment_cancellations_school_idx").on(t.schoolId, t.status),
   ],
 );
+
+// --- Clôture de caisse (2e) ---------------------------------------------------------------------
+
+export const closureStatus = pgEnum("closure_status", ["closed", "reopened"]);
+
+/**
+ * Clôture journalière d'un caissier (décision D6) : instantané de ses reçus du jour, espèces comptées
+ * et écart. Jamais modifiée, sauf une fois pour être rouverte par le directeur (motif obligatoire).
+ */
+export const cashClosures = pgTable(
+  "cash_closures",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    cashierId: uuid("cashier_id")
+      .notNull()
+      .references(() => users.id),
+    /** Journée de Brazzaville clôturée. */
+    day: date("day", { mode: "string" }).notNull(),
+    receiptCount: integer("receipt_count").notNull(),
+    cashTotal: integer("cash_total").notNull(),
+    mobileMoneyTotal: integer("mobile_money_total").notNull(),
+    transferTotal: integer("transfer_total").notNull(),
+    chequeTotal: integer("cheque_total").notNull(),
+    total: integer("total").notNull(),
+    /** Espèces réellement comptées dans la caisse. */
+    countedCash: integer("counted_cash").notNull(),
+    /** Écart = espèces comptées − espèces attendues (négatif = manque). */
+    difference: integer("difference").notNull(),
+    note: text("note"),
+    closedAt: timestamp("closed_at", { withTimezone: true }).notNull().defaultNow(),
+    status: closureStatus("status").notNull().default("closed"),
+    reopenedBy: uuid("reopened_by").references(() => users.id),
+    reopenedAt: timestamp("reopened_at", { withTimezone: true }),
+    reopenReason: text("reopen_reason"),
+  },
+  (t) => [
+    // Une seule clôture en vigueur par caissier et par jour.
+    uniqueIndex("cash_closures_one_closed")
+      .on(t.schoolId, t.cashierId, t.day)
+      .where(sql`${t.status} = 'closed'`),
+    check(
+      "cash_closures_totals",
+      sql`${t.total} = ${t.cashTotal} + ${t.mobileMoneyTotal} + ${t.transferTotal} + ${t.chequeTotal}
+        and ${t.difference} = ${t.countedCash} - ${t.cashTotal} and ${t.countedCash} >= 0`,
+    ),
+    check(
+      "cash_closures_reopened",
+      sql`${t.status} = 'closed' or (${t.reopenedBy} is not null and ${t.reopenedAt} is not null and ${t.reopenReason} is not null)`,
+    ),
+    index("cash_closures_school_day_idx").on(t.schoolId, t.day),
+  ],
+);

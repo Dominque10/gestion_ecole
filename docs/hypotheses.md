@@ -100,6 +100,9 @@
 | H55 | Une annulation de paiement rouvre les échéances concernées ; une inscription déjà validée par ce paiement **reste validée** | 2d | ⏳ |
 | H56 | Un élève parti peut encore régler ce qu'il doit (échéances non annulées) | 2d | ⏳ |
 | H57 | Au départ, une échéance déjà payée en partie n'est pas annulée : son reste demeure dû | 2d | ⏳ |
+| H58 | Clôture : l'écart porte sur les **espèces** (comptées − attendues) ; mobile money, virement et chèque se vérifient sur les relevés. On peut clôturer un jour passé oublié, jamais un jour futur | 2e | ⏳ |
+| H59 | Impayés : échéance dont la date limite est dépassée et le reste dû positif ; ancienneté comptée depuis la plus ancienne en retard (jusqu'à 30, 31-60, 61-90, plus de 90 jours) | 2e | ⏳ |
+| H60 | Le comptable voit ses propres clôtures ; le directeur voit et rouvre toutes les clôtures | 2e | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

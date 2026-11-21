@@ -4,7 +4,8 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { t } from "@/i18n";
 import type { FormState } from "@/lib/form-state";
-import { parseXAF } from "@/lib/money";
+import { formatXAF, parseXAF } from "@/lib/money";
+import { closeCash, reopenClosure } from "@/modules/finance/closures";
 import {
   collectPayment,
   decideCancellation,
@@ -84,4 +85,42 @@ export async function decideCancellationAction(
   }
   // La demande disparaît de la liste une fois décidée : la confirmation s'affiche sur la page.
   redirect(`/caisse/annulations?decision=${approve ? "validee" : "refusee"}`);
+}
+
+export async function closeCashAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { principal } = await requireAction("cash:close");
+  const values = readFields(formData, ["day", "countedCash", "note"]);
+  const counted = values.countedCash.trim() === "0" ? 0 : parseXAF(values.countedCash);
+  if (counted === null) {
+    return {
+      ...result("error", t("closure.errors.counted"), values),
+      fieldErrors: { countedCash: t("closure.errors.counted") },
+    };
+  }
+  try {
+    const done = await closeCash(principal, {
+      day: values.day,
+      countedCash: counted,
+      note: values.note,
+    });
+    refresh();
+    return result("success", t("closure.done", { ecart: formatXAF(done.difference) }));
+  } catch (error) {
+    return result("error", refusalMessage(error), values);
+  }
+}
+
+export async function reopenClosureAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("cash:reopen");
+  const reason = String(formData.get("reason") ?? "");
+  if (reason.trim().length < 3) return result("error", t("closure.errors.reason"), { reason });
+  try {
+    await reopenClosure(principal, String(formData.get("closureId") ?? ""), reason);
+  } catch (error) {
+    return result("error", refusalMessage(error), { reason });
+  }
+  redirect("/caisse/clotures?rouverte=1");
 }

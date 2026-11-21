@@ -6,8 +6,10 @@ import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
 import { idleFormState } from "@/lib/form-state";
 import {
+  closeCashAction,
   collectPaymentAction,
   decideCancellationAction,
+  reopenClosureAction,
   requestCancellationAction,
 } from "./actions";
 
@@ -133,5 +135,70 @@ export function DecideCancellationForm({ cancellationId }: { cancellationId: str
       </div>
       <FormMessage status={state.status} message={state.message} />
     </form>
+  );
+}
+
+export function CloseCashForm({ day }: { day: string }) {
+  const [state, formAction] = useActionState(closeCashAction, idleFormState);
+  return (
+    <form
+      action={formAction}
+      onSubmit={(event) => {
+        if (!window.confirm(t("closure.confirm"))) event.preventDefault();
+      }}
+      className="flex flex-col gap-4"
+      noValidate
+    >
+      <input type="hidden" name="day" value={day} />
+      <Field
+        id="counted-cash"
+        name="countedCash"
+        inputMode="numeric"
+        autoComplete="off"
+        label={t("closure.countedCash")}
+        help={t("closure.countedHelp")}
+        defaultValue={state.values.countedCash}
+        error={state.fieldErrors.countedCash}
+        required
+      />
+      <Field
+        id="closure-note"
+        name="note"
+        label={t("closure.note")}
+        help={t("closure.noteHelp")}
+        defaultValue={state.values.note}
+      />
+      <FormMessage status={state.status} message={state.message} />
+      <SubmitButton label={t("closure.submit")} />
+    </form>
+  );
+}
+
+export function ReopenClosureForm({ closureId }: { closureId: string }) {
+  const [state, formAction] = useActionState(reopenClosureAction, idleFormState);
+  return (
+    <details className="rounded-md bg-zinc-50 p-2">
+      <summary className="min-h-11 cursor-pointer content-center text-sm font-medium">
+        {t("closure.reopenTitle")}
+      </summary>
+      <form
+        action={formAction}
+        onSubmit={(event) => {
+          if (!window.confirm(t("closure.reopenConfirm"))) event.preventDefault();
+        }}
+        className="mt-2 flex flex-col gap-3"
+        noValidate
+      >
+        <input type="hidden" name="closureId" value={closureId} />
+        <Field
+          id={`reopen-${closureId}`}
+          name="reason"
+          label={t("closure.reopenReason")}
+          defaultValue={state.values.reason}
+        />
+        <FormMessage status={state.status} message={state.message} />
+        <SubmitButton label={t("closure.reopen")} variant="danger" />
+      </form>
+    </details>
   );
 }

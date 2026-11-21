@@ -35,6 +35,9 @@ const SCHOOL_ACTIONS = {
   "payments:cancel:request": ["accountant"],
   "payments:cancel:approve": ["director"],
   "payments:pay-online": ["parent"],
+  /** Clôture journalière de sa caisse ; réouverture par le directeur (tracée). */
+  "cash:close": ["accountant"],
+  "cash:reopen": ["director"],
   "grades:write": ["director", "teacher"],
   "reportcards:publish": ["director"],
   "reportcards:read": ["director", "parent"],

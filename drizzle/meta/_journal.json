@@ -36,6 +36,20 @@
       "when": 1795239623005,
       "tag": "0004_must_change_password",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1795243284795,
+      "tag": "0005_academic_years",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795243286166,
+      "tag": "0006_academic_years_rls",
+      "breakpoints": true
     }
   ]
 }

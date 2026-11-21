@@ -34,7 +34,8 @@ Contraintes du terrain à garder en tête en permanence :
   - ⏳ Étape 4 – M1 Paramétrage (6 sous-étapes 4a→4f, choix du M1 : décision D3)
     - ✅ 4a – Création d'école par le super-admin, comptes du personnel, mot de passe provisoire
     - ✅ 4b – Fiche école + stockage de fichiers (`src/server/storage/`, disque local, `STORAGE_DIR`)
-    - ⏳ 4c – Années scolaires et périodes
+    - ✅ 4c – Années scolaires et périodes (en préparation → active → archivée, garde-fous en base)
+    - ⏳ 4d – Cycles, niveaux, séries, classes, matières, coefficients
 - Next.js 16.4 : lire `node_modules/next/dist/docs/` avant d'utiliser une API (voir `AGENTS.md`).
   `middleware` s'appelle `proxy`, API de requête asynchrones, `cacheComponents` activé.
 
@@ -95,6 +96,8 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
     `school_id` sans figurer dans `TABLES_WITHOUT_SCHOOL_ID`. Toute exception y est justifiée par un commentaire.
   - Tests d'intégration sur une base séparée `<base>_test`, E2E sur `<base>_e2e`, jamais sur la base de développement.
   - Seule table avec `school_id` exemptée de RLS : `sessions` (liste `TABLES_EXEMPT_FROM_RLS`, justifiée).
+  - Année archivée = lecture seule, garantie par la base : toute future table avec `academic_year_id`
+    reçoit le déclencheur `app.forbid_write_in_archived_year()` (voir migration `0006_academic_years_rls`).
 
 ### Argent
 - Montants en **entiers FCFA (XAF)**, jamais de `float`/`decimal` côté JS.

@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { PASSWORD_MIN_LENGTH } from "@/server/auth/password";
 import { normalizePhone, parseIdentifier } from "@/server/auth/phone";
+import { isValidDate } from "./periods-logic";
 import { STAFF_ROLES } from "./roles";
 
 export { STAFF_ROLES };
@@ -94,3 +95,27 @@ export const SchoolProfileSchema = z.object({
     }),
 });
 export type SchoolProfileInput = z.input<typeof SchoolProfileSchema>;
+
+export const DateSchema = z.string().trim().refine(isValidDate);
+
+export const AcademicYearSchema = z
+  .object({
+    label: z.string().trim().min(4).max(30),
+    startDate: DateSchema,
+    endDate: DateSchema,
+    periodKind: z.enum(["trimester", "semester"]),
+  })
+  .refine((y) => y.startDate < y.endDate, { path: ["endDate"], message: "yearDates" });
+export type AcademicYearInput = z.input<typeof AcademicYearSchema>;
+
+export const PeriodsSchema = z
+  .array(
+    z.object({
+      position: z.coerce.number().int().min(1).max(3),
+      label: z.string().trim().min(1).max(60),
+      startDate: z.string().trim(),
+      endDate: z.string().trim(),
+    }),
+  )
+  .max(3);
+export type PeriodsInput = z.input<typeof PeriodsSchema>;

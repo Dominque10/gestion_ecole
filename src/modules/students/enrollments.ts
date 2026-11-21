@@ -14,7 +14,7 @@ import {
   students,
 } from "@/server/db/schema";
 import { StudentError } from "./errors";
-import { assertVisibleStudent, readContext } from "./students";
+import { assertVisibleStudent, readContext, teacherStudentsFilter } from "./students";
 
 export const EXIT_REASONS = ["transfer", "dropout", "expulsion"] as const;
 export type ExitReason = (typeof EXIT_REASONS)[number];
@@ -323,5 +323,131 @@ export async function recordDeparture(
       before: { status: row.status, classId: row.classId },
       after: data,
     });
+  });
+}
+
+// --- Liste des inscriptions et réinscription groupée (2b) --------------------------------------
+
+export type EnrollmentRow = {
+  id: string;
+  studentId: string;
+  matricule: string;
+  lastName: string;
+  firstNames: string;
+  levelId: string;
+  levelName: string;
+  classId: string | null;
+  className: string | null;
+  status: EnrollmentStatus;
+};
+
+export type EnrollmentFilter = {
+  status?: EnrollmentStatus;
+  /** Inscrits sans classe (à affecter). */
+  withoutClass?: boolean;
+  classId?: string;
+};
+
+/** Inscriptions d'une année (l'enseignant ne voit que ses élèves), triées par nom. */
+export async function listEnrollments(
+  principal: Principal,
+  academicYearId: string,
+  filter: EnrollmentFilter = {},
+): Promise<EnrollmentRow[]> {
+  const ctx = readContext(principal);
+  if (!isUuid(academicYearId)) return [];
+  if (filter.classId !== undefined && !isUuid(filter.classId)) return [];
+  return withSchool(ctx, (tx) =>
+    tx
+      .select({
+        id: enrollments.id,
+        studentId: students.id,
+        matricule: students.matricule,
+        lastName: students.lastName,
+        firstNames: students.firstNames,
+        levelId: enrollments.levelId,
+        levelName: levels.name,
+        classId: enrollments.classId,
+        className: classes.name,
+        status: enrollments.status,
+      })
+      .from(enrollments)
+      .innerJoin(students, eq(students.id, enrollments.studentId))
+      .innerJoin(levels, eq(levels.id, enrollments.levelId))
+      .leftJoin(classes, eq(classes.id, enrollments.classId))
+      .where(
+        and(
+          eq(enrollments.schoolId, ctx.schoolId),
+          eq(enrollments.academicYearId, academicYearId),
+          filter.status ? eq(enrollments.status, filter.status) : undefined,
+          filter.withoutClass ? sql`${enrollments.classId} is null` : undefined,
+          filter.classId ? eq(enrollments.classId, filter.classId) : undefined,
+          ctx.teacherOnly ? teacherStudentsFilter(ctx.userId) : undefined,
+        ),
+      )
+      .orderBy(asc(students.lastName), asc(students.firstNames)),
+  );
+}
+
+/** Nombre d'inscriptions par état pour une année (onglets de la liste). */
+export async function countEnrollments(
+  principal: Principal,
+  academicYearId: string,
+): Promise<{ pre_enrolled: number; enrolled: number; withoutClass: number; left: number }> {
+  const rows = await listEnrollments(principal, academicYearId);
+  return {
+    pre_enrolled: rows.filter((r) => r.status === "pre_enrolled").length,
+    enrolled: rows.filter((r) => r.status === "enrolled").length,
+    withoutClass: rows.filter((r) => r.status === "enrolled" && r.classId === null).length,
+    left: rows.filter((r) => r.status === "left").length,
+  };
+}
+
+export type ReEnrollDecision = { enrollmentId: string; levelId: string | null };
+
+/**
+ * Réinscription groupée : pour chaque élève d'une classe d'une autre année, une préinscription dans
+ * l'année cible au niveau choisi (niveau suivant ou redoublement) ; `levelId: null` = ne revient pas.
+ * Les élèves déjà inscrits dans l'année cible sont ignorés (comptés à part). Elle passera ensuite par
+ * la validation habituelle (paiement des frais d'inscription, décision A3).
+ */
+export async function reEnrollClass(
+  principal: Principal,
+  input: { toYearId: string; decisions: readonly ReEnrollDecision[] },
+): Promise<{ created: number; alreadyEnrolled: number }> {
+  const ctx = context(principal, "students:write");
+  return withSchool(ctx, async (tx) => {
+    await writableYear(tx, ctx.schoolId, input.toYearId);
+    let created = 0;
+    let alreadyEnrolled = 0;
+    for (const d of input.decisions) {
+      if (d.levelId === null) continue;
+      if (!isUuid(d.enrollmentId)) throw new StudentError("enrollmentNotFound");
+      const [source] = await tx
+        .select({
+          studentId: enrollments.studentId,
+          yearId: enrollments.academicYearId,
+          status: enrollments.status,
+        })
+        .from(enrollments)
+        .where(and(eq(enrollments.schoolId, ctx.schoolId), eq(enrollments.id, d.enrollmentId)));
+      if (!source || source.yearId === input.toYearId) throw new StudentError("enrollmentNotFound");
+      if (source.status === "left") continue;
+      await checkLevel(tx, ctx.schoolId, d.levelId);
+      const inserted = await tx
+        .insert(enrollments)
+        .values({
+          schoolId: ctx.schoolId,
+          studentId: source.studentId,
+          academicYearId: input.toYearId,
+          levelId: d.levelId,
+          entryDate: todayInBrazzaville(),
+        })
+        .onConflictDoNothing({ target: [enrollments.studentId, enrollments.academicYearId] })
+        .returning({ id: enrollments.id });
+      if (inserted.length > 0) created++;
+      else alreadyEnrolled++;
+    }
+    return { created, alreadyEnrolled };
   });
 }

@@ -16,6 +16,7 @@ import {
   DepartureSchema,
   preEnroll,
   recordDeparture,
+  reEnrollClass,
   validateEnrollment,
 } from "@/modules/students/enrollments";
 import { saveMedical } from "@/modules/students/medical";
@@ -285,5 +286,29 @@ export async function departureAction(_prev: FormState, formData: FormData): Pro
     return result("success", t("enrollments.left"));
   } catch (error) {
     return result("error", refusalMessage(error), values);
+  }
+}
+
+export async function reEnrollAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { principal } = await requireAction("students:write");
+  // Un champ « decision-<id de l'inscription d'origine> » par élève : id du niveau, ou vide.
+  const decisions = [...formData.entries()]
+    .filter(([key]) => key.startsWith("decision-"))
+    .map(([key, value]) => ({
+      enrollmentId: key.slice("decision-".length),
+      levelId: String(value) === "" ? null : String(value),
+    }));
+  try {
+    const done = await reEnrollClass(principal, {
+      toYearId: String(formData.get("toYearId") ?? ""),
+      decisions,
+    });
+    refresh();
+    return result(
+      "success",
+      t("enrollments.reEnrolled", { n: done.created, deja: done.alreadyEnrolled }),
+    );
+  } catch (error) {
+    return result("error", refusalMessage(error));
   }
 }

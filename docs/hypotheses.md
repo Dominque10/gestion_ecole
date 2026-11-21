@@ -87,6 +87,10 @@
 | H42 | Après sa clôture, un caissier ne peut plus encaisser ce jour-là (réouverture par le directeur, tracée) | 2e | ⏳ |
 | H43 | Une fiche élève n'est jamais supprimée (le départ se gère par l'inscription) | 2a | ⏳ |
 | H44 | Pièces jointes : photos uniquement (pas de PDF), réduites dans le téléphone (1 600 px max) | 2a | ⏳ |
+| H45 | La classe s'affecte après la validation de l'inscription ; une préinscription peut changer de niveau | 2b | ⏳ |
+| H46 | Réinscription groupée : crée des **préinscriptions** (validées ensuite comme les autres, au paiement des frais d'inscription) ; niveau suivant proposé (CM2 → 6e, 3e → 2nde), redoublement possible ; après la Tle, « ne revient pas » par défaut | 2b | ⏳ |
+| H47 | Un enseignant voit les élèves des classes où il enseigne ou dont il est professeur principal, pour les années non archivées | 2b | ⏳ |
+| H48 | Le départ d'un élève n'est pas réversible dans l'application (une erreur se corrige par une nouvelle inscription) | 2b | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

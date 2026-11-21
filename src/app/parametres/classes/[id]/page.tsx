@@ -5,6 +5,7 @@ import { t } from "@/i18n";
 import { getClass, listTeachers } from "@/modules/settings/classes";
 import { listLevels } from "@/modules/settings/levels";
 import { listYears } from "@/modules/settings/years";
+import { listEnrollments } from "@/modules/students/enrollments";
 import { can } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
 import { DeleteClassForm, EditClassForm, TeachersForm } from "../class-forms";
@@ -33,6 +34,10 @@ async function Content({ params }: Props) {
     listYears(principal),
   ]);
   const year = years.find((y) => y.id === schoolClass.academicYearId);
+  const roster = await listEnrollments(principal, schoolClass.academicYearId, {
+    classId: schoolClass.id,
+    status: "enrolled",
+  });
   const readOnly = !can(principal, "settings:write") || year?.status === "archived";
 
   return (
@@ -49,6 +54,28 @@ async function Content({ params }: Props) {
       {year?.status === "archived" && (
         <p className="rounded-md bg-zinc-100 p-3">{t("classes.readOnly")}</p>
       )}
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xl font-semibold">
+          {schoolClass.capacity
+            ? t("enrollments.rosterTitleCapacity", { n: roster.length, max: schoolClass.capacity })
+            : t("enrollments.rosterTitle", { n: roster.length })}
+        </h2>
+        {roster.length === 0 ? (
+          <p className="text-zinc-600">{t("enrollments.rosterEmpty")}</p>
+        ) : (
+          <ol className="flex list-decimal flex-col gap-1 rounded-md border border-zinc-300 py-2 pr-3 pl-10">
+            {roster.map((r) => (
+              <li key={r.id}>
+                <Link href={`/eleves/${r.studentId}`} className="text-blue-800 underline">
+                  {r.lastName} {r.firstNames}
+                </Link>{" "}
+                <span className="text-sm text-zinc-600">{r.matricule}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
 
       <h2 className="text-xl font-semibold">{t("classes.subjectsTitle")}</h2>
       {schoolClass.subjects.length === 0 ? (

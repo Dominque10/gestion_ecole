@@ -25,6 +25,12 @@ const MENU: {
   visible?: (p: Principal) => boolean;
 }[] = [
   { href: "/eleves", label: "nav.students", action: "students:read", visible: canBrowseStudents },
+  {
+    href: "/inscriptions",
+    label: "nav.enrollments",
+    action: "students:read",
+    visible: canBrowseStudents,
+  },
   { href: "/plateforme/ecoles", label: "nav.schools", action: "school:create" },
   { href: "/parametres/demarrage", label: "nav.setup", action: "settings:write" },
   { href: "/parametres/ecole", label: "nav.schoolProfile", action: "settings:read" },

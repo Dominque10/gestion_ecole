@@ -1,13 +1,14 @@
 // Base dédiée aux tests de bout en bout (<base>_e2e) : migrée, vidée, puis préremplie.
 import { hash } from "@node-rs/argon2";
 import pg from "pg";
-import { ensureDatabase, runMigrations } from "../../src/server/db/setup.ts";
+import { ensureDatabase, runMigrations, setupJobQueue } from "../../src/server/db/setup.ts";
 import { e2eDatabaseUrls, E2E_ACCOUNT, E2E_SUPERADMIN } from "./env.ts";
 
 export default async function setup(): Promise<void> {
   const { app, admin } = e2eDatabaseUrls();
   await ensureDatabase(admin, app);
   await runMigrations(admin);
+  await setupJobQueue(admin);
 
   const client = new pg.Client({ connectionString: admin });
   await client.connect();

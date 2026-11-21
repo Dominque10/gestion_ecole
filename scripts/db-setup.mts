@@ -1,6 +1,6 @@
 // Crée la base et le rôle app_user, puis applique les migrations. Usage : pnpm db:setup
 import { existsSync } from "node:fs";
-import { ensureDatabase, runMigrations } from "../src/server/db/setup.ts";
+import { ensureDatabase, runMigrations, setupJobQueue } from "../src/server/db/setup.ts";
 
 if (existsSync(".env")) process.loadEnvFile(".env");
 
@@ -13,4 +13,5 @@ if (!adminUrl || !appUrl) {
 
 await ensureDatabase(adminUrl, appUrl);
 await runMigrations(adminUrl);
+await setupJobQueue(adminUrl);
 console.log("Base prête : rôle app_user en place, migrations appliquées.");

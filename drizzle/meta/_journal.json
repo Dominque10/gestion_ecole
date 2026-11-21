@@ -162,6 +162,13 @@
       "when": 1795276643290,
       "tag": "0022_cash_closures_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1795277776389,
+      "tag": "0023_verify_receipt",
+      "breakpoints": true
     }
   ]
 }

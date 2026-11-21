@@ -7,13 +7,14 @@ import { formatXAF } from "@/lib/money";
 import { getReceipt } from "@/modules/finance/payments";
 import { can } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
 import { PrintButton } from "./print-button";
 
 export const metadata: Metadata = { title: t("receipt.title") };
 
 type Props = Pick<PageProps<"/caisse/recus/[id]">, "params" | "searchParams">;
 
-/** Reçu imprimable (format ticket étroit). Le PDF et le QR code arrivent en sous-étape 2f. */
+/** Reçu à l'écran, imprimable ; PDF (A5 ou ticket 80 mm, avec QR code) produit par le worker. */
 export default function ReceiptPage({ params, searchParams }: Props) {
   return (
     <main className="mx-auto flex w-full max-w-sm flex-1 flex-col gap-4 p-6 print:max-w-none print:p-0">
@@ -76,6 +77,15 @@ async function Content({ params, searchParams }: Props) {
         </p>
       )}
       <div className="flex flex-col gap-3 print:hidden">
+        <DownloadPdfButton
+          request={{ kind: "receipt", paymentId: r.paymentId, format: "A5" }}
+          label={t("documents.receiptA5")}
+        />
+        <DownloadPdfButton
+          request={{ kind: "receipt", paymentId: r.paymentId, format: "ticket" }}
+          label={t("documents.receiptTicket")}
+          variant="secondary"
+        />
         <PrintButton />
         {can(principal, "payments:collect") && (
           <Link

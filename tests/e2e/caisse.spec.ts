@@ -107,6 +107,11 @@ test("le comptable encaisse et édite le reçu ; le directeur valide une annulat
     page.getByRole("status").filter({ hasText: "l'inscription est validée" }),
   ).toBeVisible();
 
+  // PDF du reçu, produit par le worker, puis téléchargé.
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Télécharger le reçu (PDF)" }).click();
+  expect((await download).suggestedFilename()).toBe("recu-SJB-2026-00001.pdf");
+
   // 3. Le comptable demande l'annulation depuis la fiche de l'élève.
   await page.goto(`/eleves/${studentId}`);
   const card = page.getByRole("article").filter({ hasText: "2026-2027 · 6e" });

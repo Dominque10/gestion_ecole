@@ -17,16 +17,21 @@
     "db:setup": "node scripts/db-setup.mts",
     "db:migrate": "node scripts/db-setup.mts",
     "superadmin:create": "node scripts/create-superadmin.mts",
-    "password:reset": "node scripts/reset-password.mts"
+    "password:reset": "node scripts/reset-password.mts",
+    "worker": "node --import tsx --conditions=react-server src/worker/index.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
     "drizzle-orm": "0.45.4",
     "next": "16.4.6",
     "pg": "^8.23.1",
+    "pg-boss": "^12.38.2",
+    "playwright-core": "1.65.1",
+    "qrcode": "^1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
+    "tsx": "^4.23.15",
     "zod": "^4.6.7"
   },
   "devDependencies": {
@@ -34,6 +39,7 @@
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^22.20.5",
     "@types/pg": "^8.23.1",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "0.31.11",

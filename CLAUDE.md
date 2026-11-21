@@ -28,7 +28,7 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 2c – Échéances (grille + réductions fratrie, bourse, remise)
   - ✅ 2d – Encaissement, reçus, annulation (D7), validation automatique de l'inscription (A3)
   - ✅ 2e – Clôture de caisse journalière et liste des impayés (jalon « clôture = somme des reçus » testé)
-  - ⏳ 2f – Documents PDF (worker pg-boss + Playwright) : reçu + QR, listes de classe, cartes, certificats
+  - ⏳ 2f – Documents PDF (worker pg-boss + Playwright) : ✅ reçu + QR ; ⏳ listes de classe, cartes, certificats
 - Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`
@@ -156,6 +156,15 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   Accès en **lecture seule**, uniquement après **autorisation du directeur**, pour 24 h par défaut
   (`membership` avec rôle `support`, date d'expiration, directeur qui l'a accordée). Chaque ouverture
   et chaque consultation tracées dans `audit_logs`. Agir à la place d'un utilisateur : V2, ne pas coder.
+
+### Tâches de fond et documents
+- **Mise en œuvre (2f)** : file pg-boss (schéma `pgboss`, installée par `pnpm db:setup` via `setupJobQueue`,
+  droits d'usage seulement pour `app_user`). Worker : `pnpm worker` (rôle `app_user`, soumis à la RLS).
+- Documents : l'application vérifie les droits et dépose la tâche (`requestDocument`) ; le worker relit
+  les rôles en base, produit le HTML (`src/modules/documents/*-template.ts`, textes échappés) puis le PDF
+  (Chromium). Le PDF reste 1 h dans le résultat de la tâche, récupérable par le seul demandeur.
+- QR code des reçus : lien signé avec `AUTH_SECRET` → page publique `/verifier/<jeton>`, fonction SQL
+  `app.verify_receipt` (aucune donnée d'élève).
 
 ### Hors-ligne
 - Saisie des notes et de l'appel possible hors ligne (file locale IndexedDB, synchro au retour du réseau).

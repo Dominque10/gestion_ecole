@@ -63,6 +63,15 @@ export async function withAuth<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
   return getDb().transaction(fn);
 }
 
+/**
+ * Lecture publique, sans école ni utilisateur de session : réservée à l'appel d'une fonction
+ * app.* SECURITY DEFINER qui ne renvoie que le strict nécessaire (ex. vérification d'un reçu par
+ * QR code). Aucune table métier n'est lisible ainsi (RLS).
+ */
+export async function withPublic<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
+  return getDb().transaction(fn);
+}
+
 /** Fixe l'école de session à l'intérieur d'une transaction déjà ouverte (module d'auth). */
 export async function setSchoolContext(tx: Tx, ctx: SchoolContext): Promise<void> {
   const schoolId = uuid.parse(ctx.schoolId);

@@ -65,3 +65,53 @@ export async function runMigrations(adminUrl: string, migrationsFolder = "drizzl
 }
 
 export { databaseName, withDatabase };
+
+/** File d'attente des tâches de fond (pg-boss) : schéma « pgboss », dans la même base. */
+export const JOB_SCHEMA = "pgboss";
+export const DOCUMENTS_QUEUE = "documents";
+
+/**
+ * Installe ou met à jour la file d'attente pg-boss avec le compte administrateur, puis donne au rôle
+ * applicatif les seuls droits d'usage (il n'est propriétaire de rien, comme pour les tables métier).
+ */
+export async function setupJobQueue(adminUrl: string): Promise<void> {
+  const { PgBoss } = await import("pg-boss");
+  const boss = new PgBoss({
+    connectionString: adminUrl,
+    schema: JOB_SCHEMA,
+    migrate: true,
+    supervise: false,
+    schedule: false,
+  });
+  boss.on("error", () => undefined);
+  await boss.start();
+  try {
+    if (!(await boss.getQueue(DOCUMENTS_QUEUE))) {
+      // Le PDF produit voyage dans le résultat de la tâche, effacé 1 h après : aucun document
+      // concernant des mineurs ne s'accumule sur le serveur. Rendu bloqué : abandonné après 2 min ;
+      // demande non prise par le worker en 10 min : abandonnée.
+      await boss.createQueue(DOCUMENTS_QUEUE, {
+        retryLimit: 1,
+        expireInSeconds: 120,
+        retentionSeconds: 600,
+        deleteAfterSeconds: 3600,
+      });
+    }
+  } finally {
+    await boss.stop({ graceful: false });
+  }
+  const client = new pg.Client({ connectionString: adminUrl });
+  await client.connect();
+  try {
+    const role = client.escapeIdentifier(APP_ROLE);
+    const schema = client.escapeIdentifier(JOB_SCHEMA);
+    await client.query(`grant usage on schema ${schema} to ${role}`);
+    await client.query(
+      `grant select, insert, update, delete on all tables in schema ${schema} to ${role}`,
+    );
+    await client.query(`grant usage, select on all sequences in schema ${schema} to ${role}`);
+    await client.query(`grant execute on all functions in schema ${schema} to ${role}`);
+  } finally {
+    await client.end();
+  }
+}

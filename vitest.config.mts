@@ -28,7 +28,13 @@ export default defineConfig({
           fileParallelism: false,
           env: (() => {
             const { app, admin } = testDatabaseUrls();
-            return { DATABASE_URL: app, DATABASE_ADMIN_URL: admin };
+            return {
+              DATABASE_URL: app,
+              DATABASE_ADMIN_URL: admin,
+              // Valeurs propres aux tests (jamais celles du .env de développement).
+              AUTH_SECRET: "secret-de-test-integration-assez-long",
+              APP_URL: "https://ecole.test",
+            };
           })(),
         },
       },

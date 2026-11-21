@@ -34,6 +34,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
       - run: pnpm lint
-      - run: pnpm test
+      # Chromium sert aussi aux tests d'intégration (PDF produits par le worker).
       - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test
       - run: pnpm test:e2e

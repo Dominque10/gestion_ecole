@@ -811,6 +811,28 @@ export const fr = {
     late: "En retard de {n} jour(s) depuis le {date}",
     call: "Appeler {tel}",
   },
+  documents: {
+    preparing: "Préparation du PDF…",
+    ready: "PDF prêt : le téléchargement commence.",
+    failed: "Le PDF n'a pas pu être préparé. Réessayez dans un instant.",
+    slow: "Le PDF tarde à arriver : le service des documents est peut-être arrêté. Réessayez plus tard.",
+    receiptA5: "Télécharger le reçu (PDF)",
+    receiptTicket: "Ticket 80 mm (PDF)",
+  },
+  verify: {
+    title: "Vérification d'un reçu",
+    valid: "Reçu authentique",
+    cancelled: "Reçu ANNULÉ",
+    cancelledHelp: "Ce paiement a été annulé par l'école : ce reçu n'a plus de valeur.",
+    invalid: "Reçu introuvable",
+    invalidHelp:
+      "Ce lien n'est pas valable. Le reçu présenté n'a peut-être pas été émis par l'école.",
+    school: "École : {nom}",
+    number: "Numéro : {numero}",
+    date: "Date : {date}",
+    amount: "Montant : {montant}",
+    privacy: "Pour protéger les élèves, aucune information personnelle n'est affichée ici.",
+  },
   receipt: {
     title: "Reçu de paiement",
     number: "Reçu n° {numero}",

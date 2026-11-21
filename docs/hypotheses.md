@@ -103,6 +103,8 @@
 | H58 | Clôture : l'écart porte sur les **espèces** (comptées − attendues) ; mobile money, virement et chèque se vérifient sur les relevés. On peut clôturer un jour passé oublié, jamais un jour futur | 2e | ⏳ |
 | H59 | Impayés : échéance dont la date limite est dépassée et le reste dû positif ; ancienneté comptée depuis la plus ancienne en retard (jusqu'à 30, 31-60, 61-90, plus de 90 jours) | 2e | ⏳ |
 | H60 | Le comptable voit ses propres clôtures ; le directeur voit et rouvre toutes les clôtures | 2e | ⏳ |
+| H61 | Les PDF ne sont pas conservés sur le serveur : produits à la demande, récupérables 1 h par la seule personne qui les a demandés | 2f | ⏳ |
+| H62 | La page publique de vérification d'un reçu (QR code) affiche école, numéro, date, montant et validité, **jamais l'élève** | 2f | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

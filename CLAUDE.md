@@ -23,7 +23,7 @@ Contraintes du terrain à garder en tête en permanence :
 - Module en cours : **aucun** (prochain : fondations puis M1)
 - Dernier jalon validé : —
 - Fait en phase 0 : dépôt Git initialisé, CLAUDE.md, BACKLOG.md, `docs/cadrage.md` ;
-  décisions A1, A2, A5 prises (voir `docs/cadrage.md` §C).
+  décisions A1 à A6 prises (voir `docs/cadrage.md` §C). Écarts A7 et A8 avec le Claude Doc à trancher.
   Aucun code applicatif pour l'instant.
 
 ## 3. Règles de périmètre — à respecter strictement
@@ -32,6 +32,7 @@ Contraintes du terrain à garder en tête en permanence :
 2. Toute idée, amélioration ou fonction hors V1 → l'ajouter dans `BACKLOG.md`, **ne pas la coder**.
 3. Suivre l'ordre des modules M1 → M7. Ne pas commencer un module tant que le précédent
    ne passe pas son critère d'acceptation (tests au vert).
+   **Exception (décision A3)** : M2 et M3 sont développés ensemble en phase 2.
 4. Préparer l'avenir **uniquement dans le modèle de données**, jamais avec des écrans,
    routes ou fonctions anticipés.
 5. En cas de doute sur le périmètre ou une règle métier : **demander**, ne pas inventer.
@@ -85,6 +86,8 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - Rôles : super-admin, directeur, secrétaire/surveillant, comptable/caissier, enseignant, parent.
   Un utilisateur peut cumuler plusieurs rôles (`memberships.roles[]`).
 - Un parent ne voit que ses enfants ; un enseignant que ses classes/matières.
+- **Données médicales** (décision A4) : table séparée `student_medical`, RLS réservée à la direction
+  (lecture et écriture). Le secrétariat modifie la fiche élève sans jamais voir ces données.
 - **Parent multi-écoles** (décision A2) : un seul compte parent, une `membership` « parent » par école.
   Une unique fonction SQL dédiée (testée) liste ses enfants toutes écoles confondues, en ne renvoyant
   que nom, classe et école. Choisir un enfant bascule la session sur l'école de l'enfant ; ensuite tout
@@ -123,9 +126,14 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 ## 8. Modèle de données (tables principales)
 
 `schools`, `users`, `memberships`, `academic_years`, `periods`, `levels`, `classes`, `subjects`,
-`class_subjects`, `students`, `guardians`, `student_guardians`, `enrollments`, `fee_items`,
-`invoices` (échéances), `payments`, `payment_allocations`, `assessments`, `grades`,
-`report_cards`, `attendance`, `time_slots`, `staff`, `notifications`, `audit_logs` (25 tables).
+`class_subjects`, `time_slots`, `staff`, `students`, `student_medical`, `guardians`,
+`student_guardians`, `enrollments`, `fee_items`, `invoices` (échéances), `payments`,
+`payment_allocations`, `assessments`, `grades`, `report_cards`, `attendance`,
+`notifications`, `audit_logs` (26 tables).
+
+- Matricule (décision A6) : `CODE-AA-NNNNN` (ex. `SJB-26-00042`), préfixe stocké dans `schools`,
+  numéro d'ordre continu par école, attribué une fois, jamais modifié ni réutilisé.
+- `enrollments` porte un « mode de validation » (manuel / paiement) — décision A3.
 
 - `time_slots` (décision A1) : créneaux nommés définis par chaque école (demi-journées ou heures),
   utilisés par l'appel en M5. **Pas un emploi du temps** (hors V1).

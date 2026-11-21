@@ -36,3 +36,6 @@ Thumbs.db
 # Sauvegardes de base locales
 *.dump
 *.sql.gz
+
+# Certificats
+*.pem

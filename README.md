@@ -8,4 +8,4 @@ notes et bulletins, absences, espace parents, tableau de bord.
 - Points ouverts et décisions du cadrage : [docs/cadrage.md](docs/cadrage.md)
 - Idées hors V1 : [BACKLOG.md](BACKLOG.md)
 
-**Statut : Phase 0 – Cadrage.** Pas encore de code applicatif.
+**Statut : Phase 1 – Fondations** (étape 1 terminée). Démarrage : `pnpm install`, `docker compose up -d`, `pnpm dev`.

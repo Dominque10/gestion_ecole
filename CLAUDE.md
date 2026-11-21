@@ -27,7 +27,13 @@ Contraintes du terrain à garder en tête en permanence :
   de test derrière l'interface interne. Toujours signaler quand un choix est une hypothèse.
 - Fait en phase 0 : dépôt Git initialisé, CLAUDE.md, BACKLOG.md, `docs/cadrage.md` ;
   décisions A1 à A8 prises (voir `docs/cadrage.md` §C).
-  Aucun code applicatif pour l'instant.
+- Plan de la Phase 1 : `docs/plan-phase-1.md` (validé).
+  - ✅ Étape 1 – Socle technique (Next.js 16.4, Vitest, Playwright, Prettier, CI, Docker Compose)
+  - ⏳ Étape 2 – Base de données et isolation (RLS)
+  - ⏳ Étape 3 – Comptes, connexion, rôles
+  - ⏳ Étape 4 – M1 Paramétrage
+- Next.js 16.4 : lire `node_modules/next/dist/docs/` avant d'utiliser une API (voir `AGENTS.md`).
+  `middleware` s'appelle `proxy`, API de requête asynchrones, `cacheComponents` activé.
 
 ## 3. Règles de périmètre — à respecter strictement
 
@@ -166,7 +172,9 @@ pnpm dev              # serveur de développement
 pnpm worker           # worker des tâches de fond
 pnpm test             # tests unitaires et d'intégration
 pnpm test:e2e         # tests Playwright
-pnpm lint             # ESLint + typecheck
+pnpm lint             # types générés Next + ESLint + typecheck
+pnpm format           # Prettier (les fichiers .md sont exclus)
+docker compose up -d  # PostgreSQL 16 local (port 5433)
 pnpm db:generate      # générer une migration Drizzle
 pnpm db:migrate       # appliquer les migrations
 ```

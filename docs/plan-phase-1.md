@@ -1,6 +1,6 @@
 # Plan — Phase 1 : Fondations + M1 Paramétrage
 
-> Statut : **proposé, à valider** avant tout code (CLAUDE.md §11).
+> Statut : **validé le 2026-11-21**, hypothèses 1 à 4 comprises.
 > Jalon de sortie : tests d'isolation entre écoles au vert + critère d'acceptation M1.
 
 ## Étape 1 — Socle technique

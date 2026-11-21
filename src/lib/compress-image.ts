@@ -27,9 +27,14 @@ function toBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promi
  * Réduit une image et la convertit en WebP (ou JPEG si le navigateur ne sait pas produire du WebP).
  * Fond blanc : le cachet et la signature restent lisibles à l'impression.
  */
-export async function compressImage(file: File): Promise<Blob> {
+export async function compressImage(
+  file: File,
+  options: { maxSide?: number; targetBytes?: number } = {},
+): Promise<Blob> {
+  const maxSide = options.maxSide ?? MAX_IMAGE_SIDE;
+  const targetBytes = options.targetBytes ?? TARGET_IMAGE_BYTES;
   const bitmap = await createImageBitmap(file);
-  const { width, height } = scaledSize(bitmap.width, bitmap.height);
+  const { width, height } = scaledSize(bitmap.width, bitmap.height, maxSide);
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -46,7 +51,7 @@ export async function compressImage(file: File): Promise<Blob> {
     if (!blob || blob.type !== "image/webp") blob = await toBlob(canvas, "image/jpeg", quality);
     if (!blob) break;
     best = blob;
-    if (blob.size <= TARGET_IMAGE_BYTES) break;
+    if (blob.size <= targetBytes) break;
   }
   if (!best) throw new Error("Conversion impossible");
   return best;

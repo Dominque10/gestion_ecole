@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { t, type MessageKey } from "@/i18n";
 import { getSetupStatus } from "@/modules/settings/setup-status";
-import { can, type Action } from "@/server/auth/permissions";
+import { seesAllStudents } from "@/modules/students/students";
+import { can, type Action, type Principal } from "@/server/auth/permissions";
 import { requireSession } from "@/server/auth/session";
 import { logoutAction } from "./actions";
 
@@ -17,7 +18,14 @@ export default function HomePage() {
 }
 
 /** Entrées du menu, affichées selon les droits (le serveur revérifie sur chaque page). */
-const MENU: { href: string; label: MessageKey; action: Action }[] = [
+const MENU: {
+  href: string;
+  label: MessageKey;
+  action: Action;
+  visible?: (p: Principal) => boolean;
+}[] = [
+  // L'enseignant ne verra ses élèves qu'avec les inscriptions (2b) : pas de lien pour lui d'ici là.
+  { href: "/eleves", label: "nav.students", action: "students:read", visible: seesAllStudents },
   { href: "/plateforme/ecoles", label: "nav.schools", action: "school:create" },
   { href: "/parametres/demarrage", label: "nav.setup", action: "settings:write" },
   { href: "/parametres/ecole", label: "nav.schoolProfile", action: "settings:read" },
@@ -34,7 +42,9 @@ const MENU: { href: string; label: MessageKey; action: Action }[] = [
 async function Welcome() {
   const { principal, userName } = await requireSession();
   const roles = principal.roles.map((r) => t(`roles.${r}`)).join(", ");
-  const links = MENU.filter((link) => can(principal, link.action));
+  const links = MENU.filter(
+    (link) => can(principal, link.action) && (link.visible?.(principal) ?? true),
+  );
   // Rappel du démarrage pour le directeur, tant que le paramétrage n'est pas terminé.
   const setup = can(principal, "settings:write") ? await getSetupStatus(principal) : null;
   const setupDone = setup?.steps.filter((s) => s.done).length ?? 0;

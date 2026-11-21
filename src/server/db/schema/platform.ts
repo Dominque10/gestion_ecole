@@ -31,6 +31,8 @@ export const schools = pgTable("schools", {
   code: text("code").notNull().unique(),
   /** Préfixe des matricules élèves (ex. « SJB » → SJB-26-00042). */
   matriculePrefix: text("matricule_prefix").notNull(),
+  /** Dernier numéro d'ordre de matricule attribué (continu, jamais réutilisé, décision A6). */
+  lastMatriculeNumber: integer("last_matricule_number").notNull().default(0),
   subdomain: text("subdomain").unique(),
   address: text("address"),
   phone: text("phone"),

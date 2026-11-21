@@ -23,7 +23,8 @@ Contraintes du terrain à garder en tête en permanence :
 - Version en cours : **V1**
 - Phase en cours : **Phase 2 – Élèves et caisse** (M2 + M3 ensemble, décision A3)
 - Plan : `docs/plan-phase-2.md` (validé, décision D6) — sous-étapes 2a → 2g
-  - ⏳ 2a – Fiche élève, responsables, données médicales, pièces jointes, recherche
+  - ✅ 2a – Fiche élève, responsables, données médicales, pièces jointes, recherche
+  - ⏳ 2b – Inscription (préinscription → validée → classe), réinscription groupée, départs
 - Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`
@@ -135,6 +136,9 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - Un parent ne voit que ses enfants ; un enseignant que ses classes/matières.
 - **Données médicales** (décision A4) : table séparée `student_medical`, RLS réservée à la direction
   (lecture et écriture). Le secrétariat modifie la fiche élève sans jamais voir ces données.
+  Mise en œuvre : politique RLS avec `app.current_user_has_role('director')` (migration `0013`).
+- Élèves : l'enseignant ne voit aucune fiche tant que les inscriptions (2b) ne relient pas ses classes
+  (`seesAllStudents`). Matricule : compteur `schools.last_matricule_number`, verrouillé à chaque création.
 - **Parent multi-écoles** (décision A2) : un seul compte parent, une `membership` « parent » par école.
   Une unique fonction SQL dédiée (testée) liste ses enfants toutes écoles confondues, en ne renvoyant
   que nom, classe et école. Choisir un enfant bascule la session sur l'école de l'enfant ; ensuite tout

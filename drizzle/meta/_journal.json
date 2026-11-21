@@ -85,6 +85,20 @@
       "when": 1795271393110,
       "tag": "0011_password_reset",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1795272647260,
+      "tag": "0012_students",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1795272649599,
+      "tag": "0013_students_rls",
+      "breakpoints": true
     }
   ]
 }

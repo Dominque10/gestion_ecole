@@ -2,6 +2,7 @@ import "server-only";
 import type { z } from "zod";
 import { t } from "@/i18n";
 import { SettingsError } from "@/modules/settings/errors";
+import { StudentError } from "@/modules/students/errors";
 import { ForbiddenError } from "@/server/auth/permissions";
 import type { FormState } from "@/lib/form-state";
 
@@ -34,6 +35,7 @@ export function invalidForm(
 /** Traduit un refus métier ou de droits en message ; toute autre erreur remonte telle quelle. */
 export function refusalMessage(error: unknown): string {
   if (error instanceof SettingsError) return t(`settings.errors.${error.code}`);
+  if (error instanceof StudentError) return t(`students.errors.${error.code}`);
   if (error instanceof ForbiddenError) return t("form.forbidden");
   throw error;
 }

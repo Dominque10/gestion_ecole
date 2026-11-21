@@ -48,6 +48,8 @@ export const academicYears = pgTable(
     endDate: date("end_date", { mode: "string" }).notNull(),
     periodKind: periodKind("period_kind").notNull().default("trimester"),
     status: academicYearStatus("status").notNull().default("upcoming"),
+    /** Dernier numéro de reçu de l'année (continu, sans trou, décision D6). */
+    lastReceiptNumber: integer("last_receipt_number").notNull().default(0),
     ...timestamps,
   },
   (t) => [

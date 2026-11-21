@@ -4,9 +4,11 @@ import { Suspense } from "react";
 import { ImageUploadForm } from "@/components/image-upload-form";
 import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
-import { formatDay, todayInBrazzaville } from "@/lib/dates";
+import { formatDateTime, formatDay, todayInBrazzaville } from "@/lib/dates";
 import { formatXAF } from "@/lib/money";
 import { listInvoices, optionalFees, type Invoice } from "@/modules/finance/invoices";
+import { listPayments } from "@/modules/finance/payments";
+import { RequestCancellationForm } from "@/app/caisse/cash-forms";
 import { listLevels } from "@/modules/settings/levels";
 import { listYears } from "@/modules/settings/years";
 import {
@@ -356,12 +358,16 @@ async function InvoicesBlock({
   enrollmentId: string;
   editable: boolean;
 }) {
-  const rows = await listInvoices(principal, enrollmentId);
+  const [rows, paymentLines] = await Promise.all([
+    listInvoices(principal, enrollmentId),
+    listPayments(principal, enrollmentId),
+  ]);
+  const canRequestCancel = can(principal, "payments:cancel:request");
   const canManage = editable && can(principal, "invoices:manage");
   const canDiscount = editable && can(principal, "invoices:discount");
   const optional = canManage ? await optionalFees(principal, enrollmentId) : [];
   const open = rows.filter((r) => r.status === "open");
-  const total = open.reduce((sum, r) => sum + r.due, 0);
+  const total = open.reduce((sum, r) => sum + r.remaining, 0);
   return (
     <div className="flex flex-col gap-3 border-t border-zinc-200 pt-3">
       <h4 className="font-semibold">{t("finance.invoicesTitle")}</h4>
@@ -385,6 +391,12 @@ async function InvoicesBlock({
                   </span>
                 </span>
                 <span>{t("finance.dueBy", { date: formatDay(i.dueDate) })}</span>
+                {i.status === "open" && i.paid > 0 && (
+                  <span>
+                    {t("finance.paidLine", { montant: formatXAF(i.paid) })} ·{" "}
+                    {t("finance.remainingLine", { montant: formatXAF(i.remaining) })}
+                  </span>
+                )}
                 {i.discountAmount > 0 && (
                   <span>
                     {t("finance.discount", {
@@ -399,8 +411,55 @@ async function InvoicesBlock({
               </li>
             ))}
           </ul>
-          <p className="font-semibold">{t("finance.totalDue", { montant: formatXAF(total) })}</p>
+          <p className="font-semibold">
+            {t("finance.totalRemaining", { montant: formatXAF(total) })}
+          </p>
         </>
+      )}
+      <h4 className="font-semibold">{t("finance.paymentsTitle")}</h4>
+      {paymentLines.length === 0 ? (
+        <p className="text-sm text-zinc-600">{t("finance.noPayments")}</p>
+      ) : (
+        <ul className="flex flex-col divide-y divide-zinc-200 text-sm">
+          {paymentLines.map((p) => (
+            <li key={p.id} className="flex flex-col gap-1 py-2">
+              <span className="flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  {p.kind === "payment"
+                    ? t("finance.paymentLine", {
+                        date: formatDateTime(p.paidAt),
+                        montant: formatXAF(p.amount),
+                        mode: t(`finance.methods.${p.method}`),
+                      })
+                    : t("finance.reversalLine", {
+                        date: formatDateTime(p.paidAt),
+                        montant: formatXAF(p.amount),
+                      })}
+                </span>
+                {p.reversed && (
+                  <span className="rounded bg-red-100 px-2 py-0.5 font-medium text-red-900">
+                    {t("finance.reversedBadge")}
+                  </span>
+                )}
+                {p.pendingCancellation && (
+                  <span className="rounded bg-amber-100 px-2 py-0.5 font-medium text-amber-900">
+                    {t("finance.pendingBadge")}
+                  </span>
+                )}
+              </span>
+              {p.receiptNumber && (
+                <Link href={`/caisse/recus/${p.id}`} className="text-blue-800 underline">
+                  {t("finance.receipt", { numero: p.receiptNumber })}
+                </Link>
+              )}
+              {canRequestCancel &&
+                editable &&
+                p.kind === "payment" &&
+                !p.reversed &&
+                !p.pendingCancellation && <RequestCancellationForm paymentId={p.id} />}
+            </li>
+          ))}
+        </ul>
       )}
       {canManage && <AddMissingFeesButton enrollmentId={enrollmentId} />}
       {canManage && optional.length > 0 && (

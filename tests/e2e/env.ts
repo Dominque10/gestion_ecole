@@ -8,6 +8,14 @@ export const E2E_ACCOUNT = {
   password: "Mot-de-passe-e2e-2026",
 } as const;
 
+/** Comptable de l'école de test (seul rôle qui encaisse). */
+export const E2E_ACCOUNTANT = {
+  name: "Jean Comptable",
+  phone: "+242061112299",
+  phoneLocal: "06 111 22 99",
+  password: "Comptable-e2e-2026",
+} as const;
+
 /** Super-admin de la plateforme (connexion sans code école). */
 export const E2E_SUPERADMIN = {
   email: "admin@plateforme.test",

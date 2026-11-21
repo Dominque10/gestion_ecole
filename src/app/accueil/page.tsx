@@ -31,6 +31,8 @@ const MENU: {
     action: "students:read",
     visible: canBrowseStudents,
   },
+  { href: "/caisse", label: "nav.cash", action: "payments:collect" },
+  { href: "/caisse/annulations", label: "nav.cancellations", action: "payments:cancel:approve" },
   { href: "/plateforme/ecoles", label: "nav.schools", action: "school:create" },
   { href: "/parametres/demarrage", label: "nav.setup", action: "settings:write" },
   { href: "/parametres/ecole", label: "nav.schoolProfile", action: "settings:read" },

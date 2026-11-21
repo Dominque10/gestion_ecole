@@ -10,12 +10,17 @@ import {
   enrollments,
   feeItems,
   invoices,
+  paymentAllocations,
   schools,
   studentGuardians,
 } from "@/server/db/schema";
 import { readContext } from "@/modules/students/students";
 import { FinanceError } from "./errors";
 import { addDiscount, amountDue, buildInvoices, percentOf, type FeeTranche } from "./invoice-logic";
+
+/** Montant déjà payé sur une échéance (somme des répartitions, annulations comprises). */
+export const paidOnInvoice = sql<number>`coalesce((select sum(pa.amount) from payment_allocations pa
+  where pa.invoice_id = "invoices"."id"), 0)::int`;
 
 export type Invoice = {
   id: string;
@@ -28,6 +33,8 @@ export type Invoice = {
   discountAmount: number;
   discountNote: string | null;
   due: number;
+  paid: number;
+  remaining: number;
   dueDate: string;
   status: "open" | "cancelled";
   cancelReason: string | null;
@@ -177,16 +184,23 @@ export async function generateMandatoryInvoices(
 
 /**
  * Niveau changé avant validation : les échéances sont recalculées pour le nouveau niveau.
- * (Avec la caisse, sous-étape 2d : refusé si un paiement existe déjà.)
+ * Refusé si un paiement existe déjà.
  */
 export async function regenerateInvoices(tx: Tx, schoolId: string, enrollmentId: string) {
+  const [paid] = await tx
+    .select({ id: paymentAllocations.id })
+    .from(paymentAllocations)
+    .innerJoin(invoices, eq(invoices.id, paymentAllocations.invoiceId))
+    .where(eq(invoices.enrollmentId, enrollmentId))
+    .limit(1);
+  if (paid) throw new FinanceError("hasPayments");
   await tx.delete(invoices).where(eq(invoices.enrollmentId, enrollmentId));
   return generateMandatoryInvoices(tx, schoolId, enrollmentId);
 }
 
 /**
- * Départ (hypothèse H40) : les échéances dont la date limite tombe après la date de départ sont
- * annulées, jamais supprimées.
+ * Départ (hypothèse H40) : les échéances non payées dont la date limite tombe après la date de
+ * départ sont annulées, jamais supprimées.
  */
 export async function cancelInvoicesAfter(
   tx: Tx,
@@ -206,6 +220,8 @@ export async function cancelInvoicesAfter(
         eq(invoices.enrollmentId, input.enrollmentId),
         eq(invoices.status, "open"),
         gt(invoices.dueDate, input.exitDate),
+        // Ce qui est déjà (même en partie) payé reste dû et acquis (hypothèse H40).
+        sql`${paidOnInvoice} = 0`,
       ),
     )
     .returning({ id: invoices.id });
@@ -229,11 +245,11 @@ export async function listInvoices(principal: Principal, enrollmentId: string): 
       .where(and(eq(enrollments.schoolId, ctx.schoolId), eq(enrollments.id, enrollmentId)));
     if (!enrollment) throw new FinanceError("enrollmentNotFound");
     const rows = await tx
-      .select()
+      .select({ invoice: invoices, paid: paidOnInvoice })
       .from(invoices)
       .where(eq(invoices.enrollmentId, enrollmentId))
       .orderBy(asc(invoices.dueDate), asc(invoices.feeName), asc(invoices.installmentNumber));
-    return rows.map((r) => ({
+    return rows.map(({ invoice: r, paid }) => ({
       id: r.id,
       feeName: r.feeName,
       kind: r.kind,
@@ -244,6 +260,8 @@ export async function listInvoices(principal: Principal, enrollmentId: string): 
       discountAmount: r.discountAmount,
       discountNote: r.discountNote,
       due: amountDue(r),
+      paid,
+      remaining: r.status === "open" ? amountDue(r) - paid : 0,
       dueDate: r.dueDate,
       status: r.status,
       cancelReason: r.cancelReason,
@@ -347,7 +365,7 @@ export async function grantScholarship(
   return withSchool(ctx, async (tx) => {
     await writableEnrollment(tx, ctx.schoolId, enrollmentId);
     const rows = await tx
-      .select()
+      .select({ invoice: invoices, paid: paidOnInvoice })
       .from(invoices)
       .where(
         and(
@@ -356,15 +374,14 @@ export async function grantScholarship(
           eq(invoices.status, "open"),
         ),
       )
-      .for("update");
+      .for("update", { of: invoices });
     if (rows.length === 0) throw new FinanceError("noTuition");
-    for (const r of rows) {
+    for (const { invoice: r, paid } of rows) {
+      // Jamais de remise sur ce qui est déjà payé : le reste dû ne descend pas sous zéro.
+      const extra = Math.min(percentOf(r.amount, percent), amountDue(r) - paid);
       await tx
         .update(invoices)
-        .set({
-          ...addDiscount(r, percentOf(r.amount, percent), `Bourse ${percent} %`),
-          updatedAt: new Date(),
-        })
+        .set({ ...addDiscount(r, extra, `Bourse ${percent} %`), updatedAt: new Date() })
         .where(eq(invoices.id, r.id));
     }
     await tx.insert(auditLogs).values({
@@ -390,15 +407,16 @@ export async function grantExceptionalDiscount(
   const reason = ReasonSchema.parse(input.reason);
   if (!isUuid(invoiceId)) throw new FinanceError("invoiceNotFound");
   await withSchool(ctx, async (tx) => {
-    const [row] = await tx
-      .select()
+    const [found] = await tx
+      .select({ invoice: invoices, paid: paidOnInvoice })
       .from(invoices)
       .where(and(eq(invoices.schoolId, ctx.schoolId), eq(invoices.id, invoiceId)))
-      .for("update");
-    if (!row) throw new FinanceError("invoiceNotFound");
+      .for("update", { of: invoices });
+    if (!found) throw new FinanceError("invoiceNotFound");
+    const row = found.invoice;
     await writableEnrollment(tx, ctx.schoolId, row.enrollmentId);
     if (row.status !== "open") throw new FinanceError("invoiceCancelled");
-    if (amount > amountDue(row)) throw new FinanceError("discountTooLarge");
+    if (amount > amountDue(row) - found.paid) throw new FinanceError("discountTooLarge");
     await tx
       .update(invoices)
       .set({ ...addDiscount(row, amount, `Remise : ${reason}`), updatedAt: new Date() })

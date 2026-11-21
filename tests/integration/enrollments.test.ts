@@ -137,8 +137,11 @@ describe("Parcours d'inscription", () => {
 
   it("pas de classe avant la validation ; validation manuelle tracée", async () => {
     await expectStudentError(assignClass(director(), enrollment, sixA), "notEnrolled");
-    const secretary: Principal = { ...director(), roles: ["secretary"] };
-    await validateEnrollment(secretary, enrollment);
+    // Validation manuelle : exception réservée au directeur depuis la caisse (décision A3).
+    await expect(
+      validateEnrollment({ ...director(), roles: ["secretary"] }, enrollment),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+    await validateEnrollment(director(), enrollment);
     await expectStudentError(
       changeEnrollmentLevel(director(), enrollment, cinquieme),
       "notPreEnrolled",

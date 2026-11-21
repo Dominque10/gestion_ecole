@@ -134,6 +134,20 @@
       "when": 1795274515494,
       "tag": "0018_invoices_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1795275253472,
+      "tag": "0019_payments",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1795275255110,
+      "tag": "0020_payments_rls",
+      "breakpoints": true
     }
   ]
 }

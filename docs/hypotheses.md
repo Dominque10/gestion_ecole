@@ -96,6 +96,10 @@
 | H51 | Fratrie : frères et sœurs = un responsable en commun ; s'applique aux enfants inscrits **après** le premier la même année ; non recalculée si l'aîné part ensuite ; arrondi au franc inférieur | 2c | ⏳ |
 | H52 | Bourse = % sur les échéances de scolarité **encore ouvertes** ; remise exceptionnelle = montant sur une échéance ; les réductions se cumulent sur le montant d'origine, sans jamais le dépasser ; directeur seul, motif obligatoire | 2c | ⏳ |
 | H53 | L'enseignant ne voit pas les comptes (échéances, paiements) de ses élèves | 2c | ⏳ |
+| H54 | Référence obligatoire pour mobile money, virement et chèque ; une même référence n'est enregistrée qu'une fois par école | 2d | ⏳ |
+| H55 | Une annulation de paiement rouvre les échéances concernées ; une inscription déjà validée par ce paiement **reste validée** | 2d | ⏳ |
+| H56 | Un élève parti peut encore régler ce qu'il doit (échéances non annulées) | 2d | ⏳ |
+| H57 | Au départ, une échéance déjà payée en partie n'est pas annulée : son reste demeure dû | 2d | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

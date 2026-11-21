@@ -8,10 +8,24 @@ export type FinanceErrorCode =
   | "feeAlreadyInvoiced"
   | "noTuition"
   | "discountTooLarge"
-  | "enrollmentLeft";
+  | "enrollmentLeft"
+  | "hasPayments"
+  | "overpayment"
+  | "nothingDue"
+  | "referenceRequired"
+  | "duplicateReference"
+  | "paymentNotFound"
+  | "alreadyReversed"
+  | "cancellationPending"
+  | "cancellationNotFound"
+  | "cashClosed";
 
 export class FinanceError extends Error {
-  constructor(readonly code: FinanceErrorCode) {
+  constructor(
+    readonly code: FinanceErrorCode,
+    /** Valeurs insérées dans le message (ex. le reste à payer maximal). */
+    readonly params?: Record<string, string | number>,
+  ) {
     super(`Finances : ${code}`);
     this.name = "FinanceError";
   }

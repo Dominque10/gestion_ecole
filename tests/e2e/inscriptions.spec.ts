@@ -84,11 +84,11 @@ test("préinscription, validation, affectation en classe puis départ", async ({
   // 4. Départ (transfert), après confirmation.
   await card.getByText("Enregistrer un départ").click();
   await card.getByLabel("Motif").selectOption({ label: "Transfert" });
-  await card.getByLabel("Date de départ").fill("2027-02-10");
+  await card.getByLabel("Date de départ").fill("2099-02-10");
   await card.getByRole("textbox", { name: "Précision" }).fill("École Saint-Michel");
   page.once("dialog", (dialog) => dialog.accept());
   await card.getByRole("button", { name: "Enregistrer le départ" }).click();
   await expect(card.getByText("Parti", { exact: true })).toBeVisible();
-  await expect(card).toContainText("Transfert le 10 févr. 2027 · École Saint-Michel");
+  await expect(card).toContainText("Transfert le 10 févr. 2099 · École Saint-Michel");
   await expect(card).toContainText("Classe : 6e A");
 });

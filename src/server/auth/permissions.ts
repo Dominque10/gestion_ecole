@@ -25,8 +25,8 @@ const SCHOOL_ACTIONS = {
   "students:read": ["director", "secretary", "accountant", "teacher", "support"],
   "students:write": ["director", "secretary"],
   "students:medical": ["director"],
-  /** Validation manuelle d'une inscription (A3) ; réservée au directeur quand la caisse existera (2d). */
-  "enrollments:validate": ["director", "secretary"],
+  /** Validation manuelle d'une inscription : exception réservée au directeur, tracée (décision A3). */
+  "enrollments:validate": ["director"],
   /** Échéances : générer les frais manquants, ajouter un frais facultatif. */
   "invoices:manage": ["director", "secretary", "accountant"],
   /** Bourse et remise exceptionnelle (cahier des charges §5, M3). */

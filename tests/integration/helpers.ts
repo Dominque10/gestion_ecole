@@ -57,3 +57,11 @@ export async function createSchoolWithDirector(
     return { schoolId: school.id, directorId: director.id };
   });
 }
+
+/**
+ * Fixe la date d'entrée d'une inscription (elle vaut « aujourd'hui » à la création) : les tests de
+ * départ ne dépendent ainsi pas du jour où ils tournent.
+ */
+export async function setEntryDate(enrollmentId: string, date: string): Promise<void> {
+  await adminQuery("update enrollments set entry_date = $2 where id = $1", [enrollmentId, date]);
+}

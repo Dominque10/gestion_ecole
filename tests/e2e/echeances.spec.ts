@@ -85,12 +85,12 @@ test("échéances créées à la préinscription, fratrie, bourse et remise du d
   // Aînée : aucune réduction, 175 000 FCFA.
   let card = await preEnroll(page, ids.first);
   await expect(card).toContainText("Scolarité — tranche 3/3");
-  await expect(card).toContainText("Total à payer : 175 000 FCFA");
+  await expect(card).toContainText("Reste à payer : 175 000 FCFA");
 
   // Cadet : fratrie 10 % sur la scolarité (3 × 5 000), 160 000 FCFA.
   card = await preEnroll(page, ids.second);
   await expect(card).toContainText("Réduction : 5 000 FCFA (Fratrie 10 %)");
-  await expect(card).toContainText("Total à payer : 160 000 FCFA");
+  await expect(card).toContainText("Reste à payer : 160 000 FCFA");
 
   // Bourse de 50 % : 25 000 + 3 × 20 000 = 85 000 FCFA.
   await card.getByText("Accorder une bourse (directeur)").click();
@@ -100,7 +100,7 @@ test("échéances créées à la préinscription, fratrie, bourse et remise du d
   await expect(
     card.getByRole("status").filter({ hasText: "Bourse accordée sur 3 échéance(s)." }),
   ).toBeVisible();
-  await expect(card).toContainText("Total à payer : 85 000 FCFA");
+  await expect(card).toContainText("Reste à payer : 85 000 FCFA");
 
   // Remise exceptionnelle de 5 000 sur l'inscription : 80 000 FCFA.
   await card.getByText("Remise exceptionnelle (directeur)").click();
@@ -108,5 +108,5 @@ test("échéances créées à la préinscription, fratrie, bourse et remise du d
   await card.getByRole("textbox", { name: "Montant de la remise (FCFA)" }).fill("5 000");
   await card.getByRole("textbox", { name: "Motif" }).last().fill("Famille en difficulté");
   await card.getByRole("button", { name: "Accorder la remise" }).click();
-  await expect(card).toContainText("Total à payer : 80 000 FCFA");
+  await expect(card).toContainText("Reste à payer : 80 000 FCFA");
 });

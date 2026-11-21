@@ -19,7 +19,13 @@ import { addDefaultLevels, listLevels } from "@/modules/settings/levels";
 import { activateYear, createYear } from "@/modules/settings/years";
 import { changeEnrollmentLevel, preEnroll, recordDeparture } from "@/modules/students/enrollments";
 import { createStudent } from "@/modules/students/students";
-import { adminQuery, createSchoolWithDirector, createSuperadmin, resetDatabase } from "./helpers";
+import {
+  adminQuery,
+  createSchoolWithDirector,
+  createSuperadmin,
+  resetDatabase,
+  setEntryDate,
+} from "./helpers";
 import { eq } from "drizzle-orm";
 
 let director: Principal;
@@ -281,6 +287,7 @@ describe("Départ et années archivées", () => {
       academicYearId: y1,
       levelId: sixieme,
     });
+    await setEntryDate(enrollment, "2026-10-01");
     await recordDeparture(director, enrollment, {
       reason: "transfer",
       date: "2026-12-20",

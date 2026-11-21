@@ -26,7 +26,8 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 2a – Fiche élève, responsables, données médicales, pièces jointes, recherche
   - ✅ 2b – Inscription (préinscription → validée → classe), réinscription groupée, départs
   - ✅ 2c – Échéances (grille + réductions fratrie, bourse, remise)
-  - ⏳ 2d – Encaissement, reçus, annulation, validation automatique de l'inscription (A3)
+  - ✅ 2d – Encaissement, reçus, annulation (D7), validation automatique de l'inscription (A3)
+  - ⏳ 2e – Clôture de caisse journalière et liste des impayés
 - Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`
@@ -117,6 +118,11 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - Webhooks de paiement **idempotents** (clé unique = référence de transaction opérateur) et **signature vérifiée**.
 - Numérotation des reçus continue, sans trou, par école.
 
+- **Mise en œuvre (2d)** : `payments` et `payment_allocations` en ajout seul (droits retirés + déclencheur) ;
+  annulation = ligne `reversal` de montant opposé (`reverses_id`), après décision du directeur sur une
+  `payment_cancellations`. Reçu `PREFIXE-AAAA-NNNNN` : compteur `academic_years.last_receipt_number`
+  verrouillé dans la transaction du paiement. Reste dû d'une échéance = montant − remise − répartitions.
+
 ### Droits
 - Contrôle des droits **côté serveur sur chaque action**, jamais seulement dans l'UI.
 - **Mise en œuvre (étape 3) :**
@@ -183,7 +189,7 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 `class_subjects`, `level_subjects`, `time_slots`, `staff`, `students`, `student_medical`, `guardians`,
 `student_guardians`, `enrollments`, `fee_items`, `invoices` (échéances), `payments`,
 `payment_allocations`, `assessments`, `grades`, `report_cards`, `attendance`,
-`notifications`, `audit_logs`, `student_documents`, `cash_closures` (29 tables, décision D6).
+`notifications`, `audit_logs`, `student_documents`, `cash_closures`, `payment_cancellations` (30 tables, décisions D6, D7).
 
 - Matricule (décision A6) : `CODE-AA-NNNNN` (ex. `SJB-26-00042`), préfixe stocké dans `schools`,
   numéro d'ordre continu par école, attribué une fois, jamais modifié ni réutilisé.

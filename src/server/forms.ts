@@ -37,7 +37,7 @@ export function invalidForm(
 export function refusalMessage(error: unknown): string {
   if (error instanceof SettingsError) return t(`settings.errors.${error.code}`);
   if (error instanceof StudentError) return t(`students.errors.${error.code}`);
-  if (error instanceof FinanceError) return t(`finance.errors.${error.code}`);
+  if (error instanceof FinanceError) return t(`finance.errors.${error.code}`, error.params);
   if (error instanceof ForbiddenError) return t("form.forbidden");
   throw error;
 }

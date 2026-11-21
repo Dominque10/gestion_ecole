@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatDay, formatTime, todayInBrazzaville } from "./dates";
+import {
+  brazzavilleDayRange,
+  formatDateTime,
+  formatDay,
+  formatTime,
+  todayInBrazzaville,
+} from "./dates";
 
 describe("formatTime", () => {
   it("affiche l'heure de Brazzaville (UTC+1)", () => {
@@ -15,5 +21,17 @@ describe("todayInBrazzaville / formatDay", () => {
 
   it("affiche un jour du calendrier en français, sans décalage de fuseau", () => {
     expect(formatDay("2026-10-01")).toBe("1 oct. 2026");
+  });
+});
+
+describe("brazzavilleDayRange / formatDateTime", () => {
+  it("la journée de Brazzaville commence à 23 h UTC la veille", () => {
+    const { from, to } = brazzavilleDayRange("2026-11-21");
+    expect(from.toISOString()).toBe("2026-11-20T23:00:00.000Z");
+    expect(to.toISOString()).toBe("2026-11-21T23:00:00.000Z");
+  });
+
+  it("affiche date et heure de Brazzaville", () => {
+    expect(formatDateTime(new Date("2026-11-21T13:05:00Z"))).toBe("21/11/2026 14:05");
   });
 });

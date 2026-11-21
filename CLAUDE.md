@@ -174,7 +174,7 @@ pnpm test             # tests unitaires et d'intégration
 pnpm test:e2e         # tests Playwright
 pnpm lint             # types générés Next + ESLint + typecheck
 pnpm format           # Prettier (les fichiers .md sont exclus)
-docker compose up -d  # PostgreSQL 16 local (port 5433)
+docker compose up -d  # PostgreSQL 16 local (port 5434)
 pnpm db:generate      # générer une migration Drizzle
 pnpm db:migrate       # appliquer les migrations
 ```

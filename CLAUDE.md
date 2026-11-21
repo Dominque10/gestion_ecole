@@ -3,6 +3,8 @@
 > Ce fichier est lu par Claude Code à chaque session. Le tenir à jour (surtout « État actuel »).
 > Référence complète : le cahier des charges V1 (Claude Doc « Cahier des charges – Logiciel de gestion scolaire (Congo-Brazzaville) – Version 1 »).
 > Décisions et points ouverts du cadrage : `docs/cadrage.md`.
+> Hypothèses faites par défaut, à faire valider par le porteur : `docs/hypotheses.md`
+> (toute nouvelle hypothèse y est ajoutée ; les rappeler au porteur à la fin de chaque phase).
 
 ## 1. Le projet en bref
 
@@ -213,5 +215,5 @@ pnpm db:migrate       # appliquer les migrations
 - Avant de coder un module : relire le §3, le §4 et la section du module dans le cahier des charges,
   puis proposer un plan court (fichiers, tables, tests) et attendre validation.
 - Livrer chaque module **avec ses tests** et vérifier que `pnpm lint` et `pnpm test` passent.
-- Signaler toute hypothèse faite sur une règle métier.
+- Signaler toute hypothèse faite sur une règle métier, et l'ajouter dans `docs/hypotheses.md`.
 - À la fin d'un module : proposer la mise à jour de la section « État actuel » de ce fichier.

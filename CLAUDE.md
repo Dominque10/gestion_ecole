@@ -21,7 +21,8 @@ Contraintes du terrain à garder en tête en permanence :
 ## 2. État actuel (À METTRE À JOUR)
 
 - Version en cours : **V1**
-- Phase en cours : **Phase 2 – Élèves et caisse** (M2 + M3 ensemble, décision A3)
+- Phase en cours : **Phase 2 – Élèves et caisse** (M2 + M3 ensemble, décision A3) — **tout est codé,
+  jalon atteint (import de 1 000 élèves en ~20 s ; clôture = somme des reçus), en attente de validation**
 - Plan : `docs/plan-phase-2.md` (validé, décision D6) — sous-étapes 2a → 2g
   - ✅ 2a – Fiche élève, responsables, données médicales, pièces jointes, recherche
   - ✅ 2b – Inscription (préinscription → validée → classe), réinscription groupée, départs
@@ -29,7 +30,8 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 2d – Encaissement, reçus, annulation (D7), validation automatique de l'inscription (A3)
   - ✅ 2e – Clôture de caisse journalière et liste des impayés (jalon « clôture = somme des reçus » testé)
   - ✅ 2f – Documents PDF (worker pg-boss + Playwright) : reçu + QR, listes de classe, cartes, certificats
-  - ⏳ 2g – Import Excel/CSV des élèves (1 000 élèves en moins de 2 minutes)
+  - ✅ 2g – Import Excel/CSV des élèves (1 000 élèves en ~20 s, tout ou rien, rapport ligne par ligne)
+  - Avant la Phase 3 : faire valider au porteur les hypothèses H38 à H68 (`docs/hypotheses.md`).
 - Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`

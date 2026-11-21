@@ -115,7 +115,7 @@ async function matriculeYear(tx: Tx, schoolId: string): Promise<number> {
 }
 
 /** Attribue le prochain matricule : compteur de l'école verrouillé, continu, jamais réutilisé. */
-async function nextMatricule(tx: Tx, schoolId: string): Promise<string> {
+export async function nextMatricule(tx: Tx, schoolId: string): Promise<string> {
   const [row] = await tx
     .update(schools)
     .set({ lastMatriculeNumber: sql`${schools.lastMatriculeNumber} + 1` })
@@ -125,7 +125,7 @@ async function nextMatricule(tx: Tx, schoolId: string): Promise<string> {
 }
 
 /** Retrouve le responsable par son téléphone dans l'école, ou le crée (un parent, plusieurs enfants). */
-async function upsertGuardian(
+export async function upsertGuardian(
   tx: Tx,
   schoolId: string,
   data: z.output<typeof GuardianSchema>,

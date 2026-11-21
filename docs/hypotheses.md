@@ -107,6 +107,10 @@
 | H62 | La page publique de vérification d'un reçu (QR code) affiche école, numéro, date, montant et validité, **jamais l'élève** | 2f | ⏳ |
 | H63 | Liste de classe : direction, secrétariat, comptabilité, et l'enseignant pour ses classes ; cartes scolaires et certificats : direction et secrétariat | 2f | ⏳ |
 | H64 | Cartes scolaires au format carte bancaire (85,6 × 54 mm), 8 par page A4, avec photo ; certificats avec cachet et signature de l'école, textes accordés au sexe de l'élève | 2f | ⏳ |
+| H65 | Import **tout ou rien** : la moindre erreur bloque tout l'import ; vérification préalable sans rien enregistrer | 2g | ⏳ |
+| H66 | Doublon = mêmes nom, prénoms et date de naissance (déjà dans l'école ou deux fois dans le fichier) : refusé | 2g | ⏳ |
+| H67 | Élèves importés : nouveau matricule ; préinscrits au niveau indiqué (échéances créées) ; option directeur « déjà validées » avec classe affectée | 2g | ⏳ |
+| H68 | Fichier : 1 Mo et 3 000 élèves au plus ; CSV en UTF-8 ou Windows-1252 ; 0 initial des téléphones rétabli | 2g | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

@@ -40,6 +40,14 @@ async function Content({ searchParams }: Props) {
           {t("students.new")}
         </Link>
       )}
+      {can(principal, "students:write") && (
+        <Link
+          href="/eleves/import"
+          className="flex h-12 items-center justify-center rounded-md border border-zinc-400 px-4 font-medium"
+        >
+          {t("studentImport.link")}
+        </Link>
+      )}
       {/* Recherche : simple formulaire GET (fonctionne même avant le chargement du script). */}
       <form method="get" role="search" className="flex flex-col gap-2">
         <label htmlFor="student-search" className="font-medium">

@@ -18,6 +18,7 @@ export default function HomePage() {
 /** Entrées du menu, affichées selon les droits (le serveur revérifie sur chaque page). */
 const MENU: { href: string; label: MessageKey; action: Action }[] = [
   { href: "/plateforme/ecoles", label: "nav.schools", action: "school:create" },
+  { href: "/parametres/ecole", label: "nav.schoolProfile", action: "settings:read" },
   { href: "/parametres/personnel", label: "nav.staff", action: "staff:manage" },
 ];
 

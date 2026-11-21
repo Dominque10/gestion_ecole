@@ -33,7 +33,8 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ Étape 3 – Comptes, connexion, rôles (module maison D2, tableau des droits, accès Support)
   - ⏳ Étape 4 – M1 Paramétrage (6 sous-étapes 4a→4f, choix du M1 : décision D3)
     - ✅ 4a – Création d'école par le super-admin, comptes du personnel, mot de passe provisoire
-    - ⏳ 4b – Fiche école + stockage de fichiers
+    - ✅ 4b – Fiche école + stockage de fichiers (`src/server/storage/`, disque local, `STORAGE_DIR`)
+    - ⏳ 4c – Années scolaires et périodes
 - Next.js 16.4 : lire `node_modules/next/dist/docs/` avant d'utiliser une API (voir `AGENTS.md`).
   `middleware` s'appelle `proxy`, API de requête asynchrones, `cacheComponents` activé.
 

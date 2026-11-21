@@ -31,6 +31,7 @@ export default defineConfig({
     url: `http://localhost:${port}`,
     reuseExistingServer: false,
     timeout: 180_000,
-    env: { DATABASE_URL: db.app },
+    // Fichiers envoyés pendant les tests : dossier jetable, ignoré par Git.
+    env: { DATABASE_URL: db.app, STORAGE_DIR: "test-results/e2e-storage" },
   },
 });

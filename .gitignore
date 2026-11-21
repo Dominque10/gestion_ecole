@@ -39,3 +39,6 @@ Thumbs.db
 
 # Certificats
 *.pem
+
+# Fichiers envoyés en local (logos, cachets, signatures)
+/storage/

@@ -1,7 +1,7 @@
 // Schémas de validation du paramétrage (M1), partagés entre actions serveur et tests.
 import { z } from "zod";
 import { PASSWORD_MIN_LENGTH } from "@/server/auth/password";
-import { parseIdentifier } from "@/server/auth/phone";
+import { normalizePhone, parseIdentifier } from "@/server/auth/phone";
 import { STAFF_ROLES } from "./roles";
 
 export { STAFF_ROLES };
@@ -67,3 +67,30 @@ export const AddStaffSchema = z.object({
 export type AddStaffInput = Omit<z.input<typeof AddStaffSchema>, "roles"> & {
   roles: readonly string[];
 };
+
+/** Champ facultatif : une saisie vide devient null. */
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .transform((v) => (v === "" ? null : v));
+
+export const SchoolProfileSchema = z.object({
+  name: z.string().trim().min(2).max(150),
+  address: optionalText(300),
+  phone: z
+    .string()
+    .trim()
+    .max(30)
+    .transform((value, ctx) => {
+      if (value === "") return null;
+      const phone = normalizePhone(value);
+      if (!phone) {
+        ctx.addIssue({ code: "custom", message: "phone" });
+        return z.NEVER;
+      }
+      return phone;
+    }),
+});
+export type SchoolProfileInput = z.input<typeof SchoolProfileSchema>;

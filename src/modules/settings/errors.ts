@@ -5,7 +5,11 @@ export type SettingsErrorCode =
   | "alreadyMember"
   | "notMember"
   | "lastDirector"
-  | "cannotRemoveSelf";
+  | "cannotRemoveSelf"
+  | "notFound"
+  | "imageMissing"
+  | "imageTooLarge"
+  | "imageType";
 
 export class SettingsError extends Error {
   constructor(readonly code: SettingsErrorCode) {

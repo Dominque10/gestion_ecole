@@ -66,6 +66,14 @@
 | H33 | Échéance libre (peut tomber avant la rentrée, ex. inscription en septembre) ; les échéances d'un frais se suivent | `src/modules/settings/fees-logic.ts` | ⏳ |
 | H34 | Modifier la grille ne changera pas les échéances déjà émises aux élèves (règle à appliquer au M3) | — (M3) | ⏳ |
 
+## Copie d'année et assistant (4f)
+
+| # | Hypothèse | Où dans le code | Statut |
+|---|---|---|---|
+| H35 | La copie de structure ne se fait que vers une année **en préparation et vide** (ni classes, ni coefficients, ni frais) : pas de fusion | `src/modules/settings/structure-copy.ts` | ⏳ |
+| H36 | Copie : professeurs principaux et enseignants repris seulement s'ils ont encore le rôle Enseignant ; échéances décalées du nombre d'années entre les rentrées | `src/modules/settings/structure-copy.ts` | ⏳ |
+| H37 | Assistant : fiche « faite » dès qu'une adresse ou un téléphone est saisi ; personnel « fait » dès qu'une personne s'ajoute au directeur | `src/modules/settings/setup-status.ts` | ⏳ |
+
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 
 Voir `docs/cadrage.md` §B : modèle de bulletin (B2), règles de calcul (B3), prestataire de paiement (B4),

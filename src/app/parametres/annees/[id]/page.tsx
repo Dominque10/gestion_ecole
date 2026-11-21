@@ -6,7 +6,13 @@ import { getYear, listYears } from "@/modules/settings/years";
 import { can } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
 import { YearStatusBadge } from "../year-badge";
-import { ActivateYearForm, DeleteYearForm, EditYearForm, PeriodsForm } from "../year-forms";
+import {
+  ActivateYearForm,
+  CopyStructureForm,
+  DeleteYearForm,
+  EditYearForm,
+  PeriodsForm,
+} from "../year-forms";
 
 export const metadata: Metadata = { title: t("years.title") };
 
@@ -35,7 +41,11 @@ async function Content({
   const year = await getYear(principal, id);
   const canEdit = can(principal, "settings:write");
   const readOnly = !canEdit || year.status === "archived";
-  const current = (await listYears(principal)).find((y) => y.status === "active");
+  const allYears = await listYears(principal);
+  const current = allYears.find((y) => y.status === "active");
+  const copySources = allYears
+    .filter((y) => y.id !== year.id)
+    .map((y) => ({ id: y.id, label: y.label }));
 
   return (
     <>
@@ -66,6 +76,7 @@ async function Content({
 
       {canEdit && year.status === "upcoming" && (
         <>
+          {copySources.length > 0 && <CopyStructureForm year={year} sources={copySources} />}
           <ActivateYearForm year={year} currentLabel={current?.label ?? null} />
           <DeleteYearForm year={year} />
         </>

@@ -2,11 +2,13 @@
 
 import { useActionState } from "react";
 import { Field, FormMessage, SubmitButton } from "@/components/form-fields";
+import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
 import { idleFormState } from "@/lib/form-state";
 import type { AcademicYear } from "@/modules/settings/years";
 import {
   activateYearAction,
+  copyStructureAction,
   createYearAction,
   deleteYearAction,
   updatePeriodsAction,
@@ -189,6 +191,45 @@ export function DeleteYearForm({ year }: { year: AcademicYear }) {
       <input type="hidden" name="yearId" value={year.id} />
       <FormMessage status={state.status} message={state.message} />
       <SubmitButton label={t("years.delete")} variant="danger" />
+    </form>
+  );
+}
+
+export function CopyStructureForm({
+  year,
+  sources,
+}: {
+  year: AcademicYear;
+  sources: { id: string; label: string }[];
+}) {
+  const [state, formAction] = useActionState(copyStructureAction, idleFormState);
+  return (
+    <form
+      action={formAction}
+      onSubmit={(event) => {
+        const select = event.currentTarget.elements.namedItem("source") as HTMLSelectElement;
+        const source = select.selectedOptions[0]?.text ?? "";
+        if (!window.confirm(t("copy.confirm", { source, cible: year.label }))) {
+          event.preventDefault();
+        }
+      }}
+      className="flex flex-col gap-3 rounded-md border border-zinc-300 p-4"
+    >
+      <h2 className="text-lg font-semibold">{t("copy.title")}</h2>
+      <p className="text-sm">{t("copy.help")}</p>
+      <input type="hidden" name="yearId" value={year.id} />
+      <label htmlFor="copy-source" className="font-medium">
+        {t("copy.source")}
+      </label>
+      <select id="copy-source" name="source" className={`${inputClass} bg-white`}>
+        {sources.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.label}
+          </option>
+        ))}
+      </select>
+      <FormMessage status={state.status} message={state.message} />
+      <SubmitButton label={t("copy.submit", { nom: year.label })} variant="secondary" />
     </form>
   );
 }

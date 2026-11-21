@@ -12,6 +12,7 @@ import {
   updatePeriods,
   updateYear,
 } from "@/modules/settings/years";
+import { copyStructure } from "@/modules/settings/structure-copy";
 import { requireAction } from "@/server/auth/session";
 import { invalidForm, readFields, refusalMessage } from "@/server/forms";
 
@@ -122,4 +123,24 @@ export async function deleteYearAction(_prev: FormState, formData: FormData): Pr
     return failure(refusalMessage(error));
   }
   redirect("/parametres/annees");
+}
+
+export async function copyStructureAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("settings:write");
+  try {
+    const copied = await copyStructure(
+      principal,
+      String(formData.get("source") ?? ""),
+      String(formData.get("yearId") ?? ""),
+    );
+    refresh();
+    return success(
+      t("copy.done", { classes: copied.classes, grille: copied.gridRows, frais: copied.feeRows }),
+    );
+  } catch (error) {
+    return failure(refusalMessage(error));
+  }
 }

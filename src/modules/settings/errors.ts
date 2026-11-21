@@ -35,6 +35,8 @@ export type SettingsErrorCode =
   | "feeNameTaken"
   | "feeNotFound"
   | "registrationExists"
+  | "copySameYear"
+  | "copyTargetNotEmpty"
   | FeeProblem
   | PeriodsProblem;
 

@@ -41,6 +41,7 @@ export const fr = {
     subjects: "Matières",
     coefficients: "Coefficients",
     classes: "Classes",
+    setup: "Démarrage",
     timeSlots: "Créneaux",
     fees: "Frais de scolarité",
   },
@@ -402,6 +403,38 @@ export const fr = {
       compute: "Calculez d'abord les tranches.",
     },
   },
+  copy: {
+    title: "Reprendre la structure d'une autre année",
+    help: "Copie les classes, la grille des coefficients et les frais (échéances décalées d'un an). Les élèves ne sont pas copiés. Possible seulement tant que cette année est vide.",
+    source: "Année à copier",
+    submit: "Copier dans {nom}",
+    confirm: "Copier les classes, coefficients et frais de {source} dans {cible} ?",
+    done: "Structure copiée : {classes} classe(s), {grille} coefficient(s), {frais} tranche(s) de frais. Vérifiez maintenant chaque écran.",
+  },
+  setup: {
+    title: "Démarrage",
+    intro:
+      "Les étapes pour préparer votre école, dans l'ordre. Vous pouvez revenir ici à tout moment.",
+    progress: "{faites} étape(s) sur {total} terminée(s)",
+    continue: "Continuer : {etape}",
+    allDone: "Tout est prêt. Vous pourrez inscrire les élèves dès que ce module sera disponible.",
+    done: "Fait",
+    todo: "À faire",
+    open: "Ouvrir",
+    steps: {
+      profile: "Fiche de l'école (adresse, téléphone, logo)",
+      year: "Année scolaire et trimestres",
+      levels: "Niveaux",
+      subjects: "Matières",
+      coefficients: "Coefficients",
+      classes: "Classes",
+      timeSlots: "Créneaux de la journée",
+      fees: "Frais de scolarité",
+      staff: "Personnel de l'école",
+    },
+    homeBanner: "Paramétrage en cours : {faites} étape(s) sur {total}.",
+    homeLink: "Reprendre le démarrage",
+  },
   settings: {
     errors: {
       codeTaken: "Ce code est déjà utilisé par une autre école.",
@@ -448,6 +481,9 @@ export const fr = {
       installmentAmount: "Chaque tranche doit être un montant entier en FCFA, supérieur à zéro.",
       installmentOrder:
         "Les échéances doivent se suivre : une tranche ne peut pas tomber avant la précédente.",
+      copySameYear: "Choisissez une autre année que celle-ci.",
+      copyTargetNotEmpty:
+        "Cette année a déjà des classes, des coefficients ou des frais : la copie est réservée à une année vide.",
       subjectNameTaken: "Une matière porte déjà ce nom.",
       subjectNotFound: "Matière introuvable.",
       subjectInUse:

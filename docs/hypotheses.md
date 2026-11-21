@@ -8,6 +8,7 @@
 > Statut : ⏳ à valider · ✅ validée · ✏️ modifiée (voir la décision)
 >
 > **2026-11-21 : H1 à H37 validées par le porteur du projet (décision D5).**
+> **2026-11-21 : H38 à H68 validées par le porteur du projet (décision D8).**
 
 ## Comptes et connexion (Phase 1, étape 3 et 4a)
 
@@ -80,37 +81,37 @@
 
 | # | Hypothèse | Où dans le code | Statut |
 |---|---|---|---|
-| H38 | Matricule : « AA » = année de début de l'année scolaire de travail (en cours, sinon en préparation) au moment de la création de la fiche ; numéro d'ordre jamais réutilisé | 2a | ⏳ |
-| H39 | Affectation d'un paiement : échéance la plus ancienne d'abord ; à date égale, obligatoire avant facultatif | 2d | ⏳ |
-| H40 | Départ d'un élève : échéances à venir non payées annulées (jamais supprimées) ; le déjà payé reste acquis | 2b / 2c | ⏳ |
-| H41 | Annulation d'un paiement : tant que le directeur n'a pas validé, le paiement compte normalement | 2d | ⏳ |
-| H42 | Après sa clôture, un caissier ne peut plus encaisser ce jour-là (réouverture par le directeur, tracée) | 2e | ⏳ |
-| H43 | Une fiche élève n'est jamais supprimée (le départ se gère par l'inscription) | 2a | ⏳ |
-| H44 | Pièces jointes : photos uniquement (pas de PDF), réduites dans le téléphone (1 600 px max) | 2a | ⏳ |
-| H45 | La classe s'affecte après la validation de l'inscription ; une préinscription peut changer de niveau | 2b | ⏳ |
-| H46 | Réinscription groupée : crée des **préinscriptions** (validées ensuite comme les autres, au paiement des frais d'inscription) ; niveau suivant proposé (CM2 → 6e, 3e → 2nde), redoublement possible ; après la Tle, « ne revient pas » par défaut | 2b | ⏳ |
-| H47 | Un enseignant voit les élèves des classes où il enseigne ou dont il est professeur principal, pour les années non archivées | 2b | ⏳ |
-| H48 | Le départ d'un élève n'est pas réversible dans l'application (une erreur se corrige par une nouvelle inscription) | 2b | ⏳ |
-| H49 | Échéances créées dès la **préinscription** (le paiement des frais d'inscription validera l'inscription) ; recalculées si le niveau change avant validation | 2c | ⏳ |
-| H50 | Frais obligatoires créés automatiquement ; frais facultatifs ajoutés élève par élève | 2c | ⏳ |
-| H51 | Fratrie : frères et sœurs = un responsable en commun ; s'applique aux enfants inscrits **après** le premier la même année ; non recalculée si l'aîné part ensuite ; arrondi au franc inférieur | 2c | ⏳ |
-| H52 | Bourse = % sur les échéances de scolarité **encore ouvertes** ; remise exceptionnelle = montant sur une échéance ; les réductions se cumulent sur le montant d'origine, sans jamais le dépasser ; directeur seul, motif obligatoire | 2c | ⏳ |
-| H53 | L'enseignant ne voit pas les comptes (échéances, paiements) de ses élèves | 2c | ⏳ |
-| H54 | Référence obligatoire pour mobile money, virement et chèque ; une même référence n'est enregistrée qu'une fois par école | 2d | ⏳ |
-| H55 | Une annulation de paiement rouvre les échéances concernées ; une inscription déjà validée par ce paiement **reste validée** | 2d | ⏳ |
-| H56 | Un élève parti peut encore régler ce qu'il doit (échéances non annulées) | 2d | ⏳ |
-| H57 | Au départ, une échéance déjà payée en partie n'est pas annulée : son reste demeure dû | 2d | ⏳ |
-| H58 | Clôture : l'écart porte sur les **espèces** (comptées − attendues) ; mobile money, virement et chèque se vérifient sur les relevés. On peut clôturer un jour passé oublié, jamais un jour futur | 2e | ⏳ |
-| H59 | Impayés : échéance dont la date limite est dépassée et le reste dû positif ; ancienneté comptée depuis la plus ancienne en retard (jusqu'à 30, 31-60, 61-90, plus de 90 jours) | 2e | ⏳ |
-| H60 | Le comptable voit ses propres clôtures ; le directeur voit et rouvre toutes les clôtures | 2e | ⏳ |
-| H61 | Les PDF ne sont pas conservés sur le serveur : produits à la demande, récupérables 1 h par la seule personne qui les a demandés | 2f | ⏳ |
-| H62 | La page publique de vérification d'un reçu (QR code) affiche école, numéro, date, montant et validité, **jamais l'élève** | 2f | ⏳ |
-| H63 | Liste de classe : direction, secrétariat, comptabilité, et l'enseignant pour ses classes ; cartes scolaires et certificats : direction et secrétariat | 2f | ⏳ |
-| H64 | Cartes scolaires au format carte bancaire (85,6 × 54 mm), 8 par page A4, avec photo ; certificats avec cachet et signature de l'école, textes accordés au sexe de l'élève | 2f | ⏳ |
-| H65 | Import **tout ou rien** : la moindre erreur bloque tout l'import ; vérification préalable sans rien enregistrer | 2g | ⏳ |
-| H66 | Doublon = mêmes nom, prénoms et date de naissance (déjà dans l'école ou deux fois dans le fichier) : refusé | 2g | ⏳ |
-| H67 | Élèves importés : nouveau matricule ; préinscrits au niveau indiqué (échéances créées) ; option directeur « déjà validées » avec classe affectée | 2g | ⏳ |
-| H68 | Fichier : 1 Mo et 3 000 élèves au plus ; CSV en UTF-8 ou Windows-1252 ; 0 initial des téléphones rétabli | 2g | ⏳ |
+| H38 | Matricule : « AA » = année de début de l'année scolaire de travail (en cours, sinon en préparation) au moment de la création de la fiche ; numéro d'ordre jamais réutilisé | 2a | ✅ |
+| H39 | Affectation d'un paiement : échéance la plus ancienne d'abord ; à date égale, obligatoire avant facultatif | 2d | ✅ |
+| H40 | Départ d'un élève : échéances à venir non payées annulées (jamais supprimées) ; le déjà payé reste acquis | 2b / 2c | ✅ |
+| H41 | Annulation d'un paiement : tant que le directeur n'a pas validé, le paiement compte normalement | 2d | ✅ |
+| H42 | Après sa clôture, un caissier ne peut plus encaisser ce jour-là (réouverture par le directeur, tracée) | 2e | ✅ |
+| H43 | Une fiche élève n'est jamais supprimée (le départ se gère par l'inscription) | 2a | ✅ |
+| H44 | Pièces jointes : photos uniquement (pas de PDF), réduites dans le téléphone (1 600 px max) | 2a | ✅ |
+| H45 | La classe s'affecte après la validation de l'inscription ; une préinscription peut changer de niveau | 2b | ✅ |
+| H46 | Réinscription groupée : crée des **préinscriptions** (validées ensuite comme les autres, au paiement des frais d'inscription) ; niveau suivant proposé (CM2 → 6e, 3e → 2nde), redoublement possible ; après la Tle, « ne revient pas » par défaut | 2b | ✅ |
+| H47 | Un enseignant voit les élèves des classes où il enseigne ou dont il est professeur principal, pour les années non archivées | 2b | ✅ |
+| H48 | Le départ d'un élève n'est pas réversible dans l'application (une erreur se corrige par une nouvelle inscription) | 2b | ✅ |
+| H49 | Échéances créées dès la **préinscription** (le paiement des frais d'inscription validera l'inscription) ; recalculées si le niveau change avant validation | 2c | ✅ |
+| H50 | Frais obligatoires créés automatiquement ; frais facultatifs ajoutés élève par élève | 2c | ✅ |
+| H51 | Fratrie : frères et sœurs = un responsable en commun ; s'applique aux enfants inscrits **après** le premier la même année ; non recalculée si l'aîné part ensuite ; arrondi au franc inférieur | 2c | ✅ |
+| H52 | Bourse = % sur les échéances de scolarité **encore ouvertes** ; remise exceptionnelle = montant sur une échéance ; les réductions se cumulent sur le montant d'origine, sans jamais le dépasser ; directeur seul, motif obligatoire | 2c | ✅ |
+| H53 | L'enseignant ne voit pas les comptes (échéances, paiements) de ses élèves | 2c | ✅ |
+| H54 | Référence obligatoire pour mobile money, virement et chèque ; une même référence n'est enregistrée qu'une fois par école | 2d | ✅ |
+| H55 | Une annulation de paiement rouvre les échéances concernées ; une inscription déjà validée par ce paiement **reste validée** | 2d | ✅ |
+| H56 | Un élève parti peut encore régler ce qu'il doit (échéances non annulées) | 2d | ✅ |
+| H57 | Au départ, une échéance déjà payée en partie n'est pas annulée : son reste demeure dû | 2d | ✅ |
+| H58 | Clôture : l'écart porte sur les **espèces** (comptées − attendues) ; mobile money, virement et chèque se vérifient sur les relevés. On peut clôturer un jour passé oublié, jamais un jour futur | 2e | ✅ |
+| H59 | Impayés : échéance dont la date limite est dépassée et le reste dû positif ; ancienneté comptée depuis la plus ancienne en retard (jusqu'à 30, 31-60, 61-90, plus de 90 jours) | 2e | ✅ |
+| H60 | Le comptable voit ses propres clôtures ; le directeur voit et rouvre toutes les clôtures | 2e | ✅ |
+| H61 | Les PDF ne sont pas conservés sur le serveur : produits à la demande, récupérables 1 h par la seule personne qui les a demandés | 2f | ✅ |
+| H62 | La page publique de vérification d'un reçu (QR code) affiche école, numéro, date, montant et validité, **jamais l'élève** | 2f | ✅ |
+| H63 | Liste de classe : direction, secrétariat, comptabilité, et l'enseignant pour ses classes ; cartes scolaires et certificats : direction et secrétariat | 2f | ✅ |
+| H64 | Cartes scolaires au format carte bancaire (85,6 × 54 mm), 8 par page A4, avec photo ; certificats avec cachet et signature de l'école, textes accordés au sexe de l'élève | 2f | ✅ |
+| H65 | Import **tout ou rien** : la moindre erreur bloque tout l'import ; vérification préalable sans rien enregistrer | 2g | ✅ |
+| H66 | Doublon = mêmes nom, prénoms et date de naissance (déjà dans l'école ou deux fois dans le fichier) : refusé | 2g | ✅ |
+| H67 | Élèves importés : nouveau matricule ; préinscrits au niveau indiqué (échéances créées) ; option directeur « déjà validées » avec classe affectée | 2g | ✅ |
+| H68 | Fichier : 1 Mo et 3 000 élèves au plus ; CSV en UTF-8 ou Windows-1252 ; 0 initial des téléphones rétabli | 2g | ✅ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

@@ -31,7 +31,7 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 2e – Clôture de caisse journalière et liste des impayés (jalon « clôture = somme des reçus » testé)
   - ✅ 2f – Documents PDF (worker pg-boss + Playwright) : reçu + QR, listes de classe, cartes, certificats
   - ✅ 2g – Import Excel/CSV des élèves (1 000 élèves en ~20 s, tout ou rien, rapport ligne par ligne)
-  - Avant la Phase 3 : faire valider au porteur les hypothèses H38 à H68 (`docs/hypotheses.md`).
+  - Hypothèses H38 à H68 validées (décision D8).
 - Module en cours : **M2 + M3**
 - Dernier jalon validé : **Phase 1**, validée par le porteur du projet le 2026-11-21 (décision D5),
   avec les hypothèses H1 à H37 de `docs/hypotheses.md`

@@ -113,6 +113,19 @@
 | H67 | Élèves importés : nouveau matricule ; préinscrits au niveau indiqué (échéances créées) ; option directeur « déjà validées » avec classe affectée | 2g | ✅ |
 | H68 | Fichier : 1 Mo et 3 000 élèves au plus ; CSV en UTF-8 ou Windows-1252 ; 0 initial des téléphones rétabli | 2g | ✅ |
 
+## Pédagogie (Phase 3)
+
+Règles tranchées par le porteur : décision D10 (`docs/plan-phase-3.md`). Hypothèses complémentaires :
+
+| # | Hypothèse | Où | Statut |
+|---|---|---|---|
+| H69 | Collège et lycée toujours notés **sur 20** ; primaire et préscolaire sur 20 par défaut, réglable **sur 10** par l'école | 3a | ⏳ |
+| H70 | Trois types d'évaluation fixes : **interrogation, devoir, composition** ; interrogations et devoirs forment ensemble la « moyenne des devoirs » | 3a, 3b | ⏳ |
+| H71 | Mentions automatiques par défaut : **Félicitations ≥ 16, Encouragements ≥ 14, Tableau d'honneur ≥ 12** ; avertissement et blâme ne sont jamais automatiques (conseil de classe) | 3a | ⏳ |
+| H72 | Barème sur 10 : seuils des mentions divisés par 2 ; matière facultative = points au-dessus de la moitié du barème (5 sur 10) | 3a | ⏳ |
+| H73 | Un changement de règles vaut pour les calculs suivants ; un bulletin déjà publié garde ses moyennes ; chaque changement est noté dans le journal | 3a | ⏳ |
+| H74 | Une matière est déclarée facultative dans la grille des coefficients (par niveau + série), et la copie d'année reprend ce choix | 3a | ⏳ |
+
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 
 Voir `docs/cadrage.md` §B : modèle de bulletin (B2), règles de calcul (B3), prestataire de paiement (B4),

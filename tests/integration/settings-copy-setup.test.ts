@@ -75,7 +75,7 @@ describe("Assistant de démarrage", () => {
     expect((await getSetupStatus(director())).next).toBe("coefficients");
 
     await saveGrid(director(), { academicYearId: y1, levelId: sixieme, series: "" }, [
-      { subjectId: maths, coefficient: 4 },
+      { subjectId: maths, coefficient: 4, optional: true },
     ]);
     stayingTeacher = (
       await addStaff(director(), {
@@ -143,7 +143,7 @@ describe("Copie de structure", () => {
     });
 
     expect(await getGrid(director(), { academicYearId: y2, levelId: sixieme, series: "" })).toEqual(
-      [{ subjectId: maths, coefficient: 4 }],
+      [{ subjectId: maths, coefficient: 4, optional: true }],
     );
     const copied = await listClasses(director(), y2);
     expect(copied.map((c) => [c.name, c.capacity, c.subjectCount])).toEqual([

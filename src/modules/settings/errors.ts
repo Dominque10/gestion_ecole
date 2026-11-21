@@ -27,6 +27,7 @@ export type SettingsErrorCode =
   | "subjectInUse"
   | "seriesInvalid"
   | "gridInvalid"
+  | "gradingInvalid"
   | "classNameTaken"
   | "classNotFound"
   | "classInUse"

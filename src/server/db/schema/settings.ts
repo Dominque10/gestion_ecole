@@ -150,6 +150,8 @@ export const levelSubjects = pgTable(
     series: text("series").notNull().default(""),
     subjectId: uuid("subject_id").notNull(),
     coefficient: integer("coefficient").notNull(),
+    /** Matière facultative : compte selon la règle de l'école (décision D10). */
+    optional: boolean("optional").notNull().default(false),
     ...timestamps,
   },
   (t) => [

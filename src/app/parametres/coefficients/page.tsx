@@ -54,6 +54,7 @@ async function Content({ searchParams }: Props) {
     ? await getGrid(principal, { academicYearId: year.id, levelId: level.id, series })
     : [];
   const coefficients = Object.fromEntries(grid.map((r) => [r.subjectId, r.coefficient]));
+  const optional = grid.filter((r) => r.optional).map((r) => r.subjectId);
   const gridKey = { annee: year.id, niveau: level?.id ?? "", serie: series };
 
   return (
@@ -142,6 +143,7 @@ async function Content({ searchParams }: Props) {
               gridKey={gridKey}
               subjects={subjects}
               grid={coefficients}
+              optional={optional}
               readOnly={readOnly}
             />
           )}

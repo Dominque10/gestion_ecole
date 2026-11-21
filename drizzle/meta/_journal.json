@@ -169,6 +169,13 @@
       "when": 1795277776389,
       "tag": "0023_verify_receipt",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1795286649602,
+      "tag": "0024_grading_rules",
+      "breakpoints": true
     }
   ]
 }

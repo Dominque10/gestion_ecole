@@ -103,6 +103,7 @@ export async function copyStructure(
           series: g.series,
           subjectId: g.subjectId,
           coefficient: g.coefficient,
+          optional: g.optional,
         })),
       );
     }

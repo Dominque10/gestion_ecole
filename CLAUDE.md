@@ -22,9 +22,11 @@ Contraintes du terrain à garder en tête en permanence :
 
 - Version en cours : **V1**
 - Phase en cours : **Phase 3 – Pédagogie** (M4 Notes et bulletins + M5 Absences)
-- Plan : `docs/plan-phase-3.md` (**proposé, en attente de validation**) — sous-étapes 3a → 3g
+- Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.
-- Module en cours : **M4 + M5** (rien de codé)
+  - ✅ 3a – Règles de calcul de l'école (`src/modules/grading/`, page `/parametres/calcul`), matière facultative
+    dans la grille des coefficients ; hypothèses H69 à H74 à valider
+- Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
   Plan réalisé : `docs/plan-phase-2.md` (2a → 2g). Phase 1 validée le 2026-11-21 (D5, H1 à H37).
@@ -152,6 +154,11 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   Accès en **lecture seule**, uniquement après **autorisation du directeur**, pour 24 h par défaut
   (`membership` avec rôle `support`, date d'expiration, directeur qui l'a accordée). Chaque ouverture
   et chaque consultation tracées dans `audit_logs`. Agir à la place d'un utilisateur : V2, ne pas coder.
+
+### Notes et bulletins
+- **Mise en œuvre (3a)** : règles de calcul dans `schools.grading_rules` (jsonb, null = défaut), toujours lues via
+  `readGradingRules` / `loadGradingRules` (`src/modules/grading/`), validées par `GradingRulesSchema`.
+  Matière facultative : `level_subjects.optional`.
 
 ### Tâches de fond et documents
 - **Mise en œuvre (2f)** : file pg-boss (schéma `pgboss`, installée par `pnpm db:setup` via `setupJobQueue`,

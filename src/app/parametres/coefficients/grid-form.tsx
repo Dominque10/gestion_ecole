@@ -22,24 +22,32 @@ export function GridForm({
   gridKey,
   subjects,
   grid,
+  optional,
   readOnly,
 }: {
   gridKey: Key;
   subjects: { id: string; name: string }[];
   /** Coefficient par matière enseignée. */
   grid: Record<string, number>;
+  /** Matières facultatives de la grille. */
+  optional: string[];
   readOnly: boolean;
 }) {
   const [state, formAction] = useActionState(saveGridAction, idleFormState);
   return (
     // La clé suit la grille enregistrée : les cases se remettent à jour après un ajout par défaut.
-    <form key={JSON.stringify(grid)} action={formAction} className="flex flex-col gap-4" noValidate>
+    <form
+      key={JSON.stringify([grid, optional])}
+      action={formAction}
+      className="flex flex-col gap-4"
+      noValidate
+    >
       <KeyFields gridKey={gridKey} />
       <ul className="flex flex-col divide-y divide-zinc-200 rounded-md border border-zinc-300 px-4">
         {subjects.map((subject) => {
           const taught = subject.id in grid;
           return (
-            <li key={subject.id} className="flex items-center justify-between gap-3 py-2">
+            <li key={subject.id} className="flex flex-wrap items-center justify-between gap-3 py-2">
               <label className="flex min-h-11 flex-1 items-center gap-3">
                 <input
                   type="checkbox"
@@ -64,6 +72,16 @@ export function GridForm({
                 aria-label={t("coefficients.coefficient", { matiere: subject.name })}
                 className={`${inputClass} w-20 text-center`}
               />
+              <label className="flex min-h-11 w-full items-center gap-3 pl-8 text-sm text-zinc-700">
+                <input
+                  type="checkbox"
+                  name={`fac-${subject.id}`}
+                  defaultChecked={optional.includes(subject.id)}
+                  disabled={readOnly}
+                  className="size-5"
+                />
+                {t("coefficients.optional", { matiere: subject.name })}
+              </label>
             </li>
           );
         })}

@@ -24,13 +24,15 @@ function readKey(formData: FormData): GridKey {
 
 export async function saveGridAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const { principal } = await requireAction("settings:write");
-  // Cases cochées : champ « on » (valeur = id de la matière) ; coefficient : champ « coef-<id> ».
+  // Cases cochées : champ « on » (valeur = id de la matière) ; coefficient : champ « coef-<id> » ;
+  // matière facultative : case « fac-<id> ».
   const entries = formData
     .getAll("on")
     .map(String)
     .map((subjectId) => ({
       subjectId,
       coefficient: Number(formData.get(`coef-${subjectId}`) ?? ""),
+      optional: formData.get(`fac-${subjectId}`) === "on",
     }));
   if (
     entries.some((e) => !Number.isInteger(e.coefficient) || e.coefficient < 1 || e.coefficient > 20)

@@ -35,6 +35,11 @@ export const schools = pgTable("schools", {
   lastMatriculeNumber: integer("last_matricule_number").notNull().default(0),
   /** Réduction fratrie en % sur la scolarité, dès le 2e enfant inscrit (décision D6). 0 = aucune. */
   siblingDiscountPercent: integer("sibling_discount_percent").notNull().default(0),
+  /**
+   * Règles de calcul des moyennes (décision D10), validées par `GradingRulesSchema`
+   * (`src/modules/grading/rules.ts`). null = règles par défaut.
+   */
+  gradingRules: jsonb("grading_rules"),
   subdomain: text("subdomain").unique(),
   address: text("address"),
   phone: text("phone"),

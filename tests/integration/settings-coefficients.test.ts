@@ -83,6 +83,28 @@ describe("Grille des coefficients", () => {
     });
   });
 
+  it("une matière peut être marquée facultative (décision D10)", async () => {
+    const key = { academicYearId: yearId, levelId: premiere, series: "C" };
+    const maths = await subjectId("Mathématiques");
+    const francais = await subjectId("Français");
+    await saveGrid(director(), key, [
+      { subjectId: maths, coefficient: 5 },
+      { subjectId: francais, coefficient: 2, optional: true },
+    ]);
+    const grid = await getGrid(director(), key);
+    expect(Object.fromEntries(grid.map((r) => [r.subjectId, r.optional]))).toEqual({
+      [maths]: false,
+      [francais]: true,
+    });
+    // Retour à la grille du test précédent.
+    await saveGrid(director(), key, [
+      { subjectId: maths, coefficient: 5 },
+      { subjectId: await subjectId("Physique-Chimie"), coefficient: 4 },
+      { subjectId: francais, coefficient: 2 },
+    ]);
+    expect((await getGrid(director(), key)).every((r) => !r.optional)).toBe(true);
+  });
+
   it("chaque série a sa propre grille (1re A différente de 1re C)", async () => {
     const keyA = { academicYearId: yearId, levelId: premiere, series: "A" };
     await saveGrid(director(), keyA, [{ subjectId: await subjectId("Français"), coefficient: 5 }]);

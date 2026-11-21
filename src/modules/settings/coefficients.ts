@@ -20,13 +20,15 @@ export const GridEntriesSchema = z
     z.object({
       subjectId: z.uuid(),
       coefficient: z.coerce.number().int().min(1).max(20),
+      /** Matière facultative (décision D10). */
+      optional: z.boolean().default(false),
     }),
   )
   .max(60);
 export type GridEntryInput = z.input<typeof GridEntriesSchema>[number];
 
 export type GridKey = { academicYearId: string; levelId: string; series: string };
-export type GridRow = { subjectId: string; coefficient: number };
+export type GridRow = { subjectId: string; coefficient: number; optional: boolean };
 
 function context(principal: Principal, action: "settings:read" | "settings:write") {
   authorize(principal, action);
@@ -132,7 +134,11 @@ export async function getGrid(principal: Principal, key: GridKey): Promise<GridR
   return withSchool(ctx, async (tx) => {
     const resolved = await resolveKey(tx, ctx.schoolId, key, false);
     return tx
-      .select({ subjectId: levelSubjects.subjectId, coefficient: levelSubjects.coefficient })
+      .select({
+        subjectId: levelSubjects.subjectId,
+        coefficient: levelSubjects.coefficient,
+        optional: levelSubjects.optional,
+      })
       .from(levelSubjects)
       .where(keyFilter(ctx.schoolId, resolved.key));
   });
@@ -210,7 +216,7 @@ export async function saveGrid(
               levelSubjects.series,
               levelSubjects.subjectId,
             ],
-            set: { coefficient: row.coefficient, updatedAt: new Date() },
+            set: { coefficient: row.coefficient, optional: row.optional, updatedAt: new Date() },
           });
       }
       await syncClassSubjects(tx, ctx.schoolId, k);

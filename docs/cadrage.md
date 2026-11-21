@@ -23,7 +23,7 @@
 |---|---|---|---|
 | B1 | Nom du produit et nom de domaine (.cg ou autre) | Mise en ligne | _à décider_ |
 | B2 | Modèle de bulletin exact de chaque école pilote | M4 | Hypothèse : modèle standard modifiable par école (D1) |
-| B3 | Règles de calcul : arrondis, matières facultatives, compositions vs interrogations, rang ex æquo | M4 | Hypothèse : valeurs par défaut paramétrables, proposées une par une avant M4 (D1) |
+| B3 | Règles de calcul : arrondis, matières facultatives, compositions vs interrogations, rang ex æquo | M4 | Tranché : valeurs par défaut paramétrables (D10) |
 | B4 | Agrégateur de paiement retenu, frais, délai du compte marchand | M3 / M6 | Hypothèse : faux prestataire derrière l’interface interne (D1) |
 | B5 | Prestataire SMS local et coût ; accès API WhatsApp Business | Phase 1 (OTP), M5, M6 | Hypothèse : faux prestataire derrière l’interface interne (D1) |
 | B6 | Hébergement : à l'étranger ou au Congo (loi données personnelles, latence) | Déploiement | _à décider_ |
@@ -52,3 +52,5 @@
 | 2026-11-21 | **D6 — Plan de la Phase 2 validé** (`docs/plan-phase-2.md`), avec 2 tables de plus (`student_documents`, `cash_closures` : 29 tables). Règles d'argent : réduction fratrie en pourcentage fixé par chaque école, appliquée à la scolarité dès le 2e enfant ; trop-perçu refusé à la caisse ; inscription en cours d'année = toutes les tranches dues (remise possible par le directeur) ; numéro de reçu remis à 1 chaque année scolaire (ex. `SJB-2026-00001`). Paiement en ligne et SMS restent au M6. | Porteur du projet |
 | 2026-11-21 | **D7 — Demande d'annulation de paiement dans l'application.** Le comptable saisit la demande avec son motif ; le directeur la valide (écriture inverse) ou la refuse. Nouvelle table `payment_cancellations` (30 tables). | Porteur du projet |
 | 2026-11-21 | **D8 — Hypothèses H38 à H68 de la Phase 2 validées** par le porteur du projet, une par une (`docs/hypotheses.md`). | Porteur du projet |
+| 2026-11-21 | **D9 — Jalon de la Phase 2 validé** par le porteur du projet (import de 1 000 élèves en ~20 s, clôture de caisse = somme des reçus). Passage en Phase 3 – Pédagogie (M4 + M5, plan à valider avant tout code). | Porteur du projet |
+| 2026-11-21 | **D10 — Règles de calcul par défaut (B3)**, toutes modifiables par école : moyennes arrondies au centième, rang sur la moyenne arrondie ; ex æquo « 1er, 2e ex, 2e ex, 4e » ; matières facultatives = points au-dessus de 10 seulement ; moyenne d'une matière = (moyenne interrogations/devoirs + composition) / 2 ; absent à une évaluation = non compté ; moyenne annuelle = moyenne des trimestres ; notification d'absence envoyée dès la Phase 3 via un faux prestataire SMS ; appréciation par matière par l'enseignant, générale par le professeur principal ou le directeur. Détail : `docs/plan-phase-3.md`. | Porteur du projet |

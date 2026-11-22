@@ -86,6 +86,8 @@ export const periods = pgTable(
     }).onDelete("cascade"),
     unique("periods_year_position").on(t.academicYearId, t.position),
     unique("periods_id_school").on(t.id, t.schoolId),
+    // Cible des évaluations : la période appartient à l'année de la classe.
+    unique("periods_id_year_school").on(t.id, t.academicYearId, t.schoolId),
     check("periods_position", sql`${t.position} >= 1`),
     check("periods_dates", sql`${t.startDate} <= ${t.endDate}`),
     index("periods_school_idx").on(t.schoolId),

@@ -40,6 +40,9 @@ async function guarded<T>(work: () => Promise<T>): Promise<T> {
     return await work();
   } catch (error) {
     if (dbGuardCode(error) === "GS001") throw new SettingsError("yearArchived");
+    if (isForeignKeyViolation(error, "assessments_class_subject_fk")) {
+      throw new SettingsError("subjectHasAssessments");
+    }
     if (isForeignKeyViolation(error)) throw new SettingsError("gridInvalid");
     throw error;
   }

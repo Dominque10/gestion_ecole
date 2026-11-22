@@ -176,6 +176,20 @@
       "when": 1795286649602,
       "tag": "0024_grading_rules",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1795389008045,
+      "tag": "0025_assessments",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795389014058,
+      "tag": "0026_assessments_rls",
+      "breakpoints": true
     }
   ]
 }

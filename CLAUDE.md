@@ -26,6 +26,8 @@ Contraintes du terrain à garder en tête en permanence :
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.
   - ✅ 3a – Règles de calcul de l'école (`src/modules/grading/`, page `/parametres/calcul`), matière facultative
     dans la grille des coefficients ; hypothèses H69 à H74 à valider
+  - ✅ 3b – Évaluations et saisie des notes (tables `assessments`, `grades` ; pages `/notes`) ;
+    hypothèses H75 à H81 à valider
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
@@ -159,6 +161,13 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - **Mise en œuvre (3a)** : règles de calcul dans `schools.grading_rules` (jsonb, null = défaut), toujours lues via
   `readGradingRules` / `loadGradingRules` (`src/modules/grading/`), validées par `GradingRulesSchema`.
   Matière facultative : `level_subjects.optional`.
+- **Mise en œuvre (3b)** : `src/modules/grading/assessments.ts`. Une évaluation pointe vers une ligne de
+  `class_subjects` (clé étrangère) ; un enseignant n'y accède que si `class_subjects.teacher_id` est le sien,
+  le directeur partout (action `assessments:manage` + `grades:write`). Note : `numeric(5,2)` sur le barème de
+  l'évaluation, statut `scored` / `absent` / `excused` ; déclencheur `app.check_grade_within_scale` (GS007).
+  Saisie : `parseGradeInput` (pur, partagé avec la grille client) ; `saveGrades` reçoit pour chaque case la
+  valeur d'origine et ne remplace jamais une note changée entre-temps (conflit rendu). L'identifiant d'une
+  évaluation peut venir du client (création idempotente, prépare 3c).
 
 ### Tâches de fond et documents
 - **Mise en œuvre (2f)** : file pg-boss (schéma `pgboss`, installée par `pnpm db:setup` via `setupJobQueue`,

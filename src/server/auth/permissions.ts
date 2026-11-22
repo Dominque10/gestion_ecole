@@ -38,6 +38,8 @@ const SCHOOL_ACTIONS = {
   /** Clôture journalière de sa caisse ; réouverture par le directeur (tracée). */
   "cash:close": ["accountant"],
   "cash:reopen": ["director"],
+  /** Évaluations : un enseignant pour ses classes et matières, le directeur pour toute l'école (3b). */
+  "assessments:manage": ["director", "teacher"],
   "grades:write": ["director", "teacher"],
   "reportcards:publish": ["director"],
   "reportcards:read": ["director", "parent"],

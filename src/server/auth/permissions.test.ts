@@ -35,6 +35,7 @@ const MATRIX: Record<SchoolAction, MembershipRole[]> = {
   "payments:pay-online": ["parent"],
   "cash:close": ["accountant"],
   "cash:reopen": ["director"],
+  "assessments:manage": ["director", "teacher"],
   "grades:write": ["director", "teacher"],
   "reportcards:publish": ["director"],
   "reportcards:read": ["director", "parent"],

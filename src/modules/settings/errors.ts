@@ -28,6 +28,7 @@ export type SettingsErrorCode =
   | "seriesInvalid"
   | "gridInvalid"
   | "gradingInvalid"
+  | "subjectHasAssessments"
   | "classNameTaken"
   | "classNotFound"
   | "classInUse"
@@ -69,7 +70,12 @@ export function dbGuardCode(error: unknown): string | null {
 }
 
 /** Violation de clé étrangère : la ligne est encore utilisée ailleurs (ex. niveau qui a des classes). */
-export function isForeignKeyViolation(error: unknown): boolean {
-  const e = error as { code?: string; cause?: { code?: string } };
-  return e?.code === "23503" || e?.cause?.code === "23503";
+export function isForeignKeyViolation(error: unknown, constraint?: string): boolean {
+  const e = error as {
+    code?: string;
+    constraint?: string;
+    cause?: { code?: string; constraint?: string };
+  };
+  const pgError = e?.code === "23503" ? e : e?.cause?.code === "23503" ? e.cause : null;
+  return pgError !== null && (!constraint || pgError.constraint === constraint);
 }

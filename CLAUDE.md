@@ -29,7 +29,7 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 4c – Paiement en ligne (faux prestataire) : intention, confirmation signée et idempotente, interrogation,
     expiration, trop-perçu, réconciliation quotidienne ; hypothèses H114 à H118 validées (D23)
   - ✅ 4d – Messages aux parents : canal SMS ou WhatsApp, modèles modifiables, coût journalisé, plafond mensuel ;
-    reçu de paiement et bulletin publié (`/parametres/notifications`) ; hypothèses H119 à H123 à valider
+    reçu de paiement et bulletin publié (`/parametres/notifications`) ; hypothèses H119 à H123 validées (D24)
 - Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.

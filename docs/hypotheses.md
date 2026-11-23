@@ -181,8 +181,8 @@ Plan validé : décision D20 (`docs/plan-phase-4.md`). Hypothèses complémentai
 | H116 | L'argent reçu n'est jamais refusé : il va d'abord aux échéances choisies, puis aux autres ; un surplus (échéance réglée au guichet entre-temps) est noté « trop-perçu à rembourser » sur le paiement et dans le journal, l'école rembourse | 4c | ✅ |
 | H117 | Paiement en ligne enregistré au nom du compte « Paiement en ligne » de l'école (qui ne peut pas se connecter), en mobile money, avec la référence de l'opérateur ; il n'entre dans la clôture de caisse d'aucun caissier ; reçu PDF disponible pour le parent | 4c | ✅ |
 | H118 | Réconciliation chaque jour (la veille) par le worker : une confirmation perdue est rattrapée ; une transaction inconnue est signalée dans le journal du serveur (écran de suivi pour la direction au M7) | 4c | ✅ |
-| H119 | Messages automatiques au responsable principal : absence (D15), reçu de paiement (dès l'encaissement, au guichet ou en ligne), bulletin publié (à la publication) ; un seul message par objet | 4d | ⏳ |
-| H120 | Coûts indicatifs du faux prestataire : SMS 25 FCFA, WhatsApp 15 FCFA ; les codes de connexion partent toujours par SMS et ne sont pas journalisés (ils contiennent un secret) | 4d | ⏳ |
-| H121 | Modèles de 320 caractères au plus (2 SMS), avec seulement les champs prévus pour chaque message ; un modèle enregistré devenu invalide est remplacé par celui par défaut | 4d | ⏳ |
-| H122 | Plafond mensuel facultatif (FCFA) : au-delà, le message n'est pas envoyé, il est noté « non envoyé (plafond) » et pas réessayé ; le mois est celui de Brazzaville | 4d | ⏳ |
-| H123 | Si l'école choisit WhatsApp, tous ses messages partent par WhatsApp, sans repli automatique sur SMS (à revoir avec le vrai prestataire, B5) | 4d | ⏳ |
+| H119 | Messages automatiques au responsable principal : absence (D15), reçu de paiement (dès l'encaissement, au guichet ou en ligne), bulletin publié (à la publication) ; un seul message par objet | 4d | ✅ |
+| H120 | Coûts indicatifs du faux prestataire : SMS 25 FCFA, WhatsApp 15 FCFA ; les codes de connexion partent toujours par SMS et ne sont pas journalisés (ils contiennent un secret) | 4d | ✅ |
+| H121 | Modèles de 320 caractères au plus (2 SMS), avec seulement les champs prévus pour chaque message ; un modèle enregistré devenu invalide est remplacé par celui par défaut | 4d | ✅ |
+| H122 | Plafond mensuel facultatif (FCFA) : au-delà, le message n'est pas envoyé, il est noté « non envoyé (plafond) » et pas réessayé ; le mois est celui de Brazzaville | 4d | ✅ |
+| H123 | Si l'école choisit WhatsApp, tous ses messages partent par WhatsApp, sans repli automatique sur SMS (à revoir avec le vrai prestataire, B5) | 4d | ✅ |

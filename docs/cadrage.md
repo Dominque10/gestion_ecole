@@ -67,3 +67,4 @@
 | 2026-11-23 | **D21 — Hypothèses H107 à H110 (étape 4a) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D22 — Hypothèses H111 à H113 (étape 4b) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D23 — Hypothèses H114 à H118 (étape 4c) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
+| 2026-11-23 | **D24 — Hypothèses H119 à H123 (étape 4d) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |

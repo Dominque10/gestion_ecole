@@ -31,7 +31,7 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 3c – Hors connexion : application installable, service worker, saisie sans réseau
     (`/notes/hors-ligne`), envoi automatique, conflits à trancher ; hypothèses H82 à H85 validées (D12)
   - ✅ 3d – Moyennes, rangs, mentions, moyenne annuelle (`averages.ts`), clôture des périodes par classe
-    (`period_closures`, décision D13), page `/notes/resultats` ; hypothèses H86 à H90 à valider.
+    (`period_closures`, décision D13), page `/notes/resultats` ; hypothèses H86 à H90 validées (D14).
     **Cas de référence réels du porteur toujours attendus** (critère du jalon) : un cas construit les remplace.
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de

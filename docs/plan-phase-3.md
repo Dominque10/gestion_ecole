@@ -1,6 +1,6 @@
 # Plan — Phase 3 : Pédagogie (M4 Notes et bulletins + M5 Absences)
 
-> Statut : **validé le 2026-11-21** (décision D11).
+> Statut : **validé le 2026-11-21** (décision D11) — **réalisé, jalon validé le 2026-11-23 (D19)**.
 > Jalon de sortie (cahier des charges §5) : les moyennes calculées correspondent **au centième près** à des
 > cas de référence préparés par le porteur ; **50 bulletins générés en moins de 30 secondes** ;
 > **appel d'une classe de 60 élèves en moins d'une minute** sur téléphone.

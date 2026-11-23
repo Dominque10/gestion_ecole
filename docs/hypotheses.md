@@ -152,11 +152,11 @@ Règles tranchées par le porteur : décision D10 (`docs/plan-phase-3.md`). Hypo
 | H99 | Décisions de fin d'année : « Admis(e) en classe supérieure », « Redouble », « Exclu(e) » ; prises seulement au conseil de fin d'année, une par élève, obligatoires pour valider | 3f | ✅ |
 | H100 | Absences du bulletin comptées en créneaux manqués (pas en jours), avec la part non justifiée ; retards comptés à part | 3f | ✅ |
 | H101 | Le conseil se valide après la clôture de la période pour la classe (pour l'année : la dernière période) ; une fois validé tout est figé ; le directeur peut le rouvrir (tracé) | 3f | ✅ |
-| H102 | Format du bulletin (en attendant le modèle d'une école, B2) : A4, une page par élève ; matières avec coefficient, moyenne, points, moyenne de la classe, plus forte et plus faible, appréciation ; moyenne générale, rang sur l'effectif, chiffres de la classe, absences, mention, appréciation générale, cachet, signature et visa des parents | 3g | ⏳ |
-| H103 | Les bulletins se publient par classe et par période (tous ensemble), par le directeur, une fois le conseil validé | 3g | ⏳ |
-| H104 | Rouvrir le conseil retire la publication (tracé) ; la photographie reste jusqu'à la nouvelle publication ; l'espace parents (M6) ne montrera que les bulletins publiés | 3g | ⏳ |
-| H105 | Avant publication, le directeur et le professeur principal peuvent télécharger un projet, marqué « Projet — bulletin non publié » | 3g | ⏳ |
-| H106 | Bulletin annuel : moyenne générale et rang de chaque période, moyenne annuelle, rang, mention, décision et absences de l'année (sans le détail par matière) | 3g | ⏳ |
+| H102 | Format du bulletin (en attendant le modèle d'une école, B2) : A4, une page par élève ; matières avec coefficient, moyenne, points, moyenne de la classe, plus forte et plus faible, appréciation ; moyenne générale, rang sur l'effectif, chiffres de la classe, absences, mention, appréciation générale, cachet, signature et visa des parents | 3g | ✅ |
+| H103 | Les bulletins se publient par classe et par période (tous ensemble), par le directeur, une fois le conseil validé | 3g | ✅ |
+| H104 | Rouvrir le conseil retire la publication (tracé) ; la photographie reste jusqu'à la nouvelle publication ; l'espace parents (M6) ne montrera que les bulletins publiés | 3g | ✅ |
+| H105 | Avant publication, le directeur et le professeur principal peuvent télécharger un projet, marqué « Projet — bulletin non publié » | 3g | ✅ |
+| H106 | Bulletin annuel : moyenne générale et rang de chaque période, moyenne annuelle, rang, mention, décision et absences de l'année (sans le détail par matière) | 3g | ✅ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

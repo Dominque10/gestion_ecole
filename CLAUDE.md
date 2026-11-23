@@ -21,7 +21,8 @@ Contraintes du terrain à garder en tête en permanence :
 ## 2. État actuel (À METTRE À JOUR)
 
 - Version en cours : **V1**
-- Phase en cours : **Phase 3 – Pédagogie** (M4 Notes et bulletins + M5 Absences)
+- Phase en cours : **Phase 4 – Parents et pilote** (M6 Espace parents + paiement mobile + notifications, M7 Tableau de bord) — **plan à proposer et faire valider avant tout code**
+- Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.
   - ✅ 3a – Règles de calcul de l'école (`src/modules/grading/`, page `/parametres/calcul`), matière facultative
@@ -38,11 +39,9 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 3f – Conseil de classe (`council.ts`, table `report_cards`) : appréciations par matière et générale,
     mention, décision de fin d'année, totaux d'absences ; validation après clôture ; hypothèses H97 à H101 validées (D17)
   - ✅ 3g – Bulletins PDF (`bulletins.ts`, gabarit `bulletin-template.ts`) : projet, publication avec photographie,
-    bulletin annuel ; 50 bulletins en < 1 s (critère : 30 s) ; hypothèses H102 à H106 à valider
-  - **Jalon de la Phase 3 à valider** : moyennes conformes aux cas de référence du porteur (toujours attendus),
-    50 bulletins < 30 s ✅, appel de 60 élèves < 1 min ✅
-- Module en cours : **M4 + M5**
-- Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
+    bulletin annuel ; 50 bulletins en < 1 s (critère : 30 s) ; hypothèses H102 à H106 validées (D18)
+- Module en cours : **M6 + M7** (rien de codé)
+- Dernier jalon validé : **Phase 3** (M4 + M5), validée le 2026-11-23 (D19). Avant : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
   Plan réalisé : `docs/plan-phase-2.md` (2a → 2g). Phase 1 validée le 2026-11-21 (D5, H1 à H37).
 - **Pas d'école pilote pour l'instant (D1)** : les règles qui dépendaient des écoles sont des hypothèses

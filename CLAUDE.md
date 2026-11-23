@@ -25,9 +25,11 @@ Contraintes du terrain à garder en tête en permanence :
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.
   - ✅ 3a – Règles de calcul de l'école (`src/modules/grading/`, page `/parametres/calcul`), matière facultative
-    dans la grille des coefficients ; hypothèses H69 à H74 à valider
+    dans la grille des coefficients ; hypothèses H69 à H74 validées (D12)
   - ✅ 3b – Évaluations et saisie des notes (tables `assessments`, `grades` ; pages `/notes`) ;
-    hypothèses H75 à H81 à valider
+    hypothèses H75 à H81 validées (D12)
+  - ✅ 3c – Hors connexion : application installable, service worker, saisie sans réseau
+    (`/notes/hors-ligne`), envoi automatique, conflits à trancher ; hypothèses H82 à H84 validées (D12), H85 à trancher
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
@@ -182,6 +184,17 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - Saisie des notes et de l'appel possible hors ligne (file locale IndexedDB, synchro au retour du réseau).
 - UUID générés **côté client** pour les saisies hors ligne (pas de doublons à la synchro).
 - Conflits signalés à l'utilisateur, **jamais écrasés en silence**.
+- **Mise en œuvre (3c)** :
+  - Base du téléphone : Dexie (`src/lib/offline/db.ts`), tout rangé par propriétaire `<école>:<compte>`.
+    Copies du serveur (`courses`, `sheets`) ; saisies en attente (`assessments` créées sur le téléphone,
+    `cells` avec valeur d'origine `expected`). Logique pure et testée : `store.ts`, `sync.ts` (fake-indexeddb).
+  - Envoi : `syncPending` avec les actions `src/app/notes/sync-actions.ts` (jamais de redirection ; session
+    expirée = code `session`). Toute saisie en ligne passe aussi par cette file (`GradeGrid`).
+  - Service worker : `src/sw/sw.ts` (Serwist), construit par `scripts/build-sw.mts` à la fin de `pnpm build`,
+    servi par la route `/sw.js`. Il ne garde que la page statique `/notes/hors-ligne` et les fichiers
+    `/_next/static` ; aucune page de données. Sans réseau, toute page renvoie vers `/notes/hors-ligne`.
+    L'adaptateur `@serwist/turbopack` n'est pas utilisé (incompatible avec `cacheComponents`).
+  - Pas de `Map.groupBy` ni d'API récente côté client : téléphones Android anciens.
 
 ### Traçabilité
 - `audit_logs` pour : paiements, annulations, modifications de notes après verrouillage, changements de droits.
@@ -242,7 +255,8 @@ notes, absences, échéances et bulletins s'y rattachent.
 
 ```bash
 pnpm install          # dépendances
-pnpm dev              # serveur de développement
+pnpm dev              # serveur de développement (sans service worker)
+pnpm build            # build de production + service worker (hors connexion : tester avec pnpm start)
 pnpm worker           # worker des tâches de fond (documents PDF) — à lancer avec pnpm dev
 node --import tsx scripts/sample-documents.mts <dossier>  # exemples de PDF pour vérifier le rendu
 pnpm test             # tests unitaires et d'intégration

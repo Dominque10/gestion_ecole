@@ -1,7 +1,7 @@
-// Ã‰valuations et saisie des notes (M4, sous-Ã©tape 3b).
-// Un enseignant ne voit et ne note que les matiÃ¨res qu'il enseigne dans ses classes ; le directeur,
-// toute l'Ã©cole (CLAUDE.md Â§6, Droits). Une note modifiÃ©e entre-temps par quelqu'un d'autre n'est
-// jamais Ã©crasÃ©e : le conflit est rendu Ã  l'utilisateur (CLAUDE.md Â§6, Hors-ligne).
+// Évaluations et saisie des notes (M4, sous-étape 3b).
+// Un enseignant ne voit et ne note que les matières qu'il enseigne dans ses classes ; le directeur,
+// toute l'école (CLAUDE.md §6, Droits). Une note modifiée entre-temps par quelqu'un d'autre n'est
+// jamais écrasée : le conflit est rendu à l'utilisateur (CLAUDE.md §6, Hors-ligne).
 import { and, asc, count, desc, eq, inArray, max, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { authorize, type Principal } from "@/server/auth/permissions";
@@ -53,7 +53,7 @@ export type AssessmentInput = z.input<typeof AssessmentInputSchema>;
 
 type Ctx = { schoolId: string; userId: string; allCourses: boolean };
 
-/** Le directeur voit toutes les matiÃ¨res ; un enseignant, celles qu'il enseigne. */
+/** Le directeur voit toutes les matières ; un enseignant, celles qu'il enseigne. */
 function gradingContext(principal: Principal, action: "grades:write" | "assessments:manage"): Ctx {
   authorize(principal, action);
   return {
@@ -65,12 +65,12 @@ function gradingContext(principal: Principal, action: "grades:write" | "assessme
 
 const isUuid = (value: string) => z.uuid().safeParse(value).success;
 
-/** MatiÃ¨re d'une classe enseignÃ©e par le lecteur (filtre sur class_subjects). */
+/** Matière d'une classe enseignée par le lecteur (filtre sur class_subjects). */
 function ownCourse(ctx: Ctx): SQL | undefined {
   return ctx.allCourses ? undefined : eq(classSubjects.teacherId, ctx.userId);
 }
 
-/** Traduit le garde-fou Â« annÃ©e archivÃ©e Â» de la base en refus mÃ©tier. */
+/** Traduit le garde-fou « année archivée » de la base en refus métier. */
 async function guarded<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
@@ -80,7 +80,7 @@ async function guarded<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-// --- MatiÃ¨res Ã  noter -----------------------------------------------------------------------
+// --- Matières à noter -----------------------------------------------------------------------
 
 export type Course = {
   classId: string;
@@ -91,7 +91,7 @@ export type Course = {
   teacherName: string | null;
 };
 
-/** MatiÃ¨res Ã  noter dans l'annÃ©e active : les siennes pour un enseignant, toutes pour le directeur. */
+/** Matières à noter dans l'année active : les siennes pour un enseignant, toutes pour le directeur. */
 export async function listCourses(principal: Principal): Promise<Course[]> {
   const ctx = gradingContext(principal, "grades:write");
   return withSchool(ctx, (tx) =>
@@ -177,22 +177,24 @@ export type AssessmentSummary = {
   title: string | null;
   date: string;
   maxScore: number;
-  /** Ã‰lÃ¨ves ayant une note, une absence ou une dispense. */
+  /** Élèves ayant une note, une absence ou une dispense. */
   filled: number;
 };
 
 export type CourseDetail = Course & {
   yearStatus: "upcoming" | "active" | "archived";
   periods: PeriodOption[];
-  /** PÃ©riode qui contient aujourd'hui (sinon la derniÃ¨re commencÃ©e, sinon la premiÃ¨re). */
+  /** Période qui contient aujourd'hui (sinon la dernière commencée, sinon la première). */
   currentPeriodId: string | null;
-  /** BarÃ¨me proposÃ© pour une nouvelle Ã©valuation (sur 20 ; sur 10 au primaire si l'Ã©cole l'a choisi). */
+  /** Barème proposé pour une nouvelle évaluation (sur 20 ; sur 10 au primaire si l'école l'a choisi). */
   defaultMaxScore: number;
   studentCount: number;
+  /** Élèves inscrits, par ordre alphabétique. */
+  students: { enrollmentId: string; lastName: string; firstNames: string }[];
   assessments: AssessmentSummary[];
 };
 
-/** PÃ©riode par dÃ©faut : celle du jour, sinon la derniÃ¨re commencÃ©e, sinon la premiÃ¨re. */
+/** Période par défaut : celle du jour, sinon la dernière commencée, sinon la première. */
 export function currentPeriod(list: readonly PeriodOption[], today: string): string | null {
   const ongoing = list.find((p) => p.startDate <= today && today <= p.endDate);
   if (ongoing) return ongoing.id;
@@ -213,7 +215,7 @@ async function loadPeriods(tx: Tx, yearId: string): Promise<PeriodOption[]> {
     .orderBy(asc(periods.position));
 }
 
-/** Ã‰lÃ¨ves inscrits dans la classe (ceux qu'on peut noter). */
+/** Élèves inscrits dans la classe (ceux qu'on peut noter). */
 function enrolledIn(classId: string): SQL {
   return and(eq(enrollments.classId, classId), eq(enrollments.status, "enrolled")) as SQL;
 }
@@ -228,7 +230,16 @@ export async function getCourse(
     const course = await loadCourse(tx, ctx, classId, subjectId);
     const yearPeriods = await loadPeriods(tx, course.academicYearId);
     const rules = await loadGradingRules(tx, ctx.schoolId);
-    const [{ n }] = await tx.select({ n: count() }).from(enrollments).where(enrolledIn(classId));
+    const roster = await tx
+      .select({
+        enrollmentId: enrollments.id,
+        lastName: students.lastName,
+        firstNames: students.firstNames,
+      })
+      .from(enrollments)
+      .innerJoin(students, eq(students.id, enrollments.studentId))
+      .where(enrolledIn(classId))
+      .orderBy(asc(students.lastName), asc(students.firstNames));
     const list = await tx
       .select({
         id: assessments.id,
@@ -256,13 +267,73 @@ export async function getCourse(
       periods: yearPeriods,
       currentPeriodId: currentPeriod(yearPeriods, todayInBrazzaville()),
       defaultMaxScore: primary ? rules.primaryScale : 20,
-      studentCount: n,
+      studentCount: roster.length,
+      students: roster,
       assessments: list,
     };
   });
 }
 
-// --- Ã‰valuations ----------------------------------------------------------------------------
+export type CourseSheet = {
+  assessmentId: string;
+  periodId: string;
+  kind: AssessmentKind;
+  title: string | null;
+  date: string;
+  maxScore: number;
+  /** Texte de chaque case enregistrée, par inscription (12,5 ; « a » ; « d »). */
+  values: Record<string, string>;
+};
+
+/**
+ * Toutes les évaluations d'une matière avec leurs notes, en une fois : copie gardée sur le téléphone
+ * pour la saisie hors connexion (3c). Rien pour une année archivée (plus de saisie possible).
+ */
+export async function getCourseSheets(
+  principal: Principal,
+  classId: string,
+  subjectId: string,
+): Promise<CourseSheet[]> {
+  const ctx = gradingContext(principal, "grades:write");
+  return withSchool(ctx, async (tx) => {
+    const course = await loadCourse(tx, ctx, classId, subjectId);
+    if (course.yearStatus === "archived") return [];
+    const list = await tx
+      .select({
+        assessmentId: assessments.id,
+        periodId: assessments.periodId,
+        kind: assessments.kind,
+        title: assessments.title,
+        date: assessments.date,
+        maxScore: assessments.maxScore,
+      })
+      .from(assessments)
+      .where(and(eq(assessments.classId, classId), eq(assessments.subjectId, subjectId)))
+      .orderBy(desc(assessments.date), desc(assessments.createdAt));
+    if (list.length === 0) return [];
+    const stored = await tx
+      .select({
+        assessmentId: grades.assessmentId,
+        enrollmentId: grades.enrollmentId,
+        status: grades.status,
+        score: grades.score,
+      })
+      .from(grades)
+      .where(
+        inArray(
+          grades.assessmentId,
+          list.map((a) => a.assessmentId),
+        ),
+      );
+    const values = new Map<string, Record<string, string>>(list.map((a) => [a.assessmentId, {}]));
+    for (const g of stored) {
+      values.get(g.assessmentId)![g.enrollmentId] = formatGradeValue(gradeValueOf(g));
+    }
+    return list.map((a) => ({ ...a, values: values.get(a.assessmentId)! }));
+  });
+}
+
+// --- Évaluations ----------------------------------------------------------------------------
 
 type ParsedAssessment = z.output<typeof AssessmentInputSchema>;
 
@@ -272,7 +343,7 @@ function parseAssessment(input: unknown): ParsedAssessment {
   return parsed.data;
 }
 
-/** La pÃ©riode est de l'annÃ©e de la classe et la date tombe dans l'annÃ©e (hypothÃ¨se H75). */
+/** La période est de l'année de la classe et la date tombe dans l'année (hypothèse H75). */
 async function checkPeriodAndDate(
   tx: Tx,
   course: Pick<CourseRow, "academicYearId" | "yearStart" | "yearEnd">,
@@ -289,8 +360,8 @@ async function checkPeriodAndDate(
 }
 
 /**
- * CrÃ©e une Ã©valuation dans l'annÃ©e active. L'identifiant peut venir du tÃ©lÃ©phone (saisie hors
- * connexion) : renvoyer la mÃªme Ã©valuation deux fois ne la crÃ©e qu'une fois.
+ * Crée une évaluation dans l'année active. L'identifiant peut venir du téléphone (saisie hors
+ * connexion) : renvoyer la même évaluation deux fois ne la crée qu'une fois.
  */
 export async function createAssessment(
   principal: Principal,
@@ -342,7 +413,7 @@ type AssessmentRow = {
   yearEnd: string;
 };
 
-/** Ã‰valuation d'une matiÃ¨re que le lecteur peut noter (sinon : introuvable). */
+/** Évaluation d'une matière que le lecteur peut noter (sinon : introuvable). */
 async function loadAssessment(tx: Tx, ctx: Ctx, assessmentId: string): Promise<AssessmentRow> {
   if (!isUuid(assessmentId)) throw new GradingError("assessmentNotFound");
   const [row] = await tx
@@ -382,7 +453,7 @@ async function loadAssessment(tx: Tx, ctx: Ctx, assessmentId: string): Promise<A
   return row;
 }
 
-/** Modifie une Ã©valuation ; le barÃ¨me ne descend pas sous une note dÃ©jÃ  saisie. */
+/** Modifie une évaluation ; le barème ne descend pas sous une note déjà saisie. */
 export async function updateAssessment(
   principal: Principal,
   assessmentId: string,
@@ -409,7 +480,7 @@ export async function updateAssessment(
   );
 }
 
-/** Supprime une Ã©valuation et ses notes ; si des notes existaient, la suppression est tracÃ©e. */
+/** Supprime une évaluation et ses notes ; si des notes existaient, la suppression est tracée. */
 export async function deleteAssessment(principal: Principal, assessmentId: string): Promise<void> {
   const ctx = gradingContext(principal, "assessments:manage");
   await guarded(() =>
@@ -442,9 +513,9 @@ export type GradeSheetRow = {
   matricule: string;
   lastName: string;
   firstNames: string;
-  /** Texte de la case (12,5 ; Â« a Â» ; Â« d Â» ; vide). */
+  /** Texte de la case (12,5 ; « a » ; « d » ; vide). */
   value: string;
-  /** Faux pour un Ã©lÃ¨ve parti ou changÃ© de classe : sa note reste visible, sans modification. */
+  /** Faux pour un élève parti ou changé de classe : sa note reste visible, sans modification. */
   editable: boolean;
 };
 
@@ -462,7 +533,7 @@ async function storedGrades(tx: Tx, assessmentId: string, lock = false): Promise
   return lock ? query.for("update") : query;
 }
 
-/** Ã‰lÃ¨ves de la classe, par ordre alphabÃ©tique, avec leur note ; puis les anciens Ã©lÃ¨ves notÃ©s. */
+/** Élèves de la classe, par ordre alphabétique, avec leur note ; puis les anciens élèves notés. */
 export async function getGradeSheet(
   principal: Principal,
   assessmentId: string,
@@ -520,24 +591,24 @@ export async function getGradeSheet(
 
 export type GradeEntry = {
   enrollmentId: string;
-  /** Valeur de la case au moment oÃ¹ la grille a Ã©tÃ© ouverte. */
+  /** Valeur de la case au moment où la grille a été ouverte. */
   expected: string;
   /** Valeur saisie. */
   value: string;
 };
 
 export type SaveGradesResult = {
-  /** Cases enregistrÃ©es. */
+  /** Cases enregistrées. */
   saved: number;
-  /** Cases illisibles : rien n'est enregistrÃ© tant qu'il en reste. */
+  /** Cases illisibles : rien n'est enregistré tant qu'il en reste. */
   problems: { enrollmentId: string; problem: GradeInputProblem }[];
-  /** Notes changÃ©es entre-temps par quelqu'un d'autre : laissÃ©es telles quelles, valeur actuelle. */
+  /** Notes changées entre-temps par quelqu'un d'autre : laissées telles quelles, valeur actuelle. */
   conflicts: { enrollmentId: string; current: string }[];
 };
 
 /**
- * Enregistre les cases modifiÃ©es d'une feuille de notes. Une case dont la note a changÃ© en base depuis
- * l'ouverture de la grille n'est pas Ã©crasÃ©e : elle est rendue comme conflit avec sa valeur actuelle.
+ * Enregistre les cases modifiées d'une feuille de notes. Une case dont la note a changé en base depuis
+ * l'ouverture de la grille n'est pas écrasée : elle est rendue comme conflit avec sa valeur actuelle.
  */
 export async function saveGrades(
   principal: Principal,
@@ -556,7 +627,7 @@ export async function saveGrades(
           problems.push({ enrollmentId: entry.enrollmentId, problem: value.problem });
           continue;
         }
-        // Valeur d'origine : produite par le serveur ; illisible = traitÃ©e comme une case vide.
+        // Valeur d'origine : produite par le serveur ; illisible = traitée comme une case vide.
         const expected = parseGradeInput(entry.expected, 100);
         const before: GradeValue = expected.ok ? expected.value : { status: "empty" };
         if (!sameGradeValue(before, value.value)) {
@@ -574,7 +645,7 @@ export async function saveGrades(
       if (changes.some((c) => !allowed.has(c.enrollmentId))) {
         throw new GradingError("studentNotInClass");
       }
-      // Notes actuelles verrouillÃ©es jusqu'Ã  la fin de la transaction (deux saisies simultanÃ©es).
+      // Notes actuelles verrouillées jusqu'à la fin de la transaction (deux saisies simultanées).
       const current = new Map(
         (await storedGrades(tx, assessmentId, true)).map((g) => [g.enrollmentId, g]),
       );
@@ -582,7 +653,7 @@ export async function saveGrades(
       let saved = 0;
       for (const change of changes) {
         const now = gradeValueOf(current.get(change.enrollmentId));
-        if (sameGradeValue(now, change.value)) continue; // dÃ©jÃ  la valeur voulue
+        if (sameGradeValue(now, change.value)) continue; // déjà la valeur voulue
         if (!sameGradeValue(now, change.expected)) {
           conflicts.push({ enrollmentId: change.enrollmentId, current: formatGradeValue(now) });
           continue;

@@ -119,19 +119,23 @@ Règles tranchées par le porteur : décision D10 (`docs/plan-phase-3.md`). Hypo
 
 | # | Hypothèse | Où | Statut |
 |---|---|---|---|
-| H69 | Collège et lycée toujours notés **sur 20** ; primaire et préscolaire sur 20 par défaut, réglable **sur 10** par l'école | 3a | ⏳ |
-| H70 | Trois types d'évaluation fixes : **interrogation, devoir, composition** ; interrogations et devoirs forment ensemble la « moyenne des devoirs » | 3a, 3b | ⏳ |
-| H71 | Mentions automatiques par défaut : **Félicitations ≥ 16, Encouragements ≥ 14, Tableau d'honneur ≥ 12** ; avertissement et blâme ne sont jamais automatiques (conseil de classe) | 3a | ⏳ |
-| H72 | Barème sur 10 : seuils des mentions divisés par 2 ; matière facultative = points au-dessus de la moitié du barème (5 sur 10) | 3a | ⏳ |
-| H73 | Un changement de règles vaut pour les calculs suivants ; un bulletin déjà publié garde ses moyennes ; chaque changement est noté dans le journal | 3a | ⏳ |
-| H74 | Une matière est déclarée facultative dans la grille des coefficients (par niveau + série), et la copie d'année reprend ce choix | 3a | ⏳ |
-| H75 | La date d'une évaluation doit tomber dans l'année scolaire ; la période est choisie par l'enseignant (par défaut : celle du jour), sans obligation que la date soit dans cette période | 3b | ⏳ |
-| H76 | Barème d'une évaluation : entier de 1 à 100, proposé sur 20 (sur 10 au primaire si l'école l'a choisi) ; notes avec deux décimales au plus (12,25) | 3b | ⏳ |
-| H77 | Le directeur crée des évaluations et saisit les notes de toutes les matières ; un professeur principal ne note que les matières qu'il enseigne lui-même | 3b | ⏳ |
-| H78 | Les évaluations se créent seulement dans l'année active ; l'enseignant modifie ou supprime les siennes jusqu'au verrouillage de la période (3d) ; supprimer une évaluation qui a des notes est noté dans le journal | 3b | ⏳ |
-| H79 | Seuls les élèves inscrits dans la classe sont notés ; un élève parti ou changé de classe garde ses notes, visibles mais plus modifiables | 3b | ⏳ |
-| H80 | Une matière qui a des évaluations ne peut pas être retirée de la grille des coefficients (supprimer d'abord les évaluations) | 3b | ⏳ |
-| H81 | Saisies simultanées : une note changée par quelqu'un d'autre pendant la saisie n'est pas remplacée ; l'utilisateur voit la valeur actuelle et enregistre à nouveau s'il veut garder la sienne | 3b | ⏳ |
+| H69 | Collège et lycée toujours notés **sur 20** ; primaire et préscolaire sur 20 par défaut, réglable **sur 10** par l'école | 3a | ✅ |
+| H70 | Trois types d'évaluation fixes : **interrogation, devoir, composition** ; interrogations et devoirs forment ensemble la « moyenne des devoirs » | 3a, 3b | ✅ |
+| H71 | Mentions automatiques par défaut : **Félicitations ≥ 16, Encouragements ≥ 14, Tableau d'honneur ≥ 12** ; avertissement et blâme ne sont jamais automatiques (conseil de classe) | 3a | ✅ |
+| H72 | Barème sur 10 : seuils des mentions divisés par 2 ; matière facultative = points au-dessus de la moitié du barème (5 sur 10) | 3a | ✅ |
+| H73 | Un changement de règles vaut pour les calculs suivants ; un bulletin déjà publié garde ses moyennes ; chaque changement est noté dans le journal | 3a | ✅ |
+| H74 | Une matière est déclarée facultative dans la grille des coefficients (par niveau + série), et la copie d'année reprend ce choix | 3a | ✅ |
+| H75 | La date d'une évaluation doit tomber dans l'année scolaire ; la période est choisie par l'enseignant (par défaut : celle du jour), sans obligation que la date soit dans cette période | 3b | ✅ |
+| H76 | Barème d'une évaluation : entier de 1 à 100, proposé sur 20 (sur 10 au primaire si l'école l'a choisi) ; notes avec deux décimales au plus (12,25) | 3b | ✅ |
+| H77 | Le directeur crée des évaluations et saisit les notes de toutes les matières ; un professeur principal ne note que les matières qu'il enseigne lui-même | 3b | ✅ |
+| H78 | Les évaluations se créent seulement dans l'année active ; l'enseignant modifie ou supprime les siennes jusqu'au verrouillage de la période (3d) ; supprimer une évaluation qui a des notes est noté dans le journal | 3b | ✅ |
+| H79 | Seuls les élèves inscrits dans la classe sont notés ; un élève parti ou changé de classe garde ses notes, visibles mais plus modifiables | 3b | ✅ |
+| H80 | Une matière qui a des évaluations ne peut pas être retirée de la grille des coefficients (supprimer d'abord les évaluations) | 3b | ✅ |
+| H81 | Saisies simultanées : une note changée par quelqu'un d'autre pendant la saisie n'est pas remplacée ; l'utilisateur voit la valeur actuelle et enregistre à nouveau s'il veut garder la sienne | 3b | ✅ |
+| H82 | Sans réseau, la saisie se fait dans la page « Notes hors connexion » (ouverte d'elle-même quand une page ne charge pas) ; seules les matières ouvertes au moins une fois avec du réseau sur ce téléphone y sont disponibles (élèves, évaluations et notes du moment) | 3c | ✅ |
+| H83 | Les copies sont rangées par compte sur le téléphone ; à la déconnexion, les copies (noms d'élèves, notes) sont effacées, mais pas les saisies encore en attente d'envoi | 3c | ✅ |
+| H84 | Envoi automatique à l'ouverture d'une page, au retour du réseau, puis toutes les 30 s tant qu'il reste des saisies ; une note en conflit n'est jamais envoyée d'elle-même : l'enseignant choisit « garder ma note » ou « garder la note actuelle » | 3c | ✅ |
+| H85 | Une évaluation créée sur le téléphone puis refusée à l'envoi (ex. année changée, matière retirée) reste sur le téléphone avec le motif, ses notes aussi ; l'enseignant peut la supprimer du téléphone | 3c | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/build-sw.mts",
     "start": "next start",
     "lint": "next typegen && eslint && tsc --noEmit",
     "format": "prettier --write .",
@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
+    "dexie": "4.4.7",
+    "dexie-react-hooks": "^4.4.0",
     "drizzle-orm": "0.45.4",
     "exceljs": "^4.4.0",
     "next": "16.4.6",
@@ -32,6 +34,7 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
+    "serwist": "9.5.15",
     "tsx": "^4.23.15",
     "zod": "^4.6.7"
   },
@@ -44,8 +47,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "0.31.11",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "fake-indexeddb": "^6.2.8",
     "prettier": "^3.10.1",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "4.3.3",

@@ -4,12 +4,19 @@ import { Suspense } from "react";
 import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
 import { formatDay, todayInBrazzaville } from "@/lib/dates";
-import { getCourse, type CourseDetail } from "@/modules/grading/assessments";
+import {
+  getCourse,
+  getCourseSheets,
+  type CourseDetail,
+  type CourseSheet,
+} from "@/modules/grading/assessments";
 import { GradingError } from "@/modules/grading/errors";
 import { can } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
 import { refusalMessage } from "@/server/forms";
 import { CreateAssessmentForm } from "../../assessment-forms";
+import { CourseCopy } from "../../offline/course-copy";
+import { SyncStatus } from "../../offline/sync-status";
 
 export const metadata: Metadata = { title: t("grading.title") };
 
@@ -34,8 +41,12 @@ async function Content({ params, searchParams }: Props) {
   const { principal } = await requireAction("grades:write");
   const { classId, subjectId } = await params;
   let course: CourseDetail;
+  let sheets: CourseSheet[];
   try {
-    course = await getCourse(principal, classId, subjectId);
+    [course, sheets] = await Promise.all([
+      getCourse(principal, classId, subjectId),
+      getCourseSheets(principal, classId, subjectId),
+    ]);
   } catch (error) {
     if (error instanceof GradingError) return <p role="alert">{refusalMessage(error)}</p>;
     throw error;
@@ -46,12 +57,42 @@ async function Content({ params, searchParams }: Props) {
     course.periods.find((p) => p.id === course.currentPeriodId);
   const shown = course.assessments.filter((a) => a.periodId === period?.id);
   const canCreate = can(principal, "assessments:manage") && course.yearStatus === "active";
+  const owner = `${principal.schoolId}:${principal.userId}`;
+  const offlineReady = course.yearStatus === "active" && course.periods.length > 0;
 
   return (
     <>
       <h1 className="text-2xl font-semibold">
         {t("grading.courseTitle", { matiere: course.subjectName, classe: course.className })}
       </h1>
+      {offlineReady && (
+        <>
+          <CourseCopy
+            owner={owner}
+            course={{
+              classId: course.classId,
+              subjectId: course.subjectId,
+              className: course.className,
+              subjectName: course.subjectName,
+              periods: course.periods,
+              currentPeriodId: course.currentPeriodId,
+              defaultMaxScore: course.defaultMaxScore,
+              students: course.students,
+            }}
+            sheets={sheets}
+          />
+          <SyncStatus owner={owner} />
+          <p className="text-sm text-zinc-600">
+            {t("offline.courseReady")}{" "}
+            <Link
+              href={`/notes/hors-ligne#c=${course.classId}.${course.subjectId}`}
+              className="text-blue-800 underline"
+            >
+              {t("offline.openOffline")}
+            </Link>
+          </p>
+        </>
+      )}
       {course.periods.length === 0 ? (
         <p>{t("grading.noPeriod")}</p>
       ) : (

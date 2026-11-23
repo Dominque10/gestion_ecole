@@ -9,7 +9,8 @@ import { can } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
 import { refusalMessage } from "@/server/forms";
 import { DeleteAssessmentForm, EditAssessmentForm } from "../../assessment-forms";
-import { GradeGrid } from "./grade-grid";
+import { GradeGrid } from "../../grade-grid";
+import { SyncStatus } from "../../offline/sync-status";
 
 export const metadata: Metadata = { title: t("grading.title") };
 
@@ -48,6 +49,7 @@ async function Content({ params }: Props) {
   }
   const writable = sheet.yearStatus !== "archived";
   const canManage = writable && can(principal, "assessments:manage");
+  const owner = `${principal.schoolId}:${principal.userId}`;
 
   return (
     <>
@@ -75,16 +77,37 @@ async function Content({ params }: Props) {
         </p>
       </div>
 
+      {writable && <SyncStatus owner={owner} />}
+
       {sheet.rows.length === 0 ? (
         <p>{t("grading.noStudents")}</p>
       ) : (
         <GradeGrid
           // La grille repart des valeurs enregistrées si l'évaluation change (barème, etc.).
           key={`${sheet.id}-${sheet.maxScore}`}
+          owner={owner}
           assessmentId={sheet.id}
           maxScore={sheet.maxScore}
-          rows={sheet.rows}
+          rows={sheet.rows.map((r) => ({
+            enrollmentId: r.enrollmentId,
+            name: `${r.lastName} ${r.firstNames}`,
+            editable: r.editable,
+          }))}
           readOnly={!writable}
+          serverSheet={{
+            owner,
+            assessmentId: sheet.id,
+            classId: sheet.classId,
+            subjectId: sheet.subjectId,
+            periodId: sheet.periodId,
+            kind: sheet.kind,
+            title: sheet.title,
+            date: sheet.date,
+            maxScore: sheet.maxScore,
+            values: Object.fromEntries(
+              sheet.rows.filter((r) => r.value !== "").map((r) => [r.enrollmentId, r.value]),
+            ),
+          }}
         />
       )}
 

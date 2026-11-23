@@ -994,6 +994,50 @@ export const fr = {
       outOfRange: "Note au-dessus du barème.",
     },
   },
+  offline: {
+    title: "Notes hors connexion",
+    onlineNotes: "Notes (avec réseau)",
+    noOwner:
+      "Aucune donnée sur ce téléphone. Connectez-vous une première fois avec du réseau et ouvrez vos matières dans « Notes ».",
+    noCourse:
+      "Aucune matière gardée sur ce téléphone. Avec du réseau, ouvrez une matière dans « Notes » : elle sera ensuite disponible ici, même sans réseau.",
+    homeIntro:
+      "Ces matières sont gardées sur ce téléphone. Vos notes y sont enregistrées et partiront toutes seules au retour du réseau.",
+    copiedOn: "Copie du {date}",
+    backHome: "Toutes les matières du téléphone",
+    notOnPhone:
+      "Cette évaluation n'est pas sur ce téléphone. Ouvrez la matière une fois avec du réseau.",
+    courseReady: "Cette matière est gardée sur ce téléphone.",
+    openOffline: "Saisir sans réseau",
+    assessmentNotSent: "Créée sur ce téléphone, pas encore envoyée",
+    assessmentNotSentLong:
+      "Évaluation créée sur ce téléphone : elle sera envoyée avec ses notes au retour du réseau.",
+    assessmentRefused: "Refusée par le serveur : à vérifier",
+    assessmentRefusedReason:
+      "Le serveur a refusé cette évaluation : {motif} Ses notes restent sur ce téléphone.",
+    discardAssessment: "Supprimer cette évaluation du téléphone",
+    discardAssessmentConfirm:
+      "Supprimer cette évaluation et ses notes de ce téléphone ? Elles ne seront pas envoyées.",
+    savedOnPhone:
+      "{n} note(s) enregistrée(s) sur ce téléphone. Elles partiront toutes seules au retour du réseau.",
+    cellPending: "Enregistrée sur le téléphone, en attente d'envoi",
+    cellConflict:
+      "Changée sur le serveur pendant votre saisie. Votre note : {mienne} ; note actuelle : {actuelle}.",
+    cellRefused: "Refusée par le serveur : {motif}",
+    keepMine: "Garder ma note ({valeur})",
+    keepCurrent: "Garder la note actuelle ({valeur})",
+    discard: "Annuler ma saisie",
+    sendNow: "Envoyer maintenant",
+    status: {
+      waiting: "{n} saisie(s) en attente d'envoi.",
+      sending: "Envoi de {n} saisie(s)…",
+      offline:
+        "Pas de réseau : {n} saisie(s) gardée(s) sur ce téléphone. Elles partiront toutes seules au retour du réseau.",
+      toCheck: "{n} note(s) à vérifier : voir les cases signalées.",
+      session:
+        "Votre session a expiré : reconnectez-vous pour envoyer les saisies gardées sur ce téléphone.",
+    },
+  },
   lists: {
     title: "Listes de classe",
     intro: "Listes et cartes scolaires des classes de l'année, en PDF à imprimer.",

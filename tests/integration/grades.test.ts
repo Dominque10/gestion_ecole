@@ -8,6 +8,7 @@ import {
   createAssessment,
   deleteAssessment,
   getCourse,
+  getCourseSheets,
   getGradeSheet,
   listCourses,
   saveGrades,
@@ -192,6 +193,7 @@ describe("Matières à noter", () => {
       yearStatus: "active",
     });
     expect(course.periods).toHaveLength(3);
+    expect(course.students.map((s) => s.lastName)).toEqual(["BATSIMBA", "KOUBA", "NGOMA"]);
     await expectGradingError(getCourse(teacher(mathsTeacher), sixA, french), "courseNotFound");
     await expectGradingError(getCourse(teacher(mathsTeacher), sixB, maths), "courseNotFound");
   });
@@ -321,6 +323,25 @@ describe("Évaluations", () => {
       expect(await valueOf(director(), assessment, pupils[2])).toBe("");
     });
 
+    it("copie pour le téléphone : toutes les évaluations de la matière avec leurs notes", async () => {
+      const sheets = await getCourseSheets(teacher(mathsTeacher), sixA, maths);
+      expect(sheets).toEqual([
+        {
+          assessmentId: assessment,
+          periodId: period1,
+          kind: "quiz",
+          title: "Fractions",
+          date: "2026-11-05",
+          maxScore: 20,
+          values: { [pupils[0]]: "13", [pupils[1]]: "9,75" },
+        },
+      ]);
+      await expectGradingError(
+        getCourseSheets(teacher(frenchTeacher), sixA, maths),
+        "courseNotFound",
+      );
+    });
+
     it("refuse un élève d'une autre classe", async () => {
       await expectGradingError(
         saveGrades(director(), assessment, [{ enrollmentId: outsider, expected: "", value: "10" }]),
@@ -423,6 +444,7 @@ describe("Évaluations", () => {
       await expectGradingError(createAssessment(director(), sixA, maths, quiz()), "yearNotActive");
       expect((await getGradeSheet(director(), assessment)).yearStatus).toBe("archived");
       expect(await listCourses(teacher(mathsTeacher))).toEqual([]);
+      expect(await getCourseSheets(director(), sixA, maths)).toEqual([]);
     });
   });
 });

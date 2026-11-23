@@ -34,6 +34,9 @@ async function Content() {
   return (
     <>
       <p>{t(director ? "grading.intro" : "grading.introTeacher")}</p>
+      <Link href="/notes/hors-ligne" className="text-blue-800 underline">
+        {t("offline.title")}
+      </Link>
       {[...byClass.values()].map((list) => (
         <section key={list[0].classId} className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold">{list[0].className}</h2>

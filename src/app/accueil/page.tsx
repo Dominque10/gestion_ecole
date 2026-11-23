@@ -5,7 +5,7 @@ import { getSetupStatus } from "@/modules/settings/setup-status";
 import { canBrowseStudents } from "@/modules/students/students";
 import { can, type Action, type Principal } from "@/server/auth/permissions";
 import { requireSession } from "@/server/auth/session";
-import { logoutAction } from "./actions";
+import { LogoutButton } from "./logout-button";
 
 export default function HomePage() {
   return (
@@ -90,11 +90,7 @@ async function Welcome() {
           ))}
         </nav>
       )}
-      <form action={logoutAction}>
-        <button type="submit" className="h-12 rounded-md border border-zinc-400 px-4 font-medium">
-          {t("session.logout")}
-        </button>
-      </form>
+      <LogoutButton />
     </>
   );
 }

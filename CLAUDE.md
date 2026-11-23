@@ -37,6 +37,10 @@ Contraintes du terrain à garder en tête en permanence :
     (`/absences`) ; hypothèses H91 à H96 validées (D16). Appel de 60 élèves vérifié en E2E (bien sous la minute).
   - ✅ 3f – Conseil de classe (`council.ts`, table `report_cards`) : appréciations par matière et générale,
     mention, décision de fin d'année, totaux d'absences ; validation après clôture ; hypothèses H97 à H101 validées (D17)
+  - ✅ 3g – Bulletins PDF (`bulletins.ts`, gabarit `bulletin-template.ts`) : projet, publication avec photographie,
+    bulletin annuel ; 50 bulletins en < 1 s (critère : 30 s) ; hypothèses H102 à H106 à valider
+  - **Jalon de la Phase 3 à valider** : moyennes conformes aux cas de référence du porteur (toujours attendus),
+    50 bulletins < 30 s ✅, appel de 60 élèves < 1 min ✅
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
@@ -187,6 +191,10 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   annuelle (`kind`). Appréciations de matière dans `subject_comments` (jsonb, une clé par matière, mise à jour
   atomique `jsonb_set`). Validation (`reportcards:council`) seulement après clôture ; mention vide = proposée.
   Totaux d'absences : `src/modules/attendance/totals.ts` (en créneaux).
+- **Mise en œuvre (3g)** : `src/modules/grading/bulletins.ts` construit les bulletins (`build`) ; `publishBulletins`
+  (`reportcards:publish`, conseil validé) écrit `report_cards.snapshot` + `published_at` (contrainte en base) ;
+  `getBulletins` rend les photographies si tout est publié, sinon un projet. Rouvrir le conseil retire la
+  publication. PDF : document `bulletins` (worker), gabarit `src/modules/documents/bulletin-template.ts`.
 
 ### Appel et SMS
 - **Mise en œuvre (3e)** : `src/modules/attendance/` ; `attendance` garde une ligne par élève, jour et créneau

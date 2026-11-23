@@ -90,4 +90,12 @@ test("appréciations de la matière, conseil de classe, clôture puis validation
   await expect(page.locator("li", { hasText: "BOB Test" }).first()).toContainText("Avertissement");
   await expect(page.getByRole("button", { name: "Enregistrer le conseil" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Rouvrir le conseil" })).toBeVisible();
+
+  // 5. Publication des bulletins, puis téléchargement du PDF de la classe.
+  page.once("dialog", (dialog) => void dialog.accept());
+  await page.getByRole("button", { name: "Publier les bulletins" }).click();
+  await expect(page.getByText(/Bulletins publiés le/)).toBeVisible();
+  const download = page.waitForEvent("download", { timeout: 60_000 });
+  await page.getByRole("button", { name: "Télécharger les bulletins (PDF)" }).click();
+  expect((await download).suggestedFilename()).toBe("bulletins-6e-A-Trimestre-1.pdf");
 });

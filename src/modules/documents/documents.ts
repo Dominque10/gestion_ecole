@@ -24,6 +24,8 @@ import {
 } from "./school-templates";
 import { getStorage } from "@/server/storage";
 import { imageTypeFromKey } from "@/server/storage/images";
+import { getBulletins, type BulletinSet } from "@/modules/grading/bulletins";
+import { bulletinsHtml } from "./bulletin-template";
 import { htmlToPdf } from "./pdf";
 import { receiptHtml } from "./receipt-template";
 import { receiptVerifyUrl } from "./verification";
@@ -36,6 +38,12 @@ export const DocumentRequestSchema = z.discriminatedUnion("kind", [
     kind: z.literal("certificate"),
     enrollmentId: z.uuid(),
     type: z.enum(["schooling", "radiation"]),
+  }),
+  // Bulletins d'une classe (3g) : période (identifiant) ou année (« annee »).
+  z.object({
+    kind: z.literal("bulletins"),
+    classId: z.uuid(),
+    periodKey: z.union([z.uuid(), z.literal("annee")]),
   }),
 ]);
 export type DocumentRequest = z.infer<typeof DocumentRequestSchema>;
@@ -74,7 +82,14 @@ export async function checkDocumentRequest(
       assertCertificateType(certificate, data.type);
       return certificateFileName(certificate, data.type);
     }
+    case "bulletins":
+      return bulletinsFileName(await getBulletins(principal, data.classId, data.periodKey));
   }
+}
+
+function bulletinsFileName(set: BulletinSet): string {
+  const what = set.annual ? "annuel" : slug(set.periodLabel);
+  return `bulletins-${slug(set.className)}-${what}${set.published ? "" : "-projet"}.pdf`;
 }
 
 /** Nom de fichier sûr : lettres et chiffres sans accents, tirets. */
@@ -186,6 +201,14 @@ export async function renderDocument(raw: unknown): Promise<RenderedDocument> {
         todayInBrazzaville(),
       );
       return pdfResult(certificateFileName(data, job.request.type), html);
+    }
+    case "bulletins": {
+      const set = await getBulletins(principal, job.request.classId, job.request.periodKey);
+      const html = bulletinsHtml(await schoolHeader(principal), set.bulletins, {
+        draft: !set.published,
+        printedOn: set.publishedAt ? set.publishedAt.toISOString() : todayInBrazzaville(),
+      });
+      return pdfResult(bulletinsFileName(set), html);
     }
   }
 }

@@ -21,6 +21,7 @@ export type GradingErrorCode =
   | "decisionMissing"
   | "mentionInvalid"
   | "decisionInvalid"
+  | "councilNotValidated"
   | GradeInputProblem;
 
 export class GradingError extends Error {

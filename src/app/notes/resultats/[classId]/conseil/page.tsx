@@ -15,7 +15,13 @@ import { GradingError } from "@/modules/grading/errors";
 import { can } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
 import { refusalMessage } from "@/server/forms";
-import { CouncilForm, ReopenCouncilForm, ValidateCouncilForm } from "../../../council-forms";
+import { DownloadPdfButton } from "@/components/download-pdf-button";
+import {
+  CouncilForm,
+  PublishBulletinsForm,
+  ReopenCouncilForm,
+  ValidateCouncilForm,
+} from "../../../council-forms";
 
 export const metadata: Metadata = { title: t("council.title") };
 
@@ -109,6 +115,25 @@ async function Content({ params, searchParams }: Props) {
           <ValidateCouncilForm hidden={hidden} className={council.className} />
         )}
         {decides && locked && <ReopenCouncilForm hidden={hidden} />}
+      </section>
+
+      <section className="flex flex-col gap-3 rounded-md border border-zinc-300 p-4">
+        <h2 className="text-lg font-semibold">{t("bulletins.title")}</h2>
+        <p>
+          {council.publishedAt
+            ? t("bulletins.statePublished", { date: formatDateTime(council.publishedAt) })
+            : locked
+              ? t("bulletins.stateReady")
+              : t("bulletins.stateDraft")}
+        </p>
+        {locked && !council.publishedAt && can(principal, "reportcards:publish") && (
+          <PublishBulletinsForm hidden={hidden} className={council.className} />
+        )}
+        <DownloadPdfButton
+          request={{ kind: "bulletins", classId, periodKey: council.periodKey }}
+          label={t(council.publishedAt ? "bulletins.download" : "bulletins.downloadDraft")}
+          variant={council.publishedAt ? "primary" : "secondary"}
+        />
       </section>
 
       {council.students.length === 0 ? (

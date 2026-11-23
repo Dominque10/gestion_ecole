@@ -12,6 +12,7 @@ import {
   type CouncilEntry,
   type Decision,
 } from "@/modules/grading/council";
+import { publishBulletins } from "@/modules/grading/bulletins";
 import { can } from "@/server/auth/permissions";
 import { requireAction } from "@/server/auth/session";
 import { refusalMessage } from "@/server/forms";
@@ -121,4 +122,23 @@ export async function reopenCouncilAction(
   }
   refresh();
   return state("success", t("council.reopened"));
+}
+
+export async function publishBulletinsAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("reportcards:publish");
+  let count: number;
+  try {
+    count = await publishBulletins(
+      principal,
+      String(formData.get("classe") ?? ""),
+      String(formData.get("periode") ?? ""),
+    );
+  } catch (error) {
+    return state("error", refusalMessage(error));
+  }
+  refresh();
+  return state("success", t("bulletins.published", { n: count }));
 }

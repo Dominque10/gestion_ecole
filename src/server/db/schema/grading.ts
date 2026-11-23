@@ -195,6 +195,11 @@ export const reportCards = pgTable(
     decision: councilDecision("decision"),
     councilValidatedAt: timestamp("council_validated_at", { withTimezone: true }),
     councilValidatedBy: uuid("council_validated_by").references(() => users.id),
+    /** Publication du bulletin (3g) : disponible pour l'espace parents (M6). */
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    publishedBy: uuid("published_by").references(() => users.id),
+    /** Photographie du bulletin au moment de la publication (moyennes, rang, appréciations…). */
+    snapshot: jsonb("snapshot"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

@@ -1016,6 +1016,8 @@ export const fr = {
       decisionMissing: "Choisissez une décision pour chaque élève avant de valider le conseil.",
       mentionInvalid: "Mention invalide.",
       decisionInvalid: "Décision invalide (elle se prend seulement sur la fiche de l'année).",
+      councilNotValidated:
+        "Validez d'abord le conseil de classe : les bulletins se publient ensuite.",
       unreadable: "Note illisible.",
       outOfRange: "Note au-dessus du barème.",
     },
@@ -1138,6 +1140,20 @@ export const fr = {
     lockedComments: "Le conseil de classe est validé : les appréciations ne se modifient plus.",
     saveComments: "Enregistrer les appréciations",
     commentsSaved: "Appréciations enregistrées.",
+  },
+  bulletins: {
+    title: "Bulletins",
+    stateDraft:
+      "Les bulletins seront publiables une fois le conseil validé. Vous pouvez déjà télécharger un projet pour relecture.",
+    stateReady: "Conseil validé : le directeur peut publier les bulletins.",
+    statePublished:
+      "Bulletins publiés le {date}. Pour corriger : rouvrir le conseil (la publication est retirée), puis publier à nouveau.",
+    publish: "Publier les bulletins",
+    publishConfirm:
+      "Publier les bulletins de la {classe} ? Ils seront figés tels quels et disponibles pour les parents.",
+    published: "{n} bulletin(s) publié(s).",
+    download: "Télécharger les bulletins (PDF)",
+    downloadDraft: "Télécharger le projet de bulletins (PDF)",
   },
   results: {
     title: "Résultats et clôture",

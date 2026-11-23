@@ -5,6 +5,7 @@ import { FormMessage, SubmitButton } from "@/components/form-fields";
 import { t } from "@/i18n";
 import { idleFormState, type FormState } from "@/lib/form-state";
 import {
+  publishBulletinsAction,
   reopenCouncilAction,
   saveCouncilAction,
   saveSubjectCommentsAction,
@@ -97,6 +98,23 @@ export function ReopenCouncilForm({ hidden }: { hidden: Record<string, string> }
       hidden={hidden}
       label={t("council.reopen")}
       variant="secondary"
+    />
+  );
+}
+
+export function PublishBulletinsForm({
+  hidden,
+  className,
+}: {
+  hidden: Record<string, string>;
+  className: string;
+}) {
+  return (
+    <ActionForm
+      action={publishBulletinsAction}
+      hidden={hidden}
+      label={t("bulletins.publish")}
+      confirm={t("bulletins.publishConfirm", { classe: className })}
     />
   );
 }

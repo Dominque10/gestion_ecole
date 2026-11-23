@@ -19,7 +19,7 @@ import {
 import { dbGuardCode } from "@/modules/settings/errors";
 import { attendanceTotals, type AttendanceTotals } from "@/modules/attendance/totals";
 import { closureState } from "./assessments";
-import { computeAnnualResults, mentionFor } from "./averages";
+import { computeAnnualResults, mentionFor, type PeriodResults } from "./averages";
 import { GradingError } from "./errors";
 import {
   loadClass,
@@ -50,7 +50,7 @@ async function guarded<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-type PeriodRow = {
+export type PeriodRow = {
   id: string;
   label: string;
   position: number;
@@ -58,7 +58,7 @@ type PeriodRow = {
   endDate: string;
 };
 
-async function yearPeriods(tx: Tx, yearId: string): Promise<PeriodRow[]> {
+export async function yearPeriods(tx: Tx, yearId: string): Promise<PeriodRow[]> {
   return tx
     .select({
       id: periods.id,
@@ -73,7 +73,7 @@ async function yearPeriods(tx: Tx, yearId: string): Promise<PeriodRow[]> {
 }
 
 /** Fiche du conseil d'un élève (créée au besoin) ; renvoie son identifiant. */
-async function ensureCard(
+export async function ensureCard(
   tx: Tx,
   c: ClassRow,
   schoolId: string,
@@ -107,7 +107,7 @@ function cardFilter(enrollmentId: string, periodId: string | null) {
   );
 }
 
-type CardRow = {
+export type CardRow = {
   enrollmentId: string;
   subjectComments: unknown;
   generalComment: string | null;
@@ -115,9 +115,10 @@ type CardRow = {
   decision: Decision | null;
   councilValidatedAt: Date | null;
   validatedByName: string | null;
+  publishedAt: Date | null;
 };
 
-async function loadCards(
+export async function loadCards(
   tx: Tx,
   enrollmentIds: string[],
   periodId: string | null,
@@ -132,6 +133,7 @@ async function loadCards(
       decision: reportCards.decision,
       councilValidatedAt: reportCards.councilValidatedAt,
       validatedByName: users.name,
+      publishedAt: reportCards.publishedAt,
     })
     .from(reportCards)
     .leftJoin(users, eq(users.id, reportCards.councilValidatedBy))
@@ -147,7 +149,7 @@ async function loadCards(
 }
 
 /** Texte de l'appréciation d'une matière dans une fiche. */
-function commentOf(stored: unknown, subjectId: string): string {
+export function commentOf(stored: unknown, subjectId: string): string {
   const entry = (stored as Record<string, { text?: unknown }> | null)?.[subjectId];
   return typeof entry?.text === "string" ? entry.text : "";
 }
@@ -320,12 +322,14 @@ export type CouncilSheet = {
   closed: boolean;
   validatedAt: Date | null;
   validatedByName: string | null;
+  /** Bulletins publiés (3g). */
+  publishedAt: Date | null;
   /** Mentions possibles : celles de l'école, puis celles du seul conseil. */
   mentionChoices: string[];
   students: CouncilStudent[];
 };
 
-type Computed = {
+export type Computed = {
   c: ClassRow;
   setup: Loaded;
   list: PeriodRow[];
@@ -338,10 +342,14 @@ type Computed = {
   closed: boolean;
   from: string;
   to: string;
+  /** Résultats détaillés de la période (vide pour l'année). */
+  results: PeriodResults | null;
+  /** Résultats de chaque période (fiche annuelle seulement). */
+  perPeriod: PeriodResults[];
 };
 
 /** Résultats sur lesquels porte le conseil (période ou année). */
-async function compute(
+export async function compute(
   tx: Tx,
   ctx: Ctx,
   classId: string,
@@ -353,7 +361,7 @@ async function compute(
   const setup = await loadSetup(tx, ctx, c);
   const proposals: Computed["proposals"] = new Map();
   if (periodKey === ANNUAL) {
-    const perPeriod: Awaited<ReturnType<typeof periodResults>>[] = [];
+    const perPeriod: PeriodResults[] = [];
     for (const p of list) perPeriod.push(await periodResults(tx, c, setup, p.id));
     const annual = computeAnnualResults({
       rules: setup.rules,
@@ -376,6 +384,8 @@ async function compute(
       closed: (await closureState(tx, last.id, c.classId)) === "closed",
       from: list[0].startDate,
       to: last.endDate,
+      results: null,
+      perPeriod,
     };
   }
   const period = list.find((p) => p.id === periodKey) ?? list[0];
@@ -397,6 +407,8 @@ async function compute(
     closed: (await closureState(tx, period.id, c.classId)) === "closed",
     from: period.startDate,
     to: period.endDate,
+    results,
+    perPeriod: [],
   };
 }
 
@@ -423,6 +435,10 @@ export async function getCouncil(
       closed: k.closed,
       validatedAt: validated?.councilValidatedAt ?? null,
       validatedByName: validated?.validatedByName ?? null,
+      publishedAt:
+        ids.length > 0 && ids.every((id) => cards.get(id)?.publishedAt)
+          ? (cards.get(ids[0])!.publishedAt as Date)
+          : null,
       mentionChoices: [...k.setup.rules.mentions.map((m) => m.label), ...COUNCIL_ONLY_MENTIONS],
       students: k.setup.roster.map((r) => {
         const card = cards.get(r.enrollmentId);
@@ -564,7 +580,10 @@ export async function validateCouncil(
   );
 }
 
-/** Rouvre le conseil (directeur) : appréciations, mention et décision redeviennent modifiables. */
+/**
+ * Rouvre le conseil (directeur) : appréciations, mention et décision redeviennent modifiables. Si
+ * les bulletins étaient publiés, la publication est retirée (à refaire après correction).
+ */
 export async function reopenCouncil(
   principal: Principal,
   classId: string,
@@ -581,6 +600,20 @@ export async function reopenCouncil(
       if (periodId === "") throw new GradingError("periodNotFound");
       const ids = (await loadSetup(tx, ctx, c)).roster.map((r) => r.enrollmentId);
       if (ids.length === 0) return;
+      // Bulletins publiés : la publication est retirée (la photographie reste jusqu'à la prochaine).
+      const withdrawn = await tx
+        .update(reportCards)
+        .set({ publishedAt: null, publishedBy: null })
+        .where(
+          and(
+            inArray(reportCards.enrollmentId, ids),
+            periodId
+              ? and(eq(reportCards.kind, "period"), eq(reportCards.periodId, periodId))
+              : eq(reportCards.kind, "annual"),
+            sql`${reportCards.publishedAt} is not null`,
+          ),
+        )
+        .returning({ id: reportCards.id });
       await tx
         .update(reportCards)
         .set({ councilValidatedAt: null, councilValidatedBy: null, updatedAt: new Date() })
@@ -598,7 +631,7 @@ export async function reopenCouncil(
         action: "council.reopen",
         entityType: "class",
         entityId: classId,
-        before: { periodKey: periodId ?? ANNUAL },
+        before: { periodKey: periodId ?? ANNUAL, publishedWithdrawn: withdrawn.length },
         after: null,
       });
     }),

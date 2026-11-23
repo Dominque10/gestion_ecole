@@ -23,7 +23,7 @@ Contraintes du terrain à garder en tête en permanence :
 - Version en cours : **V1**
 - Phase en cours : **Phase 4 – Parents et pilote** (M6 Espace parents + paiement mobile + notifications, M7 Tableau de bord) — plan `docs/plan-phase-4.md` validé (D20), sous-étapes 4a → 4g
   - ✅ 4a – Connexion des parents par code SMS (`src/server/auth/parent.ts`, pages `/parent`), sélecteur d'enfant
-    toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 à valider
+    toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 validées (D21)
 - Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   date,
   foreignKey,
@@ -71,6 +72,51 @@ export const assessments = pgTable(
     check("assessments_max_score", sql`${t.maxScore} between 1 and 100`),
     index("assessments_class_subject_period_idx").on(t.classId, t.subjectId, t.periodId),
     index("assessments_school_idx").on(t.schoolId),
+  ],
+);
+
+/**
+ * Clôture d'une période pour une classe (décision D13) : les notes de la classe sur la période sont
+ * verrouillées. Le directeur peut rouvrir (motif obligatoire, tracé) ; une fois rouverte, chaque
+ * modification de note est notée dans le journal. Une ligne par (période, classe).
+ */
+export const periodClosures = pgTable(
+  "period_closures",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    academicYearId: uuid("academic_year_id").notNull(),
+    periodId: uuid("period_id").notNull(),
+    classId: uuid("class_id").notNull(),
+    /** Vrai tant que la période est close pour la classe ; faux après une réouverture. */
+    closed: boolean("closed").notNull().default(true),
+    closedAt: timestamp("closed_at", { withTimezone: true }).notNull().defaultNow(),
+    closedBy: uuid("closed_by")
+      .notNull()
+      .references(() => users.id),
+    reopenedAt: timestamp("reopened_at", { withTimezone: true }),
+    reopenedBy: uuid("reopened_by").references(() => users.id),
+    reopenReason: text("reopen_reason"),
+  },
+  (t) => [
+    foreignKey({
+      name: "period_closures_period_fk",
+      columns: [t.periodId, t.academicYearId, t.schoolId],
+      foreignColumns: [periods.id, periods.academicYearId, periods.schoolId],
+    }),
+    foreignKey({
+      name: "period_closures_class_fk",
+      columns: [t.classId, t.academicYearId, t.schoolId],
+      foreignColumns: [classes.id, classes.academicYearId, classes.schoolId],
+    }),
+    unique("period_closures_period_class").on(t.periodId, t.classId),
+    check(
+      "period_closures_reopen",
+      sql`${t.closed} or (${t.reopenedAt} is not null and ${t.reopenedBy} is not null and ${t.reopenReason} is not null)`,
+    ),
+    index("period_closures_school_idx").on(t.schoolId),
   ],
 );
 

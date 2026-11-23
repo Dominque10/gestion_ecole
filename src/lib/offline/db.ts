@@ -20,6 +20,8 @@ export type OfflineCourse = {
   periods: { id: string; label: string; startDate: string; endDate: string }[];
   currentPeriodId: string | null;
   defaultMaxScore: number;
+  /** Périodes closes pour la classe (notes verrouillées) ; absent dans les copies anciennes. */
+  closedPeriodIds?: string[];
   students: OfflineStudent[];
   savedAt: number;
 };

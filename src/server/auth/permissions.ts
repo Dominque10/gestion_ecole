@@ -41,6 +41,9 @@ const SCHOOL_ACTIONS = {
   /** Évaluations : un enseignant pour ses classes et matières, le directeur pour toute l'école (3b). */
   "assessments:manage": ["director", "teacher"],
   "grades:write": ["director", "teacher"],
+  /** Clôture d'une période pour une classe ; réouverture (motif obligatoire, tracée) — 3d. */
+  "periods:close": ["director"],
+  "grades:unlock": ["director"],
   "reportcards:publish": ["director"],
   "reportcards:read": ["director", "parent"],
   "attendance:write": ["director", "secretary", "teacher"],

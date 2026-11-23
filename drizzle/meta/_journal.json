@@ -190,6 +190,20 @@
       "when": 1795389014058,
       "tag": "0026_assessments_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1795393830942,
+      "tag": "0027_period_closures",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1795393832490,
+      "tag": "0028_period_closures_rls",
+      "breakpoints": true
     }
   ]
 }

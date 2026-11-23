@@ -86,6 +86,31 @@ const GROUPS: {
       { value: "lastDouble", label: "gradingRules.lastDouble" },
     ],
   },
+  {
+    name: "generalAverageBase",
+    legend: "gradingRules.generalAverageBase",
+    choices: [
+      { value: "roundedSubjects", label: "gradingRules.roundedSubjects" },
+      { value: "exactSubjects", label: "gradingRules.exactSubjects" },
+    ],
+  },
+  {
+    name: "missingPart",
+    legend: "gradingRules.missingPart",
+    choices: [
+      { value: "useAvailable", label: "gradingRules.useAvailable" },
+      { value: "countZero", label: "gradingRules.countZero" },
+    ],
+  },
+  {
+    name: "emptySubject",
+    legend: "gradingRules.emptySubject",
+    choices: [
+      { value: "excluded", label: "gradingRules.emptyExcluded" },
+      { value: "zero", label: "gradingRules.emptyZero" },
+      { value: "unranked", label: "gradingRules.emptyUnranked" },
+    ],
+  },
 ];
 
 const formatThreshold = (n: number) => String(n).replace(".", ",");

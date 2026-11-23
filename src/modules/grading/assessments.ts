@@ -15,6 +15,7 @@ import {
   enrollments,
   grades,
   levels,
+  periodClosures,
   periods,
   students,
   subjects,
@@ -34,6 +35,7 @@ import {
   type GradeStatus,
   type GradeValue,
 } from "./grade-input";
+import { scaleFor } from "./rules";
 import { loadGradingRules } from "./settings";
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -76,6 +78,7 @@ async function guarded<T>(fn: () => Promise<T>): Promise<T> {
     return await fn();
   } catch (error) {
     if (dbGuardCode(error) === "GS001") throw new GradingError("yearArchived");
+    if (dbGuardCode(error) === "GS008") throw new GradingError("periodClosed");
     throw error;
   }
 }
@@ -189,6 +192,8 @@ export type CourseDetail = Course & {
   /** Barème proposé pour une nouvelle évaluation (sur 20 ; sur 10 au primaire si l'école l'a choisi). */
   defaultMaxScore: number;
   studentCount: number;
+  /** Périodes closes pour la classe (notes verrouillées). */
+  closedPeriodIds: string[];
   /** Élèves inscrits, par ordre alphabétique. */
   students: { enrollmentId: string; lastName: string; firstNames: string }[];
   assessments: AssessmentSummary[];
@@ -218,6 +223,29 @@ async function loadPeriods(tx: Tx, yearId: string): Promise<PeriodOption[]> {
 /** Élèves inscrits dans la classe (ceux qu'on peut noter). */
 function enrolledIn(classId: string): SQL {
   return and(eq(enrollments.classId, classId), eq(enrollments.status, "enrolled")) as SQL;
+}
+
+/** Périodes closes pour une classe (notes verrouillées, décision D13). */
+async function closedPeriods(tx: Tx, classId: string): Promise<Set<string>> {
+  const rows = await tx
+    .select({ periodId: periodClosures.periodId })
+    .from(periodClosures)
+    .where(and(eq(periodClosures.classId, classId), eq(periodClosures.closed, true)));
+  return new Set(rows.map((r) => r.periodId));
+}
+
+/** État de la clôture d'une période pour une classe : jamais close, close, ou rouverte. */
+export async function closureState(
+  tx: Tx,
+  periodId: string,
+  classId: string,
+): Promise<"open" | "closed" | "reopened"> {
+  const [row] = await tx
+    .select({ closed: periodClosures.closed })
+    .from(periodClosures)
+    .where(and(eq(periodClosures.periodId, periodId), eq(periodClosures.classId, classId)));
+  if (!row) return "open";
+  return row.closed ? "closed" : "reopened";
 }
 
 export async function getCourse(
@@ -255,7 +283,7 @@ export async function getCourse(
       .where(and(eq(assessments.classId, classId), eq(assessments.subjectId, subjectId)))
       .groupBy(assessments.id)
       .orderBy(desc(assessments.date), desc(assessments.createdAt));
-    const primary = course.cycle === "primary" || course.cycle === "preschool";
+    const closed = await closedPeriods(tx, classId);
     return {
       classId: course.classId,
       className: course.className,
@@ -266,7 +294,8 @@ export async function getCourse(
       yearStatus: course.yearStatus,
       periods: yearPeriods,
       currentPeriodId: currentPeriod(yearPeriods, todayInBrazzaville()),
-      defaultMaxScore: primary ? rules.primaryScale : 20,
+      defaultMaxScore: scaleFor(course.cycle, rules),
+      closedPeriodIds: [...closed],
       studentCount: roster.length,
       students: roster,
       assessments: list,
@@ -378,6 +407,9 @@ export async function createAssessment(
       const course = await loadCourse(tx, ctx, classId, subjectId);
       if (course.yearStatus !== "active") throw new GradingError("yearNotActive");
       await checkPeriodAndDate(tx, course, data);
+      if ((await closureState(tx, data.periodId, classId)) === "closed") {
+        throw new GradingError("periodClosed");
+      }
       await tx
         .insert(assessments)
         .values({
@@ -465,6 +497,11 @@ export async function updateAssessment(
     withSchool(ctx, async (tx) => {
       const current = await loadAssessment(tx, ctx, assessmentId);
       await checkPeriodAndDate(tx, current, data);
+      const states = [
+        await closureState(tx, current.periodId, current.classId),
+        await closureState(tx, data.periodId, current.classId),
+      ];
+      if (states.includes("closed")) throw new GradingError("periodClosed");
       const [{ highest }] = await tx
         .select({ highest: max(grades.score) })
         .from(grades)
@@ -476,6 +513,18 @@ export async function updateAssessment(
         .update(assessments)
         .set({ ...data, updatedAt: new Date() })
         .where(eq(assessments.id, assessmentId));
+      // Période rouverte après clôture : toute modification est tracée.
+      if (states.includes("reopened")) {
+        await tx.insert(auditLogs).values({
+          schoolId: ctx.schoolId,
+          actorUserId: ctx.userId,
+          action: "assessment.update_after_close",
+          entityType: "assessment",
+          entityId: assessmentId,
+          before: current,
+          after: data,
+        });
+      }
     }),
   );
 }
@@ -486,12 +535,14 @@ export async function deleteAssessment(principal: Principal, assessmentId: strin
   await guarded(() =>
     withSchool(ctx, async (tx) => {
       const current = await loadAssessment(tx, ctx, assessmentId);
+      const state = await closureState(tx, current.periodId, current.classId);
+      if (state === "closed") throw new GradingError("periodClosed");
       const [{ n }] = await tx
         .select({ n: count() })
         .from(grades)
         .where(eq(grades.assessmentId, assessmentId));
       await tx.delete(assessments).where(eq(assessments.id, assessmentId));
-      if (n > 0) {
+      if (n > 0 || state === "reopened") {
         await tx.insert(auditLogs).values({
           schoolId: ctx.schoolId,
           actorUserId: ctx.userId,
@@ -520,6 +571,8 @@ export type GradeSheetRow = {
 };
 
 export type GradeSheet = Omit<AssessmentRow, "academicYearId" | "yearStart" | "yearEnd"> & {
+  /** Période close pour la classe : notes verrouillées. */
+  closed: boolean;
   rows: GradeSheetRow[];
 };
 
@@ -584,6 +637,7 @@ export async function getGradeSheet(
       className: a.className,
       subjectName: a.subjectName,
       yearStatus: a.yearStatus,
+      closed: (await closureState(tx, a.periodId, a.classId)) === "closed",
       rows: [...enrolled.map((e) => row(e, true)), ...former.map((e) => row(e, false))],
     };
   });
@@ -619,6 +673,8 @@ export async function saveGrades(
   return guarded(() =>
     withSchool(ctx, async (tx) => {
       const a = await loadAssessment(tx, ctx, assessmentId);
+      const closure = await closureState(tx, a.periodId, a.classId);
+      if (closure === "closed") throw new GradingError("periodClosed");
       const problems: SaveGradesResult["problems"] = [];
       const changes: { enrollmentId: string; expected: GradeValue; value: GradeValue }[] = [];
       for (const entry of entries) {
@@ -689,6 +745,18 @@ export async function saveGrades(
                 updatedAt: new Date(),
               },
             });
+        }
+        // Période rouverte après clôture : chaque note modifiée est tracée (CLAUDE.md §6).
+        if (closure === "reopened") {
+          await tx.insert(auditLogs).values({
+            schoolId: ctx.schoolId,
+            actorUserId: ctx.userId,
+            action: "grade.change_after_close",
+            entityType: "grade",
+            entityId: `${assessmentId}:${change.enrollmentId}`,
+            before: { value: formatGradeValue(now) },
+            after: { value: formatGradeValue(change.value) },
+          });
         }
         saved++;
       }

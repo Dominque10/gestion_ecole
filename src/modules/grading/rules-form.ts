@@ -31,6 +31,9 @@ export function gradingRulesFromForm(fields: Record<string, string>): GradingRul
     optionalSubjects: fields.optionalSubjects,
     absence: fields.absence,
     annualAverage: fields.annualAverage,
+    generalAverageBase: fields.generalAverageBase,
+    missingPart: fields.missingPart,
+    emptySubject: fields.emptySubject,
     mentions,
   });
   return parsed.success ? sortMentions(parsed.data) : null;

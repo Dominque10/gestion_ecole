@@ -12,6 +12,12 @@ export const RANKING_MODES = ["competition", "dense", "tiebreak"] as const;
 export const OPTIONAL_SUBJECT_MODES = ["bonusAboveHalf", "normal", "excluded"] as const;
 export const ABSENCE_MODES = ["excluded", "zero"] as const;
 export const ANNUAL_AVERAGE_MODES = ["periodsMean", "lastDouble"] as const;
+/** Moyenne générale calculée avec les moyennes de matière arrondies, ou exactes (décision D13). */
+export const GENERAL_AVERAGE_BASES = ["roundedSubjects", "exactSubjects"] as const;
+/** Pas de composition (ou pas de devoirs) dans la matière : ce qui existe, ou 0 (décision D13). */
+export const MISSING_PART_MODES = ["useAvailable", "countZero"] as const;
+/** Élève sans aucune note dans une matière notée : matière exclue, comptée 0, ou non classé (D13). */
+export const EMPTY_SUBJECT_MODES = ["excluded", "zero", "unranked"] as const;
 
 export const MentionSchema = z.object({
   label: z.string().trim().min(1).max(40),
@@ -29,6 +35,9 @@ export const GradingRulesSchema = z.object({
   optionalSubjects: z.enum(OPTIONAL_SUBJECT_MODES),
   absence: z.enum(ABSENCE_MODES),
   annualAverage: z.enum(ANNUAL_AVERAGE_MODES),
+  generalAverageBase: z.enum(GENERAL_AVERAGE_BASES),
+  missingPart: z.enum(MISSING_PART_MODES),
+  emptySubject: z.enum(EMPTY_SUBJECT_MODES),
   /** Mentions automatiques, de la plus haute à la plus basse (avertissement, blâme : conseil de classe). */
   mentions: z
     .array(MentionSchema)
@@ -46,6 +55,9 @@ export const DEFAULT_GRADING_RULES: GradingRules = {
   optionalSubjects: "bonusAboveHalf",
   absence: "excluded",
   annualAverage: "periodsMean",
+  generalAverageBase: "roundedSubjects",
+  missingPart: "useAvailable",
+  emptySubject: "excluded",
   mentions: [
     { label: "Félicitations", minAverage: 16 },
     { label: "Encouragements", minAverage: 14 },
@@ -69,4 +81,12 @@ export function readGradingRules(stored: unknown): GradingRules {
 /** Mentions rangées du seuil le plus haut au plus bas : la première atteinte s'applique. */
 export function sortMentions(rules: GradingRules): GradingRules {
   return { ...rules, mentions: [...rules.mentions].sort((a, b) => b.minAverage - a.minAverage) };
+}
+
+/** Barème de l'école pour un cycle : sur 20, ou sur 10 au primaire et au préscolaire si choisi (H69). */
+export function scaleFor(
+  cycle: "preschool" | "primary" | "college" | "lycee",
+  rules: Pick<GradingRules, "primaryScale">,
+): number {
+  return cycle === "primary" || cycle === "preschool" ? rules.primaryScale : 20;
 }

@@ -113,6 +113,7 @@ function CourseView({
   if (course === null) return <NotOnPhone />;
   const period = periodId ?? course.currentPeriodId ?? course.periods[0]?.id ?? "";
   const notSent = new Map(drafts.map((d) => [d.id, d]));
+  const closed = course.closedPeriodIds?.includes(period) ?? false;
   const shown = sheets
     .filter((s) => s.periodId === period)
     .sort((a, b) => b.date.localeCompare(a.date));
@@ -174,7 +175,11 @@ function CourseView({
       </section>
       <section className="flex flex-col gap-3">
         <h3 className="text-lg font-semibold">{t("grading.newAssessment")}</h3>
-        <NewAssessmentForm owner={owner} course={course} periodId={period} />
+        {closed ? (
+          <p className="rounded-md bg-zinc-100 p-3">{t("results.lockedBanner")}</p>
+        ) : (
+          <NewAssessmentForm owner={owner} course={course} periodId={period} />
+        )}
       </section>
     </>
   );
@@ -328,6 +333,7 @@ function SheetView({ owner, assessmentId }: { owner: Owner; assessmentId: string
   if (sheet === undefined || course === undefined || draft === undefined) return null;
   if (sheet === null || course === null) return <NotOnPhone />;
   const periodLabel = course.periods.find((p) => p.id === sheet.periodId)?.label ?? "";
+  const closed = course.closedPeriodIds?.includes(sheet.periodId) ?? false;
 
   return (
     <>
@@ -351,6 +357,7 @@ function SheetView({ owner, assessmentId }: { owner: Owner; assessmentId: string
           })}
         </p>
       </div>
+      {closed && <p className="rounded-md bg-zinc-100 p-3">{t("results.lockedBanner")}</p>}
       {draft && (
         <div className="flex flex-col gap-2 rounded-md bg-zinc-100 p-3">
           <p>
@@ -388,7 +395,7 @@ function SheetView({ owner, assessmentId }: { owner: Owner; assessmentId: string
             name: `${s.lastName} ${s.firstNames}`,
             editable: true,
           }))}
-          readOnly={false}
+          readOnly={closed}
         />
       )}
     </>

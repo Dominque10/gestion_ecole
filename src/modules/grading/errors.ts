@@ -11,6 +11,10 @@ export type GradingErrorCode =
   | "yearArchived"
   | "scoreAboveMax"
   | "studentNotInClass"
+  | "periodClosed"
+  | "periodNotClosed"
+  | "reopenReason"
+  | "classNotFound"
   | GradeInputProblem;
 
 export class GradingError extends Error {

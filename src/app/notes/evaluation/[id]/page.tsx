@@ -47,7 +47,7 @@ async function Content({ params }: Props) {
     }
     throw error;
   }
-  const writable = sheet.yearStatus !== "archived";
+  const writable = sheet.yearStatus !== "archived" && !sheet.closed;
   const canManage = writable && can(principal, "assessments:manage");
   const owner = `${principal.schoolId}:${principal.userId}`;
 
@@ -77,6 +77,7 @@ async function Content({ params }: Props) {
         </p>
       </div>
 
+      {sheet.closed && <p className="rounded-md bg-zinc-100 p-3">{t("results.lockedBanner")}</p>}
       {writable && <SyncStatus owner={owner} />}
 
       {sheet.rows.length === 0 ? (

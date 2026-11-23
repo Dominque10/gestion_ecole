@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { t } from "@/i18n";
 import { listCourses, type Course } from "@/modules/grading/assessments";
+import { listResultClasses } from "@/modules/grading/results";
 import { requireAction } from "@/server/auth/session";
 
 export const metadata: Metadata = { title: t("grading.title") };
@@ -24,15 +25,33 @@ export default function GradesPage() {
 async function Content() {
   const { principal } = await requireAction("grades:write");
   const director = principal.roles.includes("director");
-  const courses = await listCourses(principal);
+  const [courses, resultClasses] = await Promise.all([
+    listCourses(principal),
+    listResultClasses(principal),
+  ]);
+  // Directeur et professeurs principaux : résultats de la classe et clôture des périodes.
+  const resultsLink = resultClasses.length > 0 && (
+    <Link
+      href="/notes/resultats"
+      className="flex min-h-12 items-center rounded-md bg-blue-700 px-4 font-semibold text-white"
+    >
+      {t("results.link")}
+    </Link>
+  );
   if (courses.length === 0) {
-    return <p>{t(director ? "grading.noCourse" : "grading.noCourseTeacher")}</p>;
+    return (
+      <>
+        {resultsLink}
+        <p>{t(director ? "grading.noCourse" : "grading.noCourseTeacher")}</p>
+      </>
+    );
   }
   // Regroupement par classe, dans l'ordre des niveaux.
   const byClass = new Map<string, Course[]>();
   for (const c of courses) byClass.set(c.classId, [...(byClass.get(c.classId) ?? []), c]);
   return (
     <>
+      {resultsLink}
       <p>{t(director ? "grading.intro" : "grading.introTeacher")}</p>
       <Link href="/notes/hors-ligne" className="text-blue-800 underline">
         {t("offline.title")}

@@ -20,7 +20,7 @@
 | 3a | **Règles de calcul de l'école** : barème (sur 20, ou sur 10 au primaire), poids des types d'évaluation (interrogations, devoirs, compositions), arrondi, rang ex æquo, matières facultatives, mentions (seuils). Écran dans Paramètres, directeur seul | colonnes dans `schools` et `level_subjects` (facultative) |
 | 3b | **Évaluations et saisie des notes** : l'enseignant crée une évaluation (type, date, barème, matière, classe, période) pour ses seules classes ; grille de saisie rapide au clavier et au téléphone ; absents et dispensés | `assessments`, `grades` |
 | 3c | **Hors connexion** : application installable (Serwist), file locale (Dexie / IndexedDB), identifiants créés sur le téléphone, synchronisation au retour du réseau, **conflits affichés, jamais écrasés** | — |
-| 3d | **Calculs** (fonctions pures, testées avec les cas de référence) : moyenne par matière, moyenne générale pondérée par les coefficients, rang, moyenne de classe, plus forte et plus faible moyenne, moyenne annuelle. **Verrouillage** des notes à la clôture de la période ; déverrouillage par le directeur seul, tracé ; toute modification après verrouillage tracée | colonnes de clôture dans `periods` |
+| 3d | **Calculs** (fonctions pures, testées avec les cas de référence) : moyenne par matière, moyenne générale pondérée par les coefficients, rang, moyenne de classe, plus forte et plus faible moyenne, moyenne annuelle. **Verrouillage** des notes à la clôture de la période ; déverrouillage par le directeur seul, tracé ; toute modification après verrouillage tracée | `period_closures` (clôture par classe, décision D13) |
 | 3e | **Appel (M5)** : par cours ou par demi-journée (créneaux du M1), tous présents par défaut, un toucher par absent ou retardataire (objectif : 60 élèves en moins d'une minute), hors connexion (même mécanisme que 3c) ; justification par le secrétariat (motif, pièce jointe) ; notification du parent pour toute absence non justifiée | `attendance`, `notifications` |
 | 3f | **Conseil de classe** : appréciations par matière (enseignant) et générale, mention proposée selon les seuils, décision (passage, redoublement, exclusion…) ; totaux d'absences et de retards | `report_cards` |
 | 3g | **Bulletins PDF** au format de l'école (logo, cachet, signature) via le worker existant : toute une classe en un clic (50 en moins de 30 s), bulletin annuel récapitulatif ; **publication après validation du directeur** | — |
@@ -29,7 +29,7 @@ L'appel (3e) passe avant le conseil de classe et les bulletins, qui reprennent l
 
 ## Garanties (CLAUDE.md §6)
 
-- RLS sur les 5 nouvelles tables, test d'isolation entre écoles ; déclencheur « année archivée = lecture seule ».
+- RLS sur les 6 nouvelles tables (dont `period_closures`, D13), test d'isolation entre écoles ; déclencheur « année archivée = lecture seule ».
 - Un enseignant ne voit et ne note que ses classes et ses matières (contrôle serveur + RLS existante).
 - Toute règle de calcul est un paramètre de l'école, couvert par des tests unitaires.
 - Les bulletins publiés gardent une **photographie** des moyennes (une correction ultérieure exige un
@@ -39,9 +39,9 @@ L'appel (3e) passe avant le conseil de classe et les bulletins, qui reprennent l
 
 ## Modèle de données
 
-Aucune table nouvelle : les 5 tables `assessments`, `grades`, `report_cards`, `attendance`,
+Une seule table nouvelle (`period_closures`, décision D13) ; les 5 tables `assessments`, `grades`, `report_cards`, `attendance`,
 `notifications` font déjà partie des 30 tables (CLAUDE.md §8). Ajouts de colonnes : règles de calcul
-dans `schools`, « facultative » dans `level_subjects`, clôture (date, auteur) dans `periods`.
+dans `schools`, « facultative » dans `level_subjects`, clôture par classe dans la table `period_closures` (décision D13, seule table ajoutée).
 
 ## Ce que le porteur du projet doit fournir (critère d'acceptation)
 

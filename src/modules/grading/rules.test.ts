@@ -11,6 +11,9 @@ const formFields = (overrides: Record<string, string> = {}) => ({
   optionalSubjects: "bonusAboveHalf",
   absence: "excluded",
   annualAverage: "periodsMean",
+  generalAverageBase: "roundedSubjects",
+  missingPart: "useAvailable",
+  emptySubject: "excluded",
   "mention-0": "Félicitations",
   "seuil-0": "16",
   "mention-1": "Encouragements",
@@ -31,6 +34,9 @@ describe("Règles par défaut (décision D10)", () => {
       optionalSubjects: "bonusAboveHalf",
       absence: "excluded",
       annualAverage: "periodsMean",
+      generalAverageBase: "roundedSubjects",
+      missingPart: "useAvailable",
+      emptySubject: "excluded",
     });
     expect(DEFAULT_GRADING_RULES.mentions.map((m) => m.minAverage)).toEqual([16, 14, 12]);
   });

@@ -30,6 +30,9 @@ Contraintes du terrain à garder en tête en permanence :
     hypothèses H75 à H81 validées (D12)
   - ✅ 3c – Hors connexion : application installable, service worker, saisie sans réseau
     (`/notes/hors-ligne`), envoi automatique, conflits à trancher ; hypothèses H82 à H85 validées (D12)
+  - ✅ 3d – Moyennes, rangs, mentions, moyenne annuelle (`averages.ts`), clôture des périodes par classe
+    (`period_closures`, décision D13), page `/notes/resultats` ; hypothèses H86 à H90 à valider.
+    **Cas de référence réels du porteur toujours attendus** (critère du jalon) : un cas construit les remplace.
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
@@ -170,6 +173,12 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   Saisie : `parseGradeInput` (pur, partagé avec la grille client) ; `saveGrades` reçoit pour chaque case la
   valeur d'origine et ne remplace jamais une note changée entre-temps (conflit rendu). L'identifiant d'une
   évaluation peut venir du client (création idempotente, prépare 3c).
+- **Mise en œuvre (3d)** : calculs purs dans `src/modules/grading/averages.ts` (tests : `averages.test.ts`, dont
+  un cas de référence construit) ; lecture et droits dans `results.ts` (résultats : directeur + professeur
+  principal). Règles D13 ajoutées aux réglages (`generalAverageBase`, `missingPart`, `emptySubject`).
+  Clôture par classe : `period_closures` (une ligne par période + classe, jamais supprimée) ; déclencheurs
+  `app.forbid_*_in_closed_period` (GS008) ; après réouverture, chaque changement de note ou d'évaluation
+  est écrit dans `audit_logs` (`grade.change_after_close`, `assessment.update_after_close`).
 
 ### Tâches de fond et documents
 - **Mise en œuvre (2f)** : file pg-boss (schéma `pgboss`, installée par `pnpm db:setup` via `setupJobQueue`,
@@ -224,7 +233,8 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 `class_subjects`, `level_subjects`, `time_slots`, `staff`, `students`, `student_medical`, `guardians`,
 `student_guardians`, `enrollments`, `fee_items`, `invoices` (échéances), `payments`,
 `payment_allocations`, `assessments`, `grades`, `report_cards`, `attendance`,
-`notifications`, `audit_logs`, `student_documents`, `cash_closures`, `payment_cancellations` (30 tables, décisions D6, D7).
+`notifications`, `audit_logs`, `student_documents`, `cash_closures`, `payment_cancellations`,
+`period_closures` (31 tables, décisions D6, D7, D13).
 
 - Matricule (décision A6) : `CODE-AA-NNNNN` (ex. `SJB-26-00042`), préfixe stocké dans `schools`,
   numéro d'ordre continu par école, attribué une fois, jamais modifié ni réutilisé.

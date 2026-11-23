@@ -136,6 +136,11 @@ Règles tranchées par le porteur : décision D10 (`docs/plan-phase-3.md`). Hypo
 | H83 | Les copies sont rangées par compte sur le téléphone ; à la déconnexion, les copies (noms d'élèves, notes) sont effacées, mais pas les saisies encore en attente d'envoi | 3c | ✅ |
 | H84 | Envoi automatique à l'ouverture d'une page, au retour du réseau, puis toutes les 30 s tant qu'il reste des saisies ; une note en conflit n'est jamais envoyée d'elle-même : l'enseignant choisit « garder ma note » ou « garder la note actuelle » | 3c | ✅ |
 | H85 | Une évaluation créée sur le téléphone puis refusée à l'envoi (ex. année changée, matière retirée) reste sur le téléphone avec le motif, ses notes aussi ; l'enseignant peut la supprimer du téléphone | 3c | ✅ |
+| H86 | Les résultats d'une classe (moyennes, rangs) sont visibles par le directeur et par le professeur principal ; les autres enseignants voient seulement les notes de leurs matières | 3d | ⏳ |
+| H87 | Rangs et chiffres de la classe portent sur les élèves inscrits dans la classe au moment du calcul ; un élève parti n'y figure plus (ses notes restent enregistrées) | 3d | ⏳ |
+| H88 | Moyenne annuelle calculée à partir des moyennes générales arrondies des périodes ; une période sans moyenne pour l'élève est laissée de côté | 3d | ⏳ |
+| H89 | « Partie manquante = 0 » ne joue que si la classe entière n'a pas eu l'épreuve ; un élève absent à la composition passée par la classe a sa moyenne sur ce qu'il a fait (règle des absences) | 3d | ⏳ |
+| H90 | Clôturer une classe déjà close ne change rien ; la réouverture demande un motif (3 à 300 caractères) ; l'historique des clôtures n'est jamais supprimé ; une matière facultative est classée en fin de liste, les autres par coefficient décroissant | 3d | ⏳ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

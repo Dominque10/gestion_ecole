@@ -56,7 +56,9 @@ async function Content({ params, searchParams }: Props) {
     course.periods.find((p) => p.id === first(query.periode)) ??
     course.periods.find((p) => p.id === course.currentPeriodId);
   const shown = course.assessments.filter((a) => a.periodId === period?.id);
-  const canCreate = can(principal, "assessments:manage") && course.yearStatus === "active";
+  const periodClosed = period !== undefined && course.closedPeriodIds.includes(period.id);
+  const canCreate =
+    can(principal, "assessments:manage") && course.yearStatus === "active" && !periodClosed;
   const owner = `${principal.schoolId}:${principal.userId}`;
   const offlineReady = course.yearStatus === "active" && course.periods.length > 0;
 
@@ -77,6 +79,7 @@ async function Content({ params, searchParams }: Props) {
               periods: course.periods,
               currentPeriodId: course.currentPeriodId,
               defaultMaxScore: course.defaultMaxScore,
+              closedPeriodIds: course.closedPeriodIds,
               students: course.students,
             }}
             sheets={sheets}
@@ -166,7 +169,9 @@ async function Content({ params, searchParams }: Props) {
                 }}
               />
             ) : (
-              <p className="rounded-md bg-zinc-100 p-3">{t("grading.readOnlyYear")}</p>
+              <p className="rounded-md bg-zinc-100 p-3">
+                {t(periodClosed ? "results.lockedBanner" : "grading.readOnlyYear")}
+              </p>
             )}
           </section>
         </>

@@ -27,7 +27,7 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 4b – Espace parents : frais et reçus, bulletins publiés (option de blocage B7), absences, sur une page
     d'environ 175 Ko (critère : 300 Ko) ; hypothèses H111 à H113 validées (D22)
   - ✅ 4c – Paiement en ligne (faux prestataire) : intention, confirmation signée et idempotente, interrogation,
-    expiration, trop-perçu, réconciliation quotidienne ; hypothèses H114 à H118 à valider
+    expiration, trop-perçu, réconciliation quotidienne ; hypothèses H114 à H118 validées (D23)
 - Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.

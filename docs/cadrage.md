@@ -72,3 +72,4 @@
 | 2026-11-23 | **D26 — Hypothèses H124 à H127 (étape 4e) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D27 — Hypothèses H128 à H132 (étape 4f, tableau de bord) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D28 — Hypothèses H133 à H137 (étape 4g, exports) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
+| 2026-11-23 | **D29 — Jalon technique de la Phase 4 validé** : parcours parent complet avec le faux opérateur (paiement, confirmation rejouée sans doublon, reçu), tableau de bord en 0,7 s pour 2 000 élèves (critère : 3 s), exports Excel et PDF. **La V1 est entièrement codée (M1 à M7).** Restent avec de vraies personnes : test « parent sans aide » et comparaison avec de vrais bulletins (D19). Suite choisie : la mise en service. | Porteur du projet |

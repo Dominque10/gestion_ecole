@@ -21,7 +21,8 @@ Contraintes du terrain à garder en tête en permanence :
 ## 2. État actuel (À METTRE À JOUR)
 
 - Version en cours : **V1**
-- Phase en cours : **Phase 4 – Parents et pilote** (M6 Espace parents + paiement mobile + notifications, M7 Tableau de bord) — plan `docs/plan-phase-4.md` validé (D20), sous-étapes 4a → 4g
+- **V1 entièrement codée (M1 à M7).** Étape en cours : **mise en service** (hébergement, sauvegardes, supervision, guide d'exploitation) — plan `docs/plan-mise-en-service.md` à valider
+- Phase 4 – Parents et pilote : **terminée, jalon technique validé le 2026-11-23 (D29)** ; bilan d'une école pilote et test « parent sans aide » à faire dès qu'une école est disponible. Plan réalisé : `docs/plan-phase-4.md` (D20), sous-étapes 4a → 4g
   - ✅ 4a – Connexion des parents par code SMS (`src/server/auth/parent.ts`, pages `/parent`), sélecteur d'enfant
     toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 validées (D21)
   - ✅ 4b – Espace parents : frais et reçus, bulletins publiés (option de blocage B7), absences, sur une page
@@ -56,8 +57,7 @@ Contraintes du terrain à garder en tête en permanence :
     mention, décision de fin d'année, totaux d'absences ; validation après clôture ; hypothèses H97 à H101 validées (D17)
   - ✅ 3g – Bulletins PDF (`bulletins.ts`, gabarit `bulletin-template.ts`) : projet, publication avec photographie,
     bulletin annuel ; 50 bulletins en < 1 s (critère : 30 s) ; hypothèses H102 à H106 validées (D18)
-- Module en cours : **M6 + M7** (rien de codé)
-- Dernier jalon validé : **Phase 3** (M4 + M5), validée le 2026-11-23 (D19). Avant : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
+- Dernier jalon validé : **Phase 4** (M6 + M7), jalon technique validé le 2026-11-23 (D29). **Phase 3** (M4 + M5), validée le 2026-11-23 (D19). Avant : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
   Plan réalisé : `docs/plan-phase-2.md` (2a → 2g). Phase 1 validée le 2026-11-21 (D5, H1 à H37).
 - **Pas d'école pilote pour l'instant (D1)** : les règles qui dépendaient des écoles sont des hypothèses

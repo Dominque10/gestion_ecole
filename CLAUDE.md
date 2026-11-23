@@ -21,7 +21,7 @@ Contraintes du terrain à garder en tête en permanence :
 ## 2. État actuel (À METTRE À JOUR)
 
 - Version en cours : **V1**
-- **V1 entièrement codée (M1 à M7).** Étape en cours : **mise en service** (hébergement, sauvegardes, supervision, guide d'exploitation) — plan `docs/plan-mise-en-service.md` à valider
+- **V1 entièrement codée (M1 à M7).** Étape en cours : **mise en service** (hébergement, sauvegardes, supervision, guide d'exploitation) — plan `docs/plan-mise-en-service.md` validé (D30), sous-étapes Sa → Sg
 - Phase 4 – Parents et pilote : **terminée, jalon technique validé le 2026-11-23 (D29)** ; bilan d'une école pilote et test « parent sans aide » à faire dès qu'une école est disponible. Plan réalisé : `docs/plan-phase-4.md` (D20), sous-étapes 4a → 4g
   - ✅ 4a – Connexion des parents par code SMS (`src/server/auth/parent.ts`, pages `/parent`), sélecteur d'enfant
     toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 validées (D21)

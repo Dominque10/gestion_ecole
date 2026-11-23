@@ -26,7 +26,7 @@
 | B3 | Règles de calcul : arrondis, matières facultatives, compositions vs interrogations, rang ex æquo | M4 | Tranché : valeurs par défaut paramétrables (D10) |
 | B4 | Agrégateur de paiement retenu, frais, délai du compte marchand | M3 / M6 | Hypothèse : faux prestataire derrière l’interface interne (D1) |
 | B5 | Prestataire SMS local et coût ; accès API WhatsApp Business | Phase 1 (OTP), M5, M6 | Hypothèse : faux prestataire derrière l’interface interne (D1) |
-| B6 | Hébergement : à l'étranger ou au Congo (loi données personnelles, latence) | Déploiement | _à décider_ |
+| B6 | Hébergement : à l'étranger ou au Congo (loi données personnelles, latence) | Déploiement | Décidé : VPS en Europe (D30), sous réserve de la loi congolaise à vérifier |
 | B7 | Blocage du bulletin en cas d'impayé : autorisé et souhaité ? | M3 / M4 | Hypothèse : option désactivée par défaut (D1) |
 | B8 | Prix de l'abonnement (après entretiens avec au moins 10 directeurs) | Commercialisation | _à décider_ |
 
@@ -73,3 +73,4 @@
 | 2026-11-23 | **D27 — Hypothèses H128 à H132 (étape 4f, tableau de bord) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D28 — Hypothèses H133 à H137 (étape 4g, exports) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D29 — Jalon technique de la Phase 4 validé** : parcours parent complet avec le faux opérateur (paiement, confirmation rejouée sans doublon, reçu), tableau de bord en 0,7 s pour 2 000 élèves (critère : 3 s), exports Excel et PDF. **La V1 est entièrement codée (M1 à M7).** Restent avec de vraies personnes : test « parent sans aide » et comparaison avec de vrais bulletins (D19). Suite choisie : la mise en service. | Porteur du projet |
+| 2026-11-23 | **D30 — Plan de mise en service validé** (`docs/plan-mise-en-service.md`), sous-étapes Sa → Sg : VPS en Europe (B6, loi congolaise sur les données à vérifier) ; fichiers sur le disque du serveur ; sauvegardes chiffrées copiées hors du serveur ; alertes par e-mail et SMS/WhatsApp ; environnement de démonstration ; domaine (B1) provisoire en attendant. | Porteur du projet |

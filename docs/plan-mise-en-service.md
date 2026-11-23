@@ -1,6 +1,6 @@
 # Plan — Mise en service de la V1 (hébergement, sauvegardes, supervision, exploitation)
 
-> Statut : **à valider** par le porteur du projet.
+> Statut : **validé** par le porteur du projet le 2026-11-23 (décision D30).
 > Contexte : la V1 est entièrement codée (M1 à M7, jalon technique de la Phase 4 validé, D29). Pour accueillir une
 > école pilote, il faut un serveur réel, sûr, sauvegardé et surveillé, qu'une personne puisse installer et mettre à
 > jour en suivant un guide. Cette étape n'ajoute **aucune fonction métier** (CLAUDE.md §3).
@@ -61,6 +61,16 @@ Ordre proposé : Sa → Sb → Sc → Sd → Se → Sf, puis Sg si tu le souhait
 4. **Copie des sauvegardes hors du serveur** : vers un stockage objet chez un autre fournisseur (recommandé) ?
 5. **Alertes** : par e-mail, par SMS, ou par WhatsApp ? À quelle(s) personne(s) ?
 6. **Démonstration** : veux-tu l'environnement de démonstration (Sg) ?
+
+## Réponses du porteur (D30)
+
+1. Hébergement : **VPS en Europe** (B6). À vérifier avant le pilote : la loi congolaise sur les données personnelles.
+2. Nom de domaine (B1) : non tranché ; domaine provisoire en attendant.
+3. Fichiers : **disque du serveur**, sauvegardé chaque nuit avec la base.
+4. Sauvegardes **copiées hors du serveur**, chez un autre fournisseur de stockage.
+5. Alertes **par e-mail et par SMS/WhatsApp** (le SMS/WhatsApp passe par le prestataire de messages : effectif dès
+   que le vrai prestataire existe ; l'e-mail fonctionne tout de suite).
+6. Environnement de **démonstration** (Sg) : oui.
 
 ## Ce qui reste hors de cette étape
 

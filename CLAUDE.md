@@ -34,7 +34,7 @@ Contraintes du terrain à garder en tête en permanence :
     (`period_closures`, décision D13), page `/notes/resultats` ; hypothèses H86 à H90 validées (D14).
     **Cas de référence réels du porteur toujours attendus** (critère du jalon) : un cas construit les remplace.
   - ✅ 3e – Appel (`/appel`, aussi hors connexion), SMS d'absence (décision D15, faux prestataire), justification
-    (`/absences`) ; hypothèses H91 à H96 à valider. Appel de 60 élèves vérifié en E2E (bien sous la minute).
+    (`/absences`) ; hypothèses H91 à H96 validées (D16). Appel de 60 élèves vérifié en E2E (bien sous la minute).
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).

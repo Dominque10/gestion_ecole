@@ -141,12 +141,12 @@ Règles tranchées par le porteur : décision D10 (`docs/plan-phase-3.md`). Hypo
 | H88 | Moyenne annuelle calculée à partir des moyennes générales arrondies des périodes ; une période sans moyenne pour l'élève est laissée de côté | 3d | ✅ |
 | H89 | « Partie manquante = 0 » ne joue que si la classe entière n'a pas eu l'épreuve ; un élève absent à la composition passée par la classe a sa moyenne sur ce qu'il a fait (règle des absences) | 3d | ✅ |
 | H90 | Clôturer une classe déjà close ne change rien ; la réouverture demande un motif (3 à 300 caractères) ; l'historique des clôtures n'est jamais supprimé ; une matière facultative est classée en fin de liste, les autres par coefficient décroissant | 3d | ✅ |
-| H91 | L'appel se fait pour aujourd'hui ou un jour passé de l'année (jamais dans le futur) ; un appel déjà fait peut être corrigé (sans écraser la saisie d'un autre) | 3e | ⏳ |
-| H92 | Sans réseau, l'appel se fait pour le jour même, dans la page hors connexion, pour les classes ouvertes au moins une fois avec du réseau dans « Appel » | 3e | ⏳ |
-| H93 | Un enseignant fait l'appel des classes où il enseigne ou dont il est professeur principal (appel par cours : ses matières) ; direction et secrétariat : toutes les classes | 3e | ⏳ |
-| H94 | Un élève remis « présent » perd la justification de ce créneau ; l'appel n'est pas verrouillé par la clôture des notes | 3e | ⏳ |
-| H95 | Justification par élève et par journée (toutes ses absences et retards non justifiés du jour), motif obligatoire, photo facultative rangée avec les pièces de l'élève | 3e | ⏳ |
-| H96 | Texte du SMS : école, élève, classe, date et créneaux manqués, demande de justifier au secrétariat ; pas de responsable principal avec téléphone : pas de SMS | 3e | ⏳ |
+| H91 | L'appel se fait pour aujourd'hui ou un jour passé de l'année (jamais dans le futur) ; un appel déjà fait peut être corrigé (sans écraser la saisie d'un autre) | 3e | ✅ |
+| H92 | Sans réseau, l'appel se fait pour le jour même, dans la page hors connexion, pour les classes ouvertes au moins une fois avec du réseau dans « Appel » | 3e | ✅ |
+| H93 | Un enseignant fait l'appel des classes où il enseigne ou dont il est professeur principal (appel par cours : ses matières) ; direction et secrétariat : toutes les classes | 3e | ✅ |
+| H94 | Un élève remis « présent » perd la justification de ce créneau ; l'appel n'est pas verrouillé par la clôture des notes | 3e | ✅ |
+| H95 | Justification par élève et par journée (toutes ses absences et retards non justifiés du jour), motif obligatoire, photo facultative rangée avec les pièces de l'élève | 3e | ✅ |
+| H96 | Texte du SMS : école, élève, classe, date et créneaux manqués, demande de justifier au secrétariat ; pas de responsable principal avec téléphone : pas de SMS | 3e | ✅ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

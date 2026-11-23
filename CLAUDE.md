@@ -35,7 +35,7 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 4f – Tableau de bord de la direction (`/tableau-de-bord`, `src/modules/dashboard/`) : effectifs,
     encaissements et recouvrement, résultats et taux de réussite, absentéisme, paiements en ligne ; 0,7 s pour
     2 000 élèves (critère : 3 s). Migration 0042 : la règle RLS « parent » est calculée une fois par requête —
-    toute nouvelle règle doit écrire `(SELECT app.current_user_is_parent_only())` ; hypothèses H128 à H132 à valider
+    toute nouvelle règle doit écrire `(SELECT app.current_user_is_parent_only())` ; hypothèses H128 à H132 validées (D27)
 - Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.

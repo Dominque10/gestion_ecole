@@ -41,5 +41,9 @@ test("le directeur télécharge la liste des élèves en Excel et celle des clas
   await classes.getByRole("button", { name: "PDF" }).click();
   const pdfFile = await pdf;
   expect(pdfFile.suggestedFilename()).toBe("classes-2026-2027.pdf");
-  expect(readFileSync(await pdfFile.path()).subarray(0, 4).toString()).toBe("%PDF");
+  expect(
+    readFileSync(await pdfFile.path())
+      .subarray(0, 4)
+      .toString(),
+  ).toBe("%PDF");
 });

@@ -1,0 +1,15 @@
+.git
+.github
+.next
+node_modules
+storage
+test-results
+playwright-report
+coverage
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.tsbuildinfo
+docs
+backups

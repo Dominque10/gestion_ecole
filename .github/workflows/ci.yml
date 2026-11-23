@@ -38,3 +38,58 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test
       - run: pnpm test:e2e
+
+  # Mise en service (Sa) : images de production construites et démarrées avec Compose, puis test de
+  # fumée en HTTPS contre les conteneurs (Docker ne tourne pas sur le poste de développement).
+  docker:
+    runs-on: ubuntu-latest
+    env:
+      COMPOSE: docker compose -f docker-compose.prod.yml --env-file .env.production
+      SMOKE_SUPERADMIN_EMAIL: admin@exemple.cg
+      SMOKE_SUPERADMIN_PASSWORD: Mot-de-passe-ci-2026
+    steps:
+      - uses: actions/checkout@v4
+      - name: Réglages de production de test
+        run: |
+          cat > .env.production <<EOF
+          APP_DOMAIN=localhost
+          ACME_EMAIL=ci@exemple.cg
+          POSTGRES_PASSWORD=$(openssl rand -hex 24)
+          APP_DB_PASSWORD=$(openssl rand -hex 24)
+          AUTH_SECRET=$(openssl rand -base64 32)
+          APP_VERSION=ci
+          EOF
+      - name: Construction des images
+        run: $COMPOSE build
+      - name: Démarrage
+        run: $COMPOSE up -d
+      - name: Création du super-admin (script d'installation)
+        run: >
+          $COMPOSE run --rm -e SUPERADMIN_PASSWORD=$SMOKE_SUPERADMIN_PASSWORD app
+          node scripts/create-superadmin.mts --email $SMOKE_SUPERADMIN_EMAIL --name "Admin CI"
+      - name: Le site répond en HTTPS, HTTP redirige
+        run: |
+          for i in $(seq 1 60); do curl -skf https://localhost/connexion -o /dev/null && break; sleep 3; done
+          curl -skf https://localhost/connexion | grep -q "Se connecter"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost/connexion)" = "308"
+      - name: Le worker est démarré
+        run: |
+          for i in $(seq 1 30); do $COMPOSE logs worker | grep -q "\[worker\] démarré" && exit 0; sleep 2; done
+          $COMPOSE logs worker; exit 1
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Test de fumée contre les conteneurs
+        run: pnpm exec playwright test -c playwright.smoke.config.ts
+        env:
+          SMOKE_URL: https://localhost
+      - name: Journaux en cas d'échec
+        if: failure()
+        run: $COMPOSE ps -a && $COMPOSE logs --tail 200
+      - name: Arrêt
+        if: always()
+        run: $COMPOSE down -v

@@ -1,0 +1,10 @@
+# Proxy HTTPS de production (mise en service, Sa). Caddy obtient et renouvelle seul le certificat
+# Let's Encrypt du domaine ; HTTP redirige vers HTTPS.
+{
+	email {$ACME_EMAIL}
+}
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}

@@ -71,3 +71,4 @@
 | 2026-11-23 | **D25 — Annonces** (porteur du projet) : publiées par le directeur **et le secrétariat** ; case « envoyer aussi par SMS/WhatsApp » **cochée par défaut**. | Porteur du projet |
 | 2026-11-23 | **D26 — Hypothèses H124 à H127 (étape 4e) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D27 — Hypothèses H128 à H132 (étape 4f, tableau de bord) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
+| 2026-11-23 | **D28 — Hypothèses H133 à H137 (étape 4g, exports) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |

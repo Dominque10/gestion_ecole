@@ -34,6 +34,7 @@ const MENU: {
     visible: canBrowseStudents,
   },
   { href: "/listes", label: "nav.lists", action: "students:read", visible: canBrowseStudents },
+  { href: "/exports", label: "nav.exports", action: "students:read", visible: canBrowseStudents },
   { href: "/parent", label: "nav.parentSpace", action: "parent:view" },
   { href: "/notes", label: "nav.grades", action: "grades:write" },
   { href: "/appel", label: "nav.rollCall", action: "attendance:write" },

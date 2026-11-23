@@ -8,7 +8,8 @@ import { getReceipt } from "@/modules/finance/payments";
 import type { MembershipRole, Principal } from "@/server/auth/permissions";
 import { withSchool } from "@/server/db/client";
 import { memberships, schools } from "@/server/db/schema";
-import { todayInBrazzaville } from "@/lib/dates";
+import { formatDateTime, todayInBrazzaville } from "@/lib/dates";
+import { buildExport, ExportRequestSchema } from "@/modules/exports/lists";
 import { authorize } from "@/server/auth/permissions";
 import { StudentError } from "@/modules/students/errors";
 import {
@@ -27,6 +28,7 @@ import { imageTypeFromKey } from "@/server/storage/images";
 import { getBulletins, type Bulletin, type BulletinSet } from "@/modules/grading/bulletins";
 import { getPublishedBulletin } from "@/modules/parents/child";
 import { bulletinsHtml } from "./bulletin-template";
+import { exportHtml } from "./export-template";
 import { htmlToPdf } from "./pdf";
 import { receiptHtml } from "./receipt-template";
 import { receiptVerifyUrl } from "./verification";
@@ -48,6 +50,8 @@ export const DocumentRequestSchema = z.discriminatedUnion("kind", [
   }),
   // Bulletin publié d'un enfant, pour son parent (4b).
   z.object({ kind: z.literal("bulletin"), reportCardId: z.uuid() }),
+  // Export d'une liste en PDF (4g) ; la même liste se télécharge aussi en Excel.
+  z.object({ kind: z.literal("export"), request: ExportRequestSchema }),
 ]);
 export type DocumentRequest = z.infer<typeof DocumentRequestSchema>;
 
@@ -92,6 +96,8 @@ export async function checkDocumentRequest(
       if (!found) throw new StudentError("documentNotFound");
       return bulletinFileName(found.bulletin);
     }
+    case "export":
+      return `${(await buildExport(principal, data.request)).fileName}.pdf`;
   }
 }
 
@@ -231,6 +237,11 @@ export async function renderDocument(raw: unknown): Promise<RenderedDocument> {
         printedOn: found.publishedAt.toISOString(),
       });
       return pdfResult(bulletinFileName(found.bulletin), html);
+    }
+    case "export": {
+      const table = await buildExport(principal, job.request.request);
+      const html = exportHtml(await schoolHeader(principal), table, formatDateTime(new Date()));
+      return pdfResult(`${table.fileName}.pdf`, html);
     }
   }
 }

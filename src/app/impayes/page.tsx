@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { ExportButtons } from "@/components/export-card";
 import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
 import { formatDay } from "@/lib/dates";
@@ -95,6 +96,7 @@ async function Content({ searchParams }: Props) {
         <p>{t("arrears.empty")}</p>
       ) : (
         <>
+          <ExportButtons request={{ list: "arrears", yearId: year.id, classId }} />
           <p className="text-lg font-semibold">
             {t("arrears.total", { montant: formatXAF(total), n: rows.length })}
           </p>

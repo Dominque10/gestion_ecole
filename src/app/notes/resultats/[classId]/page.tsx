@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ExportButtons } from "@/components/export-card";
 import { Suspense } from "react";
 import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
@@ -75,6 +76,7 @@ async function Content({ params, searchParams }: Props) {
           {t("council.annualLink")}
         </Link>
         <AnnualView results={data.annual} />
+        <ExportButtons request={{ list: "results", classId, periodKey: "annee" }} />
       </>
     );
   }
@@ -95,6 +97,9 @@ async function Content({ params, searchParams }: Props) {
         {t("council.link")}
       </Link>
       <PeriodView results={results} />
+      <ExportButtons
+        request={{ list: "results", classId: results.classId, periodKey: results.period.id }}
+      />
     </>
   );
 }

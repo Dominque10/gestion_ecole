@@ -1,4 +1,5 @@
 import "server-only";
+import { ExportError } from "@/modules/exports/lists";
 import type { z } from "zod";
 import { t } from "@/i18n";
 import { SettingsError } from "@/modules/settings/errors";
@@ -49,6 +50,7 @@ export function refusalMessage(error: unknown): string {
       champ: error.field ?? "",
     });
   }
+  if (error instanceof ExportError) return t(`exports.errors.${error.code}`);
   if (error instanceof ForbiddenError) return t("form.forbidden");
   throw error;
 }

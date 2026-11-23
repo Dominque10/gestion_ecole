@@ -23,7 +23,7 @@ function day(date: string | null): string {
   return text.replace(/^1 /, "1er ");
 }
 
-function header(school: SchoolHeader): string {
+export function header(school: SchoolHeader): string {
   const logo = school.logo
     ? `<td style="width:60px"><img src="${school.logo}" alt="" style="max-height:56px;max-width:56px"></td>`
     : "";

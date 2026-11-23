@@ -135,7 +135,7 @@ Règles tranchées par le porteur : décision D10 (`docs/plan-phase-3.md`). Hypo
 | H82 | Sans réseau, la saisie se fait dans la page « Notes hors connexion » (ouverte d'elle-même quand une page ne charge pas) ; seules les matières ouvertes au moins une fois avec du réseau sur ce téléphone y sont disponibles (élèves, évaluations et notes du moment) | 3c | ✅ |
 | H83 | Les copies sont rangées par compte sur le téléphone ; à la déconnexion, les copies (noms d'élèves, notes) sont effacées, mais pas les saisies encore en attente d'envoi | 3c | ✅ |
 | H84 | Envoi automatique à l'ouverture d'une page, au retour du réseau, puis toutes les 30 s tant qu'il reste des saisies ; une note en conflit n'est jamais envoyée d'elle-même : l'enseignant choisit « garder ma note » ou « garder la note actuelle » | 3c | ✅ |
-| H85 | Une évaluation créée sur le téléphone puis refusée à l'envoi (ex. année changée, matière retirée) reste sur le téléphone avec le motif, ses notes aussi ; l'enseignant peut la supprimer du téléphone | 3c | ⏳ |
+| H85 | Une évaluation créée sur le téléphone puis refusée à l'envoi (ex. année changée, matière retirée) reste sur le téléphone avec le motif, ses notes aussi ; l'enseignant peut la supprimer du téléphone | 3c | ✅ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

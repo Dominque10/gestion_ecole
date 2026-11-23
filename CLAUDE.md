@@ -29,7 +29,7 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 3b – Évaluations et saisie des notes (tables `assessments`, `grades` ; pages `/notes`) ;
     hypothèses H75 à H81 validées (D12)
   - ✅ 3c – Hors connexion : application installable, service worker, saisie sans réseau
-    (`/notes/hors-ligne`), envoi automatique, conflits à trancher ; hypothèses H82 à H84 validées (D12), H85 à trancher
+    (`/notes/hors-ligne`), envoi automatique, conflits à trancher ; hypothèses H82 à H85 validées (D12)
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).

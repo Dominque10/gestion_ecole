@@ -8,6 +8,7 @@ import { formatXAF } from "@/lib/money";
 import { todayInBrazzaville } from "@/lib/dates";
 import { withSchool, type Tx } from "@/server/db/client";
 import {
+  announcements,
   attendance,
   classes,
   enrollments,
@@ -38,6 +39,7 @@ const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 export const NoticeJobSchema = z.union([
   z.object({ type: z.literal("receipt"), ...base, paymentId: z.uuid() }),
   z.object({ type: z.literal("bulletin"), ...base, reportCardId: z.uuid() }),
+  z.object({ type: z.literal("announcement"), ...base, announcementId: z.uuid() }),
   z.object({ type: z.literal("absence").optional(), ...base, date: isoDate }),
 ]);
 export type NoticeJob = z.infer<typeof NoticeJobSchema>;
@@ -53,10 +55,12 @@ export async function scheduleNotice(job: NoticeJob): Promise<void> {
       ? `receipt:${job.paymentId}`
       : job.type === "bulletin"
         ? `bulletin:${job.reportCardId}:${job.enrollmentId}`
-        : `${job.enrollmentId}:${job.date}`;
+        : job.type === "announcement"
+          ? `announcement:${job.announcementId}:${job.enrollmentId}`
+          : `${job.enrollmentId}:${job.date}`;
   await boss.send(NOTIFICATIONS_QUEUE, job, {
     singletonKey: key,
-    startAfter: job.type === "receipt" || job.type === "bulletin" ? 0 : ABSENCE_DELAY_SECONDS,
+    startAfter: job.type === undefined || job.type === "absence" ? ABSENCE_DELAY_SECONDS : 0,
   });
 }
 
@@ -298,6 +302,31 @@ export async function processNotice(
         values: {
           periode: card.kind === "annual" ? t("notifications.annual") : (card.periodLabel ?? ""),
         },
+      },
+      providers,
+    );
+  }
+
+  if (job.type === "announcement") {
+    const note = await withSchool(ctx, async (tx) => {
+      const [row] = await tx
+        .select({
+          title: announcements.title,
+          body: announcements.body,
+          createdAt: announcements.createdAt,
+        })
+        .from(announcements)
+        .where(eq(announcements.id, job.announcementId));
+      return row ?? null;
+    });
+    if (!note) return "nothingToSend";
+    return deliver(
+      {
+        ...common,
+        kind: "announcement",
+        date: todayInBrazzaville(note.createdAt),
+        referenceId: job.announcementId,
+        values: { message: `${note.title} : ${note.body}` },
       },
       providers,
     );

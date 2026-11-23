@@ -281,6 +281,20 @@
       "when": 1795406113287,
       "tag": "0039_notifications_channels",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1795407235771,
+      "tag": "0040_announcements",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1795407237366,
+      "tag": "0041_announcements_rls",
+      "breakpoints": true
     }
   ]
 }

@@ -57,6 +57,7 @@ export const fr = {
     rollCall: "Appel",
     parentSpace: "Espace parents (mes enfants)",
     notifications: "Messages aux parents",
+    announcements: "Annonces aux parents",
     absences: "Absences à justifier",
   },
   form: {
@@ -1066,6 +1067,31 @@ export const fr = {
     noClass: "classe pas encore attribuée",
     backToChildren: "Mes enfants",
   },
+  announcements: {
+    title: "Annonces aux parents",
+    intro:
+      "Une annonce apparaît dans l'espace parents des familles concernées ; elle peut aussi partir par SMS ou WhatsApp (un message par famille).",
+    audience: "Pour qui ?",
+    audiences: {
+      school: "Toute l'école",
+      level: "Un niveau",
+      class: "Une classe",
+    },
+    level: "Niveau",
+    class: "Classe",
+    titleLabel: "Titre",
+    body: "Texte de l'annonce",
+    count: "{n} / 300 caractères",
+    send: "Envoyer aussi par SMS ou WhatsApp (un message par famille, compté dans le plafond mensuel)",
+    publish: "Publier l'annonce",
+    published: "Annonce publiée dans l'espace parents.",
+    publishedWithMessages: "Annonce publiée ; {n} message(s) en cours d'envoi aux familles.",
+    listTitle: "Annonces de l'année",
+    none: "Aucune annonce pour l'instant.",
+    messages: "{n} message(s) envoyé(s)",
+    noMessages: "sans message",
+    parentTitle: "Annonces de l'école",
+  },
   notifications: {
     title: "Messages aux parents",
     intro:
@@ -1458,6 +1484,8 @@ export const fr = {
         "Grille invalide : vérifiez les matières et les coefficients (entiers de 1 à 20).",
       gradingInvalid:
         "Règles de calcul invalides : vérifiez chaque choix et les seuils des mentions (0 à 20).",
+      announcementInvalid:
+        "Annonce invalide : un titre (80 caractères au plus), un texte (300 au plus) et le public visé.",
       notificationsInvalid:
         "Réglages invalides : vérifiez le canal et le plafond (montant entier en FCFA).",
       subjectHasAssessments:

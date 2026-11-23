@@ -16,6 +16,10 @@ import {
   type ChildBulletins,
 } from "@/modules/parents/child";
 import { requireAction } from "@/server/auth/session";
+import {
+  getChildAnnouncements,
+  type ChildAnnouncement,
+} from "@/modules/announcements/announcements";
 
 export const metadata: Metadata = { title: t("parent.loginTitle") };
 
@@ -44,10 +48,11 @@ async function Content({ params }: Props) {
   const child = await getChildSummary(principal, enrollmentId);
   // Enfant d'une autre école (ou d'un autre parent) : retour à la liste, qui sait basculer la session.
   if (!child) redirect("/parent");
-  const [account, bulletins, attendance] = await Promise.all([
+  const [account, bulletins, attendance, news] = await Promise.all([
     getChildAccount(principal, enrollmentId),
     getChildBulletins(principal, enrollmentId),
     getChildAttendance(principal, enrollmentId),
+    getChildAnnouncements(principal, enrollmentId),
   ]);
   return (
     <>
@@ -65,6 +70,7 @@ async function Content({ params }: Props) {
           {child.yearLabel} · {child.matricule}
         </p>
       </section>
+      <News items={news} />
       <Fees account={account} enrollmentId={enrollmentId} />
       <Bulletins data={bulletins} />
       <Absences data={attendance} />
@@ -228,6 +234,29 @@ function Absences({ data }: { data: ChildAttendance }) {
           ))}
         </ul>
       )}
+    </section>
+  );
+}
+
+function News({ items }: { items: ChildAnnouncement[] }) {
+  if (items.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-xl font-semibold">{t("announcements.parentTitle")}</h2>
+      <ul className="flex flex-col gap-2">
+        {items.slice(0, 3).map((a) => (
+          <li
+            key={a.id}
+            className="flex flex-col gap-1 rounded-lg border-l-4 border-blue-700 bg-blue-50 p-3"
+          >
+            <span className="font-semibold">{a.title}</span>
+            <span>{a.body}</span>
+            <span className="text-sm text-zinc-600">
+              {formatDay(a.createdAt.toISOString().slice(0, 10))}
+            </span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }

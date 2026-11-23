@@ -39,6 +39,8 @@ const SCHOOL_ACTIONS = {
   "parent:view": ["parent"],
   /** Messages aux parents : canal, plafond, modèles, journal des envois (4d). */
   "notifications:templates": ["director"],
+  /** Annonces aux parents (école, niveau, classe) — 4e. */
+  "announcements:send": ["director", "secretary"],
   /** Clôture journalière de sa caisse ; réouverture par le directeur (tracée). */
   "cash:close": ["accountant"],
   "cash:reopen": ["director"],

@@ -68,3 +68,4 @@
 | 2026-11-23 | **D22 — Hypothèses H111 à H113 (étape 4b) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D23 — Hypothèses H114 à H118 (étape 4c) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D24 — Hypothèses H119 à H123 (étape 4d) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
+| 2026-11-23 | **D25 — Annonces** (porteur du projet) : publiées par le directeur **et le secrétariat** ; case « envoyer aussi par SMS/WhatsApp » **cochée par défaut**. | Porteur du projet |

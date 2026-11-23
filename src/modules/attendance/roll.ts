@@ -57,14 +57,19 @@ async function guarded<T>(fn: () => Promise<T>): Promise<T> {
   }
 }
 
-export type RollClass = { classId: string; className: string; levelName: string };
+export type RollClass = { classId: string; className: string; levelId: string; levelName: string };
 
 /** Classes de l'année active où le lecteur peut faire l'appel. */
 export async function listRollClasses(principal: Principal): Promise<RollClass[]> {
   const ctx = rollContext(principal);
   return withSchool(ctx, (tx) =>
     tx
-      .select({ classId: classes.id, className: classes.name, levelName: levels.name })
+      .select({
+        classId: classes.id,
+        className: classes.name,
+        levelId: levels.id,
+        levelName: levels.name,
+      })
       .from(classes)
       .innerJoin(levels, eq(levels.id, classes.levelId))
       .innerJoin(academicYears, eq(academicYears.id, classes.academicYearId))

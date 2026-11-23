@@ -15,7 +15,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { schools, users } from "./platform";
-import { classSubjects, timeSlots } from "./settings";
+import { academicYears, classes, classSubjects, levels, timeSlots } from "./settings";
 import { enrollments, guardians, studentDocuments } from "./students";
 
 // Appel et absences (M5, sous-étape 3e). Règles RLS : migration « attendance_rls ».
@@ -127,5 +127,64 @@ export const notifications = pgTable(
       .where(sql`${t.referenceId} is not null`),
     check("notifications_cost", sql`${t.cost} >= 0`),
     index("notifications_school_idx").on(t.schoolId, t.createdAt),
+  ],
+);
+
+// --- Annonces de l'école (4e) ---------------------------------------------------------------------
+
+export const announcementAudience = pgEnum("announcement_audience", ["school", "level", "class"]);
+
+/**
+ * Annonce aux parents : toute l'école, un niveau ou une classe, pour l'année en cours. Lisible dans
+ * l'espace parents ; envoyée aussi par message si l'auteur l'a demandé (un message par famille).
+ */
+export const announcements = pgTable(
+  "announcements",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    academicYearId: uuid("academic_year_id").notNull(),
+    audience: announcementAudience("audience").notNull(),
+    levelId: uuid("level_id"),
+    classId: uuid("class_id"),
+    title: text("title").notNull(),
+    body: text("body").notNull(),
+    sendMessage: boolean("send_message").notNull(),
+    /** Familles à qui un message a été programmé. */
+    messageCount: integer("message_count").notNull().default(0),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      name: "announcements_year_fk",
+      columns: [t.academicYearId, t.schoolId],
+      foreignColumns: [academicYears.id, academicYears.schoolId],
+    }),
+    foreignKey({
+      name: "announcements_level_fk",
+      columns: [t.levelId, t.schoolId],
+      foreignColumns: [levels.id, levels.schoolId],
+    }),
+    foreignKey({
+      name: "announcements_class_fk",
+      columns: [t.classId, t.academicYearId, t.schoolId],
+      foreignColumns: [classes.id, classes.academicYearId, classes.schoolId],
+    }),
+    check(
+      "announcements_audience",
+      sql`(${t.audience} = 'school' and ${t.levelId} is null and ${t.classId} is null)
+        or (${t.audience} = 'level' and ${t.levelId} is not null and ${t.classId} is null)
+        or (${t.audience} = 'class' and ${t.classId} is not null and ${t.levelId} is null)`,
+    ),
+    check(
+      "announcements_lengths",
+      sql`length(${t.title}) between 1 and 80 and length(${t.body}) between 1 and 300`,
+    ),
+    index("announcements_school_idx").on(t.schoolId, t.createdAt),
   ],
 );

@@ -37,6 +37,7 @@ const MENU: {
   { href: "/notes", label: "nav.grades", action: "grades:write" },
   { href: "/appel", label: "nav.rollCall", action: "attendance:write" },
   { href: "/absences", label: "nav.absences", action: "attendance:justify" },
+  { href: "/annonces", label: "nav.announcements", action: "announcements:send" },
   { href: "/caisse", label: "nav.cash", action: "payments:collect" },
   { href: "/caisse/cloture", label: "nav.closure", action: "cash:close" },
   { href: "/impayes", label: "nav.arrears", action: "dashboard:finance" },

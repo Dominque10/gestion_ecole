@@ -30,6 +30,7 @@ export type SettingsErrorCode =
   | "gradingInvalid"
   | "subjectHasAssessments"
   | "notificationsInvalid"
+  | "announcementInvalid"
   | "classNameTaken"
   | "classNotFound"
   | "classInUse"

@@ -267,3 +267,64 @@ export const cashClosures = pgTable(
     index("cash_closures_school_day_idx").on(t.schoolId, t.day),
   ],
 );
+
+// --- Paiement en ligne (4c) ----------------------------------------------------------------------
+
+export const mobileOperator = pgEnum("mobile_operator", ["airtel", "mtn"]);
+export const intentStatus = pgEnum("payment_intent_status", [
+  "pending",
+  "succeeded",
+  "failed",
+  "expired",
+]);
+
+/**
+ * Intention de paiement en ligne (Airtel Money, MTN MoMo) : créée quand le parent valide, en attente
+ * de la confirmation de l'opérateur. Une fois confirmée, elle donne UN paiement (référence du
+ * prestataire unique : un message de confirmation reçu deux fois ne paie pas deux fois).
+ */
+export const paymentIntents = pgTable(
+  "payment_intents",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    academicYearId: uuid("academic_year_id").notNull(),
+    enrollmentId: uuid("enrollment_id").notNull(),
+    /** Échéances choisies par le parent (entières, décision D20). */
+    invoiceIds: uuid("invoice_ids").array().notNull(),
+    amount: integer("amount").notNull(),
+    phone: text("phone").notNull(),
+    operator: mobileOperator("operator").notNull(),
+    status: intentStatus("status").notNull().default("pending"),
+    /** Prestataire (« fake » tant qu'aucun compte marchand n'existe) et sa référence de transaction. */
+    provider: text("provider").notNull(),
+    providerRef: text("provider_ref"),
+    /** Référence de l'opérateur (Airtel, MTN), reportée sur le reçu. */
+    operatorRef: text("operator_ref"),
+    paymentId: uuid("payment_id").references(() => payments.id),
+    failureReason: text("failure_reason"),
+    createdBy: uuid("created_by")
+      .notNull()
+      .references(() => users.id),
+    lastCheckedAt: timestamp("last_checked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      name: "payment_intents_enrollment_fk",
+      columns: [t.enrollmentId, t.academicYearId, t.schoolId],
+      foreignColumns: [enrollments.id, enrollments.academicYearId, enrollments.schoolId],
+    }),
+    unique("payment_intents_provider_ref").on(t.provider, t.providerRef),
+    unique("payment_intents_payment").on(t.paymentId),
+    check("payment_intents_amount", sql`${t.amount} between 1 and 100000000`),
+    check(
+      "payment_intents_succeeded",
+      sql`(${t.status} = 'succeeded') = (${t.paymentId} is not null)`,
+    ),
+    index("payment_intents_school_idx").on(t.schoolId, t.createdAt),
+  ],
+);

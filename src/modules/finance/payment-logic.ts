@@ -55,3 +55,28 @@ export function formatReceiptNumber(prefix: string, yearStart: number, number: n
   if (!Number.isInteger(number) || number < 1) throw new Error("Numéro de reçu invalide");
   return `${prefix}-${yearStart}-${String(number).padStart(5, "0")}`;
 }
+
+/**
+ * Paiement en ligne (4c) : l'argent est déjà reçu, on ne peut pas le refuser. Il va d'abord aux
+ * échéances choisies par le parent, puis aux autres ; ce qui dépasse le reste dû (une échéance réglée
+ * au guichet entre-temps) est un trop-perçu, signalé à la direction.
+ */
+export function allocateOnline(
+  amount: number,
+  open: readonly OpenInvoice[],
+  selectedIds: readonly string[],
+): { parts: { invoiceId: string; amount: number }[]; excess: number } {
+  const selected = open.filter((i) => selectedIds.includes(i.id));
+  const others = open.filter((i) => !selectedIds.includes(i.id));
+  const parts: { invoiceId: string; amount: number }[] = [];
+  let left = amount;
+  for (const group of [selected, others]) {
+    const room = group.reduce((sum, i) => sum + Math.max(0, i.remaining), 0);
+    const share = Math.min(left, room);
+    if (share > 0) {
+      parts.push(...allocate(share, group));
+      left -= share;
+    }
+  }
+  return { parts, excess: left };
+}

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { allocate, formatReceiptNumber, OverpaymentError, type OpenInvoice } from "./payment-logic";
+import {
+  allocate,
+  allocateOnline,
+  formatReceiptNumber,
+  OverpaymentError,
+  type OpenInvoice,
+} from "./payment-logic";
 
 const inv = (
   id: string,
@@ -71,5 +77,53 @@ describe("formatReceiptNumber", () => {
     expect(formatReceiptNumber("SJB", 2026, 1)).toBe("SJB-2026-00001");
     expect(formatReceiptNumber("SJB", 2026, 123456)).toBe("SJB-2026-123456");
     expect(() => formatReceiptNumber("SJB", 2026, 0)).toThrow();
+  });
+});
+
+describe("Paiement en ligne : répartition (4c)", () => {
+  const inv = (id: string, remaining: number, dueDate: string) => ({
+    id,
+    remaining,
+    dueDate,
+    mandatory: true,
+    feeName: "Scolarité",
+    installmentNumber: 1,
+  });
+  const open = [
+    inv("t1", 30_000, "2026-10-15"),
+    inv("t2", 50_000, "2027-01-15"),
+    inv("t3", 50_000, "2027-04-15"),
+  ];
+
+  it("d'abord les échéances choisies, même si une plus ancienne reste due", () => {
+    expect(allocateOnline(50_000, open, ["t2"])).toEqual({
+      parts: [{ invoiceId: "t2", amount: 50_000 }],
+      excess: 0,
+    });
+  });
+
+  it("le surplus va aux autres échéances, dans l'ordre habituel", () => {
+    expect(allocateOnline(60_000, open, ["t2"])).toEqual({
+      parts: [
+        { invoiceId: "t2", amount: 50_000 },
+        { invoiceId: "t1", amount: 10_000 },
+      ],
+      excess: 0,
+    });
+  });
+
+  it("au-delà de tout le reste dû : trop-perçu, jamais refusé", () => {
+    expect(allocateOnline(150_000, open, ["t1"])).toEqual({
+      parts: [
+        { invoiceId: "t1", amount: 30_000 },
+        { invoiceId: "t2", amount: 50_000 },
+        { invoiceId: "t3", amount: 50_000 },
+      ],
+      excess: 20_000,
+    });
+    expect(allocateOnline(10_000, [inv("t1", 0, "2026-10-15")], ["t1"])).toEqual({
+      parts: [],
+      excess: 10_000,
+    });
   });
 });

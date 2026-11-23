@@ -68,7 +68,7 @@ function financeReadContext(principal: Principal) {
 }
 
 /** Échéances ouvertes d'une inscription avec leur reste à payer, verrouillées pour la transaction. */
-async function openInvoices(
+export async function openInvoices(
   tx: Tx,
   enrollmentId: string,
 ): Promise<(OpenInvoice & { kind: string })[]> {
@@ -89,7 +89,7 @@ async function openInvoices(
 }
 
 /** Prochain numéro de reçu de l'année : compteur verrouillé, continu, sans trou. */
-async function nextReceiptNumber(tx: Tx, schoolId: string, yearId: string): Promise<string> {
+export async function nextReceiptNumber(tx: Tx, schoolId: string, yearId: string): Promise<string> {
   const [counter] = await tx
     .update(academicYears)
     .set({ lastReceiptNumber: sql`${academicYears.lastReceiptNumber} + 1` })
@@ -106,7 +106,7 @@ async function nextReceiptNumber(tx: Tx, schoolId: string, yearId: string): Prom
  * Validation automatique (décision A3) : une préinscription devient inscription dès que toutes ses
  * échéances d'inscription sont soldées. Sans frais d'inscription dans la grille, rien d'automatique.
  */
-async function autoValidate(tx: Tx, schoolId: string, enrollmentId: string, userId: string) {
+export async function autoValidate(tx: Tx, schoolId: string, enrollmentId: string, userId: string) {
   const [enrollment] = await tx
     .select({ status: enrollments.status })
     .from(enrollments)

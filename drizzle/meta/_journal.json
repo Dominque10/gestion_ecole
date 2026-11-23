@@ -260,6 +260,20 @@
       "when": 1795403077996,
       "tag": "0036_bulletin_blocking",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1795404396024,
+      "tag": "0037_payment_intents",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1795404397645,
+      "tag": "0038_payment_intents_rls",
+      "breakpoints": true
     }
   ]
 }

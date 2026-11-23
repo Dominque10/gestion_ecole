@@ -204,3 +204,16 @@ export async function selectChild(
     return child;
   });
 }
+
+/** Numéro du compte, au format local (« 06 620 00 01 »), pour préremplir le paiement en ligne. */
+export async function getUserPhone(userId: string): Promise<string | null> {
+  const [row] = await withAuth((tx) =>
+    tx.select({ phone: users.phone }).from(users).where(eq(users.id, userId)),
+  );
+  const phone = row?.phone;
+  if (!phone) return null;
+  const local = phone.startsWith("+242") ? phone.slice(4) : phone;
+  return /^0\d{8}$/.test(local)
+    ? `${local.slice(0, 2)} ${local.slice(2, 5)} ${local.slice(5, 7)} ${local.slice(7)}`
+    : phone;
+}

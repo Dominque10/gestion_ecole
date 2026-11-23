@@ -20,7 +20,11 @@ export type FinanceErrorCode =
   | "cancellationNotFound"
   | "cashClosed"
   | "alreadyClosed"
-  | "closureNotFound";
+  | "closureNotFound"
+  | "onlineInvalid"
+  | "onlinePhone"
+  | "onlinePending"
+  | "onlineProviderDown";
 
 export class FinanceError extends Error {
   constructor(

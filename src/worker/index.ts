@@ -4,7 +4,14 @@
 import { existsSync } from "node:fs";
 import { PgBoss } from "pg-boss";
 import { closeDb } from "@/server/db/client";
-import { DOCUMENTS_QUEUE, JOB_SCHEMA, NOTIFICATIONS_QUEUE } from "@/server/db/setup";
+import {
+  DOCUMENTS_QUEUE,
+  JOB_SCHEMA,
+  NOTIFICATIONS_QUEUE,
+  PAYMENTS_QUEUE,
+} from "@/server/db/setup";
+import { checkIntent, reconcileDay } from "@/modules/finance/online";
+import { todayInBrazzaville } from "@/lib/dates";
 import { processAbsenceNotice } from "@/modules/attendance/notices";
 import { renderDocument } from "@/modules/documents/documents";
 import { closePdfBrowser } from "@/modules/documents/pdf";
@@ -33,7 +40,7 @@ async function startQueue(): Promise<PgBoss> {
     queue.on("error", (error) => console.error("[worker] pg-boss :", error.message));
     try {
       await queue.start();
-      for (const name of [DOCUMENTS_QUEUE, NOTIFICATIONS_QUEUE]) {
+      for (const name of [DOCUMENTS_QUEUE, NOTIFICATIONS_QUEUE, PAYMENTS_QUEUE]) {
         if (!(await queue.getQueue(name))) throw new Error(`file « ${name} » absente`);
       }
       return queue;
@@ -72,10 +79,35 @@ await boss.work(NOTIFICATIONS_QUEUE, { batchSize: 1, pollingIntervalSeconds: 5 }
     throw error;
   }
 });
-console.log("[worker] prêt : en attente de documents à produire et de SMS à envoyer");
+await boss.work(PAYMENTS_QUEUE, { batchSize: 1, pollingIntervalSeconds: 5 }, async ([job]) => {
+  const outcome = await checkIntent(job.data);
+  console.log(`[worker] paiement en ligne ${job.id} : ${outcome}`);
+  return { outcome };
+});
+
+// Réconciliation quotidienne du paiement en ligne : la veille, une fois par jour (vérifié chaque heure).
+let reconciledDay = "";
+async function reconcileYesterday() {
+  const yesterday = todayInBrazzaville(new Date(Date.now() - 24 * 3600 * 1000));
+  if (reconciledDay === yesterday) return;
+  try {
+    const result = await reconcileDay(yesterday);
+    reconciledDay = yesterday;
+    console.log(
+      `[worker] réconciliation du ${yesterday} : ${result.checked} transaction(s), ${result.recovered} rattrapée(s)`,
+    );
+  } catch (error) {
+    console.error("[worker] réconciliation en échec :", (error as Error).message);
+  }
+}
+const reconcileTimer = setInterval(() => void reconcileYesterday(), 3600 * 1000);
+void reconcileYesterday();
+
+console.log("[worker] prêt : documents, SMS et paiements en ligne");
 
 async function shutdown() {
   console.log("[worker] arrêt…");
+  clearInterval(reconcileTimer);
   await boss.stop({ graceful: true, timeout: 10_000 });
   await closePdfBrowser();
   await closeDb();

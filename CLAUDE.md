@@ -26,6 +26,8 @@ Contraintes du terrain à garder en tête en permanence :
     toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 validées (D21)
   - ✅ 4b – Espace parents : frais et reçus, bulletins publiés (option de blocage B7), absences, sur une page
     d'environ 175 Ko (critère : 300 Ko) ; hypothèses H111 à H113 validées (D22)
+  - ✅ 4c – Paiement en ligne (faux prestataire) : intention, confirmation signée et idempotente, interrogation,
+    expiration, trop-perçu, réconciliation quotidienne ; hypothèses H114 à H118 à valider
 - Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.
@@ -219,6 +221,11 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - **Mise en œuvre (4b)** : `src/modules/parents/child.ts` ; les lectures de la caisse (`listInvoices`, `listPayments`,
   `getReceipt`) acceptent un parent (la RLS le limite à ses enfants). Bulletin d'un enfant : document `bulletin`
   (photographie publiée). Option B7 : `schools.block_bulletins_if_overdue`, réglée dans « Frais de scolarité ».
+- **Mise en œuvre (4c)** : interface `src/server/payments/` (`PAYMENT_PROVIDER`, faux prestataire, signature HMAC
+  `PAYMENT_WEBHOOK_SECRET`, en-tête `x-signature`) ; `src/modules/finance/online.ts` ; table `payment_intents`
+  (référence du prestataire unique) ; confirmation `POST /api/v1/payments/webhook` ; file `payments` (interrogation
+  à 10 min) et réconciliation de la veille dans le worker. Écritures au nom du compte « Paiement en ligne »
+  (`onlineCashier`), jamais du parent (RLS « parent » sur `payment_intents`).
 
 ### Tâches de fond et documents
 - **Mise en œuvre (2f)** : file pg-boss (schéma `pgboss`, installée par `pnpm db:setup` via `setupJobQueue`,

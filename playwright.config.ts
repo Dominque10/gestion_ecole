@@ -9,6 +9,8 @@ const secrets = {
   APP_URL: `http://localhost:${port}`,
   // Faux prestataire SMS : les messages vont dans ce fichier (codes de connexion des parents).
   SMS_FAKE_OUTBOX: "test-results/sms-outbox.jsonl",
+  // Faux prestataire de paiement : secret des messages de confirmation signés.
+  PAYMENT_WEBHOOK_SECRET: "secret-e2e-des-paiements",
 };
 
 export default defineConfig({

@@ -71,6 +71,8 @@ export const JOB_SCHEMA = "pgboss";
 export const DOCUMENTS_QUEUE = "documents";
 /** Messages aux parents (SMS d'absence, décision D15). */
 export const NOTIFICATIONS_QUEUE = "notifications";
+/** Paiement en ligne : interrogation du prestataire quand la confirmation tarde (4c). */
+export const PAYMENTS_QUEUE = "payments";
 
 /**
  * Installe ou met à jour la file d'attente pg-boss avec le compte administrateur, puis donne au rôle
@@ -109,6 +111,15 @@ export async function setupJobQueue(adminUrl: string): Promise<void> {
         expireInSeconds: 120,
         retentionSeconds: 24 * 3600,
         deleteAfterSeconds: 7 * 24 * 3600,
+      });
+    }
+    if (!(await boss.getQueue(PAYMENTS_QUEUE))) {
+      await boss.createQueue(PAYMENTS_QUEUE, {
+        retryLimit: 3,
+        retryDelay: 120,
+        expireInSeconds: 120,
+        retentionSeconds: 24 * 3600,
+        deleteAfterSeconds: 30 * 24 * 3600,
       });
     }
   } finally {

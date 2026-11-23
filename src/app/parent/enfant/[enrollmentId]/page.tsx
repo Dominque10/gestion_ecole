@@ -65,14 +65,14 @@ async function Content({ params }: Props) {
           {child.yearLabel} · {child.matricule}
         </p>
       </section>
-      <Fees account={account} />
+      <Fees account={account} enrollmentId={enrollmentId} />
       <Bulletins data={bulletins} />
       <Absences data={attendance} />
     </>
   );
 }
 
-function Fees({ account }: { account: ChildAccount }) {
+function Fees({ account, enrollmentId }: { account: ChildAccount; enrollmentId: string }) {
   const receipts = account.payments.filter((p) => p.kind === "payment");
   return (
     <section className="flex flex-col gap-3">
@@ -91,6 +91,12 @@ function Fees({ account }: { account: ChildAccount }) {
                 {t("parentSpace.overdue", { montant: formatXAF(account.overdue) })}
               </p>
             )}
+            <Link
+              href={`/parent/enfant/${enrollmentId}/payer`}
+              className="mt-3 flex min-h-12 items-center justify-center rounded-md bg-blue-700 px-4 text-center font-semibold text-white"
+            >
+              {t("online.payButton")}
+            </Link>
           </>
         )}
       </div>

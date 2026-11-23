@@ -1,7 +1,7 @@
 // 2f — documents PDF : file d'attente pg-boss, worker, PDF Chromium, récupération, vérification.
 import { PgBoss } from "pg-boss";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { ForbiddenError, type Principal } from "@/server/auth/permissions";
+import type { Principal } from "@/server/auth/permissions";
 import { closeDb } from "@/server/db/client";
 import { DOCUMENTS_QUEUE, JOB_SCHEMA } from "@/server/db/setup";
 import { closeJobQueue } from "@/server/jobs";
@@ -20,7 +20,7 @@ import { addStaff } from "@/modules/settings/staff";
 import { createYear } from "@/modules/settings/years";
 import { preEnroll } from "@/modules/students/enrollments";
 import { createStudent } from "@/modules/students/students";
-import { createSchoolWithDirector, createSuperadmin, resetDatabase } from "./helpers";
+import { adminQuery, createSchoolWithDirector, createSuperadmin, resetDatabase } from "./helpers";
 
 let director: Principal;
 let accountant: Principal;
@@ -169,12 +169,20 @@ describe("Reçu en PDF", () => {
     await expect(
       requestDocument(other, { kind: "receipt", paymentId, format: "A5" }),
     ).rejects.toThrow();
+    // Un vrai compte parent de l'école, sans enfant concerné : le reçu lui reste introuvable (RLS).
+    const { rows } = await adminQuery<{ id: string }>(
+      "insert into users (name, phone) values ('Parent sans enfant', '+242069990000') returning id",
+    );
+    await adminQuery(
+      "insert into memberships (school_id, user_id, roles) values ($1, $2, '{parent}')",
+      [director.schoolId, rows[0].id],
+    );
     await expect(
       requestDocument(
-        { ...director, roles: ["parent"] },
+        { userId: rows[0].id, schoolId: director.schoolId, roles: ["parent"], isSuperadmin: false },
         { kind: "receipt", paymentId, format: "A5" },
       ),
-    ).rejects.toBeInstanceOf(ForbiddenError);
+    ).rejects.toThrow();
   });
 
   it("le worker relit les droits en base : une tâche forgée pour un non-membre échoue", async () => {

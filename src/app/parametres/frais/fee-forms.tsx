@@ -7,7 +7,12 @@ import { t } from "@/i18n";
 import { idleFormState, type FormState } from "@/lib/form-state";
 import { formatXAF, parseXAF } from "@/lib/money";
 import { MAX_INSTALLMENTS, proposeInstallments } from "@/modules/settings/fees-logic";
-import { deleteFeeAction, saveFeeAction, siblingDiscountAction } from "./actions";
+import {
+  bulletinBlockingAction,
+  deleteFeeAction,
+  saveFeeAction,
+  siblingDiscountAction,
+} from "./actions";
 
 type Kind = "registration" | "tuition" | "other";
 type Level = { id: string; name: string };
@@ -317,6 +322,29 @@ export function SiblingDiscountForm({ percent, canEdit }: { percent: number; can
       />
       <FormMessage status={state.status} message={state.message} />
       {canEdit && <SubmitButton label={t("finance.siblingSave")} variant="secondary" />}
+    </form>
+  );
+}
+
+/** Option B7 : bulletin caché au parent tant qu'une échéance échue reste impayée. */
+export function BulletinBlockingForm({ enabled, canEdit }: { enabled: boolean; canEdit: boolean }) {
+  const [state, formAction] = useActionState(bulletinBlockingAction, idleFormState);
+  return (
+    <form action={formAction} className="flex flex-col gap-3 rounded-md border border-zinc-300 p-4">
+      <h2 className="text-lg font-semibold">{t("fees.blockingTitle")}</h2>
+      <label className="flex min-h-11 items-start gap-3">
+        <input
+          type="checkbox"
+          name="bloquer"
+          defaultChecked={enabled}
+          disabled={!canEdit}
+          className="mt-1 size-5 shrink-0"
+        />
+        <span>{t("fees.blockingLabel")}</span>
+      </label>
+      <p className="text-sm text-zinc-600">{t("fees.blockingHelp")}</p>
+      <FormMessage status={state.status} message={state.message} />
+      {canEdit && <SubmitButton label={t("fees.blockingSave")} variant="secondary" />}
     </form>
   );
 }

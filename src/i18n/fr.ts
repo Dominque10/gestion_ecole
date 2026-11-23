@@ -429,6 +429,14 @@ export const fr = {
     },
   },
   fees: {
+    blockingTitle: "Bulletins et frais impayés",
+    blockingLabel:
+      "Cacher le bulletin aux parents tant qu'une échéance obligatoire échue reste impayée",
+    blockingHelp:
+      "Désactivé par défaut. La direction voit et imprime toujours les bulletins ; seul l'espace parents est concerné.",
+    blockingSave: "Enregistrer ce choix",
+    blockingOn: "Les bulletins seront cachés aux parents en cas de frais échus impayés.",
+    blockingOff: "Les bulletins publiés restent visibles par les parents, frais payés ou non.",
     title: "Frais de scolarité",
     intro:
       "Les frais de l'année pour chaque niveau, et leurs tranches. Les montants sont en francs CFA.",
@@ -1051,6 +1059,37 @@ export const fr = {
     childLine: "{classe} — {ecole}",
     noClass: "classe pas encore attribuée",
     backToChildren: "Mes enfants",
+  },
+  parentSpace: {
+    feesTitle: "Frais de scolarité",
+    allPaid: "Tout est payé. Merci !",
+    remaining: "Reste à payer",
+    overdue: "Dont {montant} en retard",
+    installments: "Voir les échéances ({n})",
+    installmentLabel: "{frais} — tranche {n} sur {total}",
+    installmentLine: "À payer avant le {date} : {montant}",
+    paid: "Payé",
+    toPay: "Reste {montant}",
+    receipts: "Mes reçus ({n})",
+    receiptLine: "Reçu {numero} du {date} : {montant}",
+    cancelled: "(annulé)",
+    downloadReceipt: "Télécharger le reçu",
+    bulletinsTitle: "Bulletins",
+    noBulletin:
+      "Aucun bulletin publié pour l'instant. Il apparaîtra ici dès que l'école le publiera.",
+    bulletinsBlocked:
+      "Les bulletins seront visibles après le règlement des frais en retard. Pour toute question, contactez le secrétariat de l'école.",
+    bulletinOf: "Bulletin — {periode}",
+    annualBulletin: "Bulletin annuel",
+    downloadBulletin: "Télécharger le bulletin",
+    absencesTitle: "Absences et retards",
+    absencesSummary:
+      "Cette année : {absences} absence(s) dont {nonjustifiees} non justifiée(s), {retards} retard(s).",
+    justifyHint: "Pour justifier une absence, apportez le justificatif au secrétariat de l'école.",
+    absent: "absent",
+    late: "en retard",
+    justified: "Justifiée ({motif})",
+    notJustified: "Non justifiée",
   },
   attendance: {
     title: "Appel",

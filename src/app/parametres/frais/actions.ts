@@ -6,7 +6,7 @@ import { t } from "@/i18n";
 import type { FormState } from "@/lib/form-state";
 import { parseXAF } from "@/lib/money";
 import { deleteFee, FEE_KINDS, saveFee, type FeeKind } from "@/modules/settings/fees";
-import { setSiblingDiscount } from "@/modules/finance/invoices";
+import { setBulletinBlocking, setSiblingDiscount } from "@/modules/finance/invoices";
 import { requireAction } from "@/server/auth/session";
 import { refusalMessage } from "@/server/forms";
 
@@ -105,6 +105,21 @@ export async function siblingDiscountAction(
     await setSiblingDiscount(principal, percent);
     refresh();
     return result("success", t("finance.siblingSaved", { n: percent }));
+  } catch (error) {
+    return result("error", refusalMessage(error));
+  }
+}
+
+export async function bulletinBlockingAction(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const { principal } = await requireAction("settings:write");
+  const enabled = formData.get("bloquer") === "on";
+  try {
+    await setBulletinBlocking(principal, enabled);
+    refresh();
+    return result("success", t(enabled ? "fees.blockingOn" : "fees.blockingOff"));
   } catch (error) {
     return result("error", refusalMessage(error));
   }

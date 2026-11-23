@@ -253,6 +253,13 @@
       "when": 1795401952681,
       "tag": "0035_parent_access",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1795403077996,
+      "tag": "0036_bulletin_blocking",
+      "breakpoints": true
     }
   ]
 }

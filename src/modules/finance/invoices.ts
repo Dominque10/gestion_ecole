@@ -2,7 +2,7 @@
 // (fratrie automatique, bourse et remise exceptionnelle par le directeur), annulation au départ.
 import { and, asc, eq, gt, inArray, lt, ne, sql } from "drizzle-orm";
 import { z } from "zod";
-import { authorize, type Principal } from "@/server/auth/permissions";
+import { authorize, can, type Principal } from "@/server/auth/permissions";
 import { withSchool, type Tx } from "@/server/db/client";
 import {
   academicYears,
@@ -230,6 +230,10 @@ export async function cancelInvoicesAfter(
 
 /** Lecture des comptes d'élèves : pas pour un enseignant (il voit ses élèves, pas leurs finances). */
 function financeReadContext(principal: Principal) {
+  // Parent (4b) : il lit les comptes de ses enfants ; la RLS « parent » ne lui montre qu'eux.
+  if (can(principal, "parent:view") && !can(principal, "students:read")) {
+    return { schoolId: principal.schoolId as string, userId: principal.userId, teacherOnly: false };
+  }
   const ctx = readContext(principal);
   if (ctx.teacherOnly) throw new FinanceError("enrollmentNotFound");
   return ctx;
@@ -469,4 +473,41 @@ export async function getSiblingDiscount(principal: Principal): Promise<number> 
       .where(eq(schools.id, schoolId)),
   );
   return row?.percent ?? 0;
+}
+
+/** Option B7 (désactivée par défaut) : bulletin caché au parent tant qu'une échéance échue est impayée. */
+export async function setBulletinBlocking(principal: Principal, enabled: boolean): Promise<void> {
+  authorize(principal, "settings:write");
+  const schoolId = principal.schoolId as string;
+  await withSchool({ schoolId, userId: principal.userId }, async (tx) => {
+    const [before] = await tx
+      .select({ enabled: schools.blockBulletinsIfOverdue })
+      .from(schools)
+      .where(eq(schools.id, schoolId));
+    await tx
+      .update(schools)
+      .set({ blockBulletinsIfOverdue: enabled, updatedAt: new Date() })
+      .where(eq(schools.id, schoolId));
+    await tx.insert(auditLogs).values({
+      schoolId,
+      actorUserId: principal.userId,
+      action: "school.bulletin_blocking",
+      entityType: "school",
+      entityId: schoolId,
+      before: { enabled: before?.enabled ?? false },
+      after: { enabled },
+    });
+  });
+}
+
+export async function getBulletinBlocking(principal: Principal): Promise<boolean> {
+  authorize(principal, "settings:read");
+  const schoolId = principal.schoolId as string;
+  const [row] = await withSchool({ schoolId, userId: principal.userId }, (tx) =>
+    tx
+      .select({ enabled: schools.blockBulletinsIfOverdue })
+      .from(schools)
+      .where(eq(schools.id, schoolId)),
+  );
+  return row?.enabled ?? false;
 }

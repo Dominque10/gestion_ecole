@@ -2,7 +2,7 @@
 // directeur (décision D7), validation automatique de l'inscription au paiement (décision A3).
 import { and, asc, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { z } from "zod";
-import { authorize, type Principal } from "@/server/auth/permissions";
+import { authorize, can, type Principal } from "@/server/auth/permissions";
 import { withSchool, type Tx } from "@/server/db/client";
 import {
   academicYears,
@@ -58,6 +58,10 @@ function context(
 
 /** Lecture des paiements : pas pour un enseignant (hypothèse H53). */
 function financeReadContext(principal: Principal) {
+  // Parent (4b) : il lit les comptes de ses enfants ; la RLS « parent » ne lui montre qu'eux.
+  if (can(principal, "parent:view") && !can(principal, "students:read")) {
+    return { schoolId: principal.schoolId as string, userId: principal.userId, teacherOnly: false };
+  }
   const ctx = readContext(principal);
   if (ctx.teacherOnly) throw new FinanceError("paymentNotFound");
   return ctx;

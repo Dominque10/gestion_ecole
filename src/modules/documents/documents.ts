@@ -24,7 +24,8 @@ import {
 } from "./school-templates";
 import { getStorage } from "@/server/storage";
 import { imageTypeFromKey } from "@/server/storage/images";
-import { getBulletins, type BulletinSet } from "@/modules/grading/bulletins";
+import { getBulletins, type Bulletin, type BulletinSet } from "@/modules/grading/bulletins";
+import { getPublishedBulletin } from "@/modules/parents/child";
 import { bulletinsHtml } from "./bulletin-template";
 import { htmlToPdf } from "./pdf";
 import { receiptHtml } from "./receipt-template";
@@ -45,6 +46,8 @@ export const DocumentRequestSchema = z.discriminatedUnion("kind", [
     classId: z.uuid(),
     periodKey: z.union([z.uuid(), z.literal("annee")]),
   }),
+  // Bulletin publié d'un enfant, pour son parent (4b).
+  z.object({ kind: z.literal("bulletin"), reportCardId: z.uuid() }),
 ]);
 export type DocumentRequest = z.infer<typeof DocumentRequestSchema>;
 
@@ -84,7 +87,17 @@ export async function checkDocumentRequest(
     }
     case "bulletins":
       return bulletinsFileName(await getBulletins(principal, data.classId, data.periodKey));
+    case "bulletin": {
+      const found = await getPublishedBulletin(principal, data.reportCardId);
+      if (!found) throw new StudentError("documentNotFound");
+      return bulletinFileName(found.bulletin);
+    }
   }
+}
+
+function bulletinFileName(b: Bulletin): string {
+  const what = b.annual ? "annuel" : slug(b.periodLabel);
+  return `bulletin-${b.student.matricule}-${what}.pdf`;
 }
 
 function bulletinsFileName(set: BulletinSet): string {
@@ -209,6 +222,15 @@ export async function renderDocument(raw: unknown): Promise<RenderedDocument> {
         printedOn: set.publishedAt ? set.publishedAt.toISOString() : todayInBrazzaville(),
       });
       return pdfResult(bulletinsFileName(set), html);
+    }
+    case "bulletin": {
+      const found = await getPublishedBulletin(principal, job.request.reportCardId);
+      if (!found) throw new StudentError("documentNotFound");
+      const html = bulletinsHtml(await schoolHeader(principal), [found.bulletin], {
+        draft: false,
+        printedOn: found.publishedAt.toISOString(),
+      });
+      return pdfResult(bulletinFileName(found.bulletin), html);
     }
   }
 }

@@ -173,3 +173,6 @@ Plan validé : décision D20 (`docs/plan-phase-4.md`). Hypothèses complémentai
 | H108 | Le compte parent se reconnaît au **téléphone principal** d'une fiche de responsable (pas au second numéro) ; le compte prend le nom de la première fiche | 4a | ✅ |
 | H109 | Enfants affichés : inscriptions en cours (préinscriptions comprises) des années non archivées ; un enfant parti n'apparaît plus | 4a | ✅ |
 | H110 | Un membre du personnel qui est aussi parent garde ses rôles et gagne le rôle parent ; un compte « parent seulement » ne voit que ses enfants, et lit le référentiel de l'école (classes, matières, périodes, créneaux, grille des frais) | 4a | ✅ |
+| H111 | Frais vus par le parent : échéances ouvertes (les annulées sont masquées), reste à payer et part en retard, et ses reçus (un reçu annulé reste visible, marqué « annulé ») | 4b | ⏳ |
+| H112 | Blocage (B7) : seules les échéances **obligatoires** échues comptent ; tant qu'il en reste une impayée, tous les bulletins publiés de l'enfant sont cachés au parent, avec un message l'invitant à contacter le secrétariat | 4b | ⏳ |
+| H113 | Absences vues par le parent : totaux de l'année et les 15 dernières absences ou retards ; pas de justification en ligne (le justificatif s'apporte au secrétariat) | 4b | ⏳ |

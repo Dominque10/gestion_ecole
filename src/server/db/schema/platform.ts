@@ -35,6 +35,8 @@ export const schools = pgTable("schools", {
   lastMatriculeNumber: integer("last_matricule_number").notNull().default(0),
   /** Réduction fratrie en % sur la scolarité, dès le 2e enfant inscrit (décision D6). 0 = aucune. */
   siblingDiscountPercent: integer("sibling_discount_percent").notNull().default(0),
+  /** Option B7 (désactivée par défaut) : le parent ne voit pas le bulletin tant qu'une échéance échue reste impayée. */
+  blockBulletinsIfOverdue: boolean("block_bulletins_if_overdue").notNull().default(false),
   /**
    * Règles de calcul des moyennes (décision D10), validées par `GradingRulesSchema`
    * (`src/modules/grading/rules.ts`). null = règles par défaut.

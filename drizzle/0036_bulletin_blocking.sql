@@ -1,0 +1,1 @@
+ALTER TABLE "schools" ADD COLUMN "block_bulletins_if_overdue" boolean DEFAULT false NOT NULL;

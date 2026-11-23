@@ -1,6 +1,7 @@
 // Envoi de SMS derrière une interface interne (décision D1) : faux prestataire de test pour l'instant,
 // le vrai prestataire sera branché au M6 (B5) sans toucher au reste de l'application.
 import { randomUUID } from "node:crypto";
+import { appendFileSync } from "node:fs";
 
 export interface SmsProvider {
   /** Envoie un SMS ; lève une erreur si le prestataire refuse ou ne répond pas (nouvel essai). */
@@ -20,7 +21,13 @@ export class FakeSmsProvider implements SmsProvider {
     }
     const ref = `fake-${randomUUID()}`;
     this.sent.push({ to, body, ref });
-    console.log(`[sms factice] → ${to} : ${body}`);
+    // Tests de bout en bout : boîte d'envoi lisible (jamais en production, où le vrai prestataire sert).
+    const outbox = process.env.SMS_FAKE_OUTBOX;
+    if (outbox) {
+      appendFileSync(outbox, `${JSON.stringify({ to, body, at: new Date().toISOString() })}\n`);
+    } else {
+      console.log(`[sms factice] → ${to} : ${body}`);
+    }
     return { ref };
   }
 }

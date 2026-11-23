@@ -70,6 +70,11 @@ export const users = pgTable(
     failedLoginCount: integer("failed_login_count").notNull().default(0),
     lockedUntil: timestamp("locked_until", { withTimezone: true }),
     lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
+    /** Code de connexion par SMS des parents (4a) : haché, jamais en clair. */
+    otpHash: text("otp_hash"),
+    otpExpiresAt: timestamp("otp_expires_at", { withTimezone: true }),
+    otpAttempts: integer("otp_attempts").notNull().default(0),
+    otpSentAt: timestamp("otp_sent_at", { withTimezone: true }),
     ...timestamps,
   },
   (t) => [check("users_email_or_phone", sql`${t.email} is not null or ${t.phone} is not null`)],

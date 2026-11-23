@@ -4,6 +4,7 @@ import { t, type MessageKey } from "@/i18n";
 import { getSetupStatus } from "@/modules/settings/setup-status";
 import { canBrowseStudents } from "@/modules/students/students";
 import { can, type Action, type Principal } from "@/server/auth/permissions";
+import { redirect } from "next/navigation";
 import { requireSession } from "@/server/auth/session";
 import { LogoutButton } from "./logout-button";
 
@@ -32,6 +33,7 @@ const MENU: {
     visible: canBrowseStudents,
   },
   { href: "/listes", label: "nav.lists", action: "students:read", visible: canBrowseStudents },
+  { href: "/parent", label: "nav.parentSpace", action: "parent:view" },
   { href: "/notes", label: "nav.grades", action: "grades:write" },
   { href: "/appel", label: "nav.rollCall", action: "attendance:write" },
   { href: "/absences", label: "nav.absences", action: "attendance:justify" },
@@ -56,6 +58,9 @@ const MENU: {
 
 async function Welcome() {
   const { principal, userName } = await requireSession();
+  // Compte qui n'est que parent dans cette école : son espace à lui.
+  if (principal.roles.length > 0 && principal.roles.every((r) => r === "parent"))
+    redirect("/parent");
   const roles = principal.roles.map((r) => t(`roles.${r}`)).join(", ");
   const links = MENU.filter(
     (link) => can(principal, link.action) && (link.visible?.(principal) ?? true),

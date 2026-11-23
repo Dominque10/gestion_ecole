@@ -162,3 +162,14 @@ Règles tranchées par le porteur : décision D10 (`docs/plan-phase-3.md`). Hypo
 
 Voir `docs/cadrage.md` §B : modèle de bulletin (B2), règles de calcul (B3), prestataire de paiement (B4),
 prestataire SMS (B5), blocage du bulletin en cas d'impayé (B7).
+
+## Parents et pilote (Phase 4)
+
+Plan validé : décision D20 (`docs/plan-phase-4.md`). Hypothèses complémentaires :
+
+| # | Hypothèse | Où | Statut |
+|---|---|---|---|
+| H107 | Code SMS de 6 chiffres valable 10 minutes, un envoi par minute au plus ; 5 codes faux = blocage 15 minutes ; session parent de 30 jours (éviter un SMS à chaque visite) | 4a | ⏳ |
+| H108 | Le compte parent se reconnaît au **téléphone principal** d'une fiche de responsable (pas au second numéro) ; le compte prend le nom de la première fiche | 4a | ⏳ |
+| H109 | Enfants affichés : inscriptions en cours (préinscriptions comprises) des années non archivées ; un enfant parti n'apparaît plus | 4a | ⏳ |
+| H110 | Un membre du personnel qui est aussi parent garde ses rôles et gagne le rôle parent ; un compte « parent seulement » ne voit que ses enfants, et lit le référentiel de l'école (classes, matières, périodes, créneaux, grille des frais) | 4a | ⏳ |

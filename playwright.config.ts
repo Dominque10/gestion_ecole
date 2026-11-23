@@ -7,6 +7,8 @@ const db = e2eDatabaseUrls();
 const secrets = {
   AUTH_SECRET: "secret-de-test-e2e-assez-long-pour-signer",
   APP_URL: `http://localhost:${port}`,
+  // Faux prestataire SMS : les messages vont dans ce fichier (codes de connexion des parents).
+  SMS_FAKE_OUTBOX: "test-results/sms-outbox.jsonl",
 };
 
 export default defineConfig({

@@ -22,6 +22,8 @@ Contraintes du terrain à garder en tête en permanence :
 
 - Version en cours : **V1**
 - Phase en cours : **Phase 4 – Parents et pilote** (M6 Espace parents + paiement mobile + notifications, M7 Tableau de bord) — plan `docs/plan-phase-4.md` validé (D20), sous-étapes 4a → 4g
+  - ✅ 4a – Connexion des parents par code SMS (`src/server/auth/parent.ts`, pages `/parent`), sélecteur d'enfant
+    toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 à valider
 - Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.
@@ -202,6 +204,16 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - SMS : interface `src/server/sms/` (`SMS_PROVIDER`, faux prestataire par défaut) ; file pg-boss `notifications`
   (politique « short », clé `inscription:jour`, départ 30 min après l'appel) ; tâche `processAbsenceNotice` dans le
   worker ; `notifications` unique par élève, type et jour (un SMS par jour).
+
+### Espace parents
+- **Mise en œuvre (4a)** : connexion `requestParentCode` / `verifyParentCode` (code haché dans `users.otp_*`, réponse
+  identique pour un numéro inconnu) ; `app.attach_parent` relie le compte aux fiches de responsable et ajoute le rôle
+  `parent` ; `app.parent_children()` = seule lecture inter-écoles (A2) ; `selectChild` bascule `sessions.school_id`.
+- RLS : chaque table d'école a des politiques **restrictives** `<table>_parent_read/insert/update/delete`
+  (migration `0035_parent_access`) : un compte « parent seulement » (`app.current_user_is_parent_only()`) ne lit que
+  ses enfants (`app.parent_student_ids()`, `app.parent_enrollment_ids()`), aucune note isolée, les bulletins publiés,
+  et n'écrit rien. Toute nouvelle table d'école doit recevoir ces quatre politiques (vérifié par un test).
+- Faux prestataire SMS : `SMS_FAKE_OUTBOX` (fichier) pour lire les codes dans les tests E2E.
 
 ### Tâches de fond et documents
 - **Mise en œuvre (2f)** : file pg-boss (schéma `pgboss`, installée par `pnpm db:setup` via `setupJobQueue`,

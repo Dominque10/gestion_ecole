@@ -77,7 +77,10 @@ describe("Garde-fou générique : structure de la base", () => {
       `
       select c.relname as table_name, c.relrowsecurity as rls, c.relforcerowsecurity as forced,
         (select count(*)::int from pg_policies p where p.schemaname = 'public' and p.tablename = c.relname) as policies,
+        -- Seules les politiques qui OUVRENT un accès (permissives) doivent viser l'école ; les
+        -- restrictives (ex. règles « parent », 4a) ne font que réduire ce qu'elles laissent voir.
         (select count(*)::int from pg_policies p where p.schemaname = 'public' and p.tablename = c.relname
+           and p.permissive = 'PERMISSIVE'
            and p.policyname <> all($1::text[])
            and coalesce(p.qual, '') || coalesce(p.with_check, '') not like '%current_school_id()%') as policies_without_school
       from pg_class c

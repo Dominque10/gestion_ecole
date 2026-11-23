@@ -239,6 +239,20 @@
       "when": 1795397714057,
       "tag": "0033_report_cards_publication",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1795401951044,
+      "tag": "0034_parent_otp",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1795401952681,
+      "tag": "0035_parent_access",
+      "breakpoints": true
     }
   ]
 }

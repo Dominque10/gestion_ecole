@@ -55,6 +55,7 @@ export const fr = {
     fees: "Frais de scolarité",
     grades: "Notes",
     rollCall: "Appel",
+    parentSpace: "Espace parents (mes enfants)",
     absences: "Absences à justifier",
   },
   form: {
@@ -1021,6 +1022,35 @@ export const fr = {
       unreadable: "Note illisible.",
       outOfRange: "Note au-dessus du barème.",
     },
+  },
+  parent: {
+    codeSms:
+      "Votre code de connexion : {code}. Il est valable 10 minutes. Ne le donnez à personne.",
+    loginTitle: "Espace parents",
+    loginIntro:
+      "Entrez le numéro de téléphone que vous avez donné à l'école. Vous recevrez un code par SMS.",
+    phone: "Votre numéro de téléphone",
+    phoneHelp: "Exemple : 06 123 45 67",
+    sendCode: "Recevoir mon code",
+    codeSent:
+      "Si ce numéro est connu de l'école, un code vient de vous être envoyé par SMS. Il peut mettre une minute à arriver.",
+    code: "Code reçu par SMS (6 chiffres)",
+    signIn: "Entrer",
+    otherPhone: "Changer de numéro",
+    resend: "Je n'ai rien reçu : renvoyer un code",
+    phoneInvalid: "Numéro de téléphone non reconnu. Exemple : 06 123 45 67.",
+    sendingFailed: "L'envoi du SMS n'a pas marché. Réessayez dans un instant.",
+    codeInvalid: "Code incorrect ou expiré. Vérifiez le SMS ou demandez un nouveau code.",
+    locked: "Trop d'essais. Réessayez après {heure}.",
+    staffLink: "Vous êtes parent ? Entrez avec un code SMS",
+    staffSide: "Vous travaillez à l'école ? Connexion du personnel",
+    childrenTitle: "Mes enfants",
+    noChildren:
+      "Aucun enfant inscrit n'est relié à votre numéro. Contactez le secrétariat de l'école.",
+    open: "Voir",
+    childLine: "{classe} — {ecole}",
+    noClass: "classe pas encore attribuée",
+    backToChildren: "Mes enfants",
   },
   attendance: {
     title: "Appel",

@@ -60,3 +60,4 @@
 | 2026-11-23 | **D14 — Hypothèses H86 à H90 (étape 3d) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-23 | **D15 — SMS d'absence** (porteur du projet) : un seul SMS par élève et par jour, envoyé 30 minutes après l'appel (rien ne part si l'absence est corrigée ou justifiée entre-temps), au responsable principal ; les retards ne sont pas signalés. Faux prestataire SMS de test jusqu'au M6. | Porteur du projet |
 | 2026-11-23 | **D16 — Hypothèses H91 à H96 (étape 3e) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
+| 2026-11-23 | **D17 — Hypothèses H97 à H101 (étape 3f) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |

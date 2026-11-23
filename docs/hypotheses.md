@@ -147,11 +147,11 @@ Règles tranchées par le porteur : décision D10 (`docs/plan-phase-3.md`). Hypo
 | H94 | Un élève remis « présent » perd la justification de ce créneau ; l'appel n'est pas verrouillé par la clôture des notes | 3e | ✅ |
 | H95 | Justification par élève et par journée (toutes ses absences et retards non justifiés du jour), motif obligatoire, photo facultative rangée avec les pièces de l'élève | 3e | ✅ |
 | H96 | Texte du SMS : école, élève, classe, date et créneaux manqués, demande de justifier au secrétariat ; pas de responsable principal avec téléphone : pas de SMS | 3e | ✅ |
-| H97 | Appréciations de 300 caractères au plus ; le directeur peut écrire celles de toutes les matières ; une appréciation vidée est retirée | 3f | ⏳ |
-| H98 | Mentions possibles au conseil : celles de l'école, plus « Avertissement » et « Blâme », ou aucune ; sans choix du directeur, la mention proposée selon les seuils est retenue à la validation | 3f | ⏳ |
-| H99 | Décisions de fin d'année : « Admis(e) en classe supérieure », « Redouble », « Exclu(e) » ; prises seulement au conseil de fin d'année, une par élève, obligatoires pour valider | 3f | ⏳ |
-| H100 | Absences du bulletin comptées en créneaux manqués (pas en jours), avec la part non justifiée ; retards comptés à part | 3f | ⏳ |
-| H101 | Le conseil se valide après la clôture de la période pour la classe (pour l'année : la dernière période) ; une fois validé tout est figé ; le directeur peut le rouvrir (tracé) | 3f | ⏳ |
+| H97 | Appréciations de 300 caractères au plus ; le directeur peut écrire celles de toutes les matières ; une appréciation vidée est retirée | 3f | ✅ |
+| H98 | Mentions possibles au conseil : celles de l'école, plus « Avertissement » et « Blâme », ou aucune ; sans choix du directeur, la mention proposée selon les seuils est retenue à la validation | 3f | ✅ |
+| H99 | Décisions de fin d'année : « Admis(e) en classe supérieure », « Redouble », « Exclu(e) » ; prises seulement au conseil de fin d'année, une par élève, obligatoires pour valider | 3f | ✅ |
+| H100 | Absences du bulletin comptées en créneaux manqués (pas en jours), avec la part non justifiée ; retards comptés à part | 3f | ✅ |
+| H101 | Le conseil se valide après la clôture de la période pour la classe (pour l'année : la dernière période) ; une fois validé tout est figé ; le directeur peut le rouvrir (tracé) | 3f | ✅ |
 
 ## Points du cadrage déjà notés comme hypothèses (décision D1)
 

@@ -36,7 +36,7 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 3e – Appel (`/appel`, aussi hors connexion), SMS d'absence (décision D15, faux prestataire), justification
     (`/absences`) ; hypothèses H91 à H96 validées (D16). Appel de 60 élèves vérifié en E2E (bien sous la minute).
   - ✅ 3f – Conseil de classe (`council.ts`, table `report_cards`) : appréciations par matière et générale,
-    mention, décision de fin d'année, totaux d'absences ; validation après clôture ; hypothèses H97 à H101 à valider
+    mention, décision de fin d'année, totaux d'absences ; validation après clôture ; hypothèses H97 à H101 validées (D17)
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).

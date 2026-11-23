@@ -21,7 +21,7 @@ Contraintes du terrain à garder en tête en permanence :
 ## 2. État actuel (À METTRE À JOUR)
 
 - Version en cours : **V1**
-- Phase en cours : **Phase 4 – Parents et pilote** (M6 Espace parents + paiement mobile + notifications, M7 Tableau de bord) — **plan à proposer et faire valider avant tout code**
+- Phase en cours : **Phase 4 – Parents et pilote** (M6 Espace parents + paiement mobile + notifications, M7 Tableau de bord) — plan `docs/plan-phase-4.md` validé (D20), sous-étapes 4a → 4g
 - Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.

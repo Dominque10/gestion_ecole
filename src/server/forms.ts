@@ -6,6 +6,7 @@ import { StudentError } from "@/modules/students/errors";
 import { FinanceError } from "@/modules/finance/errors";
 import { GradingError } from "@/modules/grading/errors";
 import { AttendanceError } from "@/modules/attendance/errors";
+import { TemplateError } from "@/modules/notifications/settings";
 import { ForbiddenError } from "@/server/auth/permissions";
 import type { FormState } from "@/lib/form-state";
 
@@ -42,6 +43,12 @@ export function refusalMessage(error: unknown): string {
   if (error instanceof FinanceError) return t(`finance.errors.${error.code}`, error.params);
   if (error instanceof GradingError) return t(`grading.errors.${error.code}`);
   if (error instanceof AttendanceError) return t(`attendance.errors.${error.code}`);
+  if (error instanceof TemplateError) {
+    return t(`notifications.problems.${error.problem}`, {
+      message: t(`notifications.kinds.${error.kind}`),
+      champ: error.field ?? "",
+    });
+  }
   if (error instanceof ForbiddenError) return t("form.forbidden");
   throw error;
 }

@@ -12,7 +12,7 @@ import {
 } from "@/server/db/setup";
 import { checkIntent, reconcileDay } from "@/modules/finance/online";
 import { todayInBrazzaville } from "@/lib/dates";
-import { processAbsenceNotice } from "@/modules/attendance/notices";
+import { processNotice } from "@/modules/notifications/notices";
 import { renderDocument } from "@/modules/documents/documents";
 import { closePdfBrowser } from "@/modules/documents/pdf";
 
@@ -71,11 +71,11 @@ await boss.work(DOCUMENTS_QUEUE, { batchSize: 1, pollingIntervalSeconds: 1 }, as
 });
 await boss.work(NOTIFICATIONS_QUEUE, { batchSize: 1, pollingIntervalSeconds: 5 }, async ([job]) => {
   try {
-    const outcome = await processAbsenceNotice(job.data);
-    console.log(`[worker] SMS d'absence ${job.id} : ${outcome}`);
+    const outcome = await processNotice(job.data);
+    console.log(`[worker] message aux parents ${job.id} : ${outcome}`);
     return { outcome };
   } catch (error) {
-    console.error(`[worker] SMS d'absence ${job.id} en échec :`, (error as Error).message);
+    console.error(`[worker] message aux parents ${job.id} en échec :`, (error as Error).message);
     throw error;
   }
 });

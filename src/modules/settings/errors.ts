@@ -29,6 +29,7 @@ export type SettingsErrorCode =
   | "gridInvalid"
   | "gradingInvalid"
   | "subjectHasAssessments"
+  | "notificationsInvalid"
   | "classNameTaken"
   | "classNotFound"
   | "classInUse"

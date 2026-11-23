@@ -34,6 +34,7 @@ const MATRIX: Record<SchoolAction, MembershipRole[]> = {
   "payments:cancel:approve": ["director"],
   "payments:pay-online": ["parent"],
   "parent:view": ["parent"],
+  "notifications:templates": ["director"],
   "cash:close": ["accountant"],
   "cash:reopen": ["director"],
   "assessments:manage": ["director", "teacher"],

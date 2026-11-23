@@ -56,6 +56,7 @@ export const fr = {
     grades: "Notes",
     rollCall: "Appel",
     parentSpace: "Espace parents (mes enfants)",
+    notifications: "Messages aux parents",
     absences: "Absences à justifier",
   },
   form: {
@@ -1065,6 +1066,42 @@ export const fr = {
     noClass: "classe pas encore attribuée",
     backToChildren: "Mes enfants",
   },
+  notifications: {
+    title: "Messages aux parents",
+    intro:
+      "Messages envoyés automatiquement aux parents (responsable principal) : absence, reçu de paiement, bulletin publié, annonce.",
+    channel: "Canal d'envoi",
+    sms: "SMS (tous les téléphones)",
+    whatsapp: "WhatsApp (moins cher, mais le parent doit avoir WhatsApp)",
+    cap: "Plafond mensuel (FCFA)",
+    capHelp:
+      "Au-delà, les messages ne partent plus jusqu'au mois suivant. Laissez vide pour ne pas plafonner.",
+    templatesTitle: "Modèles des messages",
+    fields: "Champs utilisables : {champs}",
+    kinds: {
+      absence: "Absence",
+      receipt: "Reçu de paiement",
+      bulletin: "Bulletin publié",
+      announcement: "Annonce",
+    },
+    save: "Enregistrer les réglages",
+    saved: "Réglages des messages enregistrés.",
+    problems: {
+      empty: "Le modèle « {message} » est vide.",
+      tooLong: "Le modèle « {message} » est trop long (320 caractères au plus).",
+      unknownField: "Le modèle « {message} » contient un champ inconnu : {{champ}}.",
+    },
+    logTitle: "Derniers messages",
+    monthCost: "Ce mois-ci : {n} message(s) envoyé(s), {montant}.",
+    noMessage: "Aucun message envoyé pour l'instant.",
+    status: {
+      sent: "envoyé",
+      failed: "échec",
+      skipped: "non envoyé (plafond)",
+    },
+    capReached: "Plafond mensuel de l'école atteint.",
+    annual: "année",
+  },
   online: {
     cashierName: "Paiement en ligne",
     description: "Frais de scolarité",
@@ -1421,6 +1458,8 @@ export const fr = {
         "Grille invalide : vérifiez les matières et les coefficients (entiers de 1 à 20).",
       gradingInvalid:
         "Règles de calcul invalides : vérifiez chaque choix et les seuils des mentions (0 à 20).",
+      notificationsInvalid:
+        "Réglages invalides : vérifiez le canal et le plafond (montant entier en FCFA).",
       subjectHasAssessments:
         "Une matière retirée a déjà des évaluations dans une classe : supprimez d'abord ces évaluations, ou gardez la matière.",
       classNameTaken: "Une classe porte déjà ce nom cette année.",

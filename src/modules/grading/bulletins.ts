@@ -27,6 +27,7 @@ import {
   type Decision,
 } from "./council";
 import { GradingError } from "./errors";
+import { scheduleNotice } from "@/modules/notifications/notices";
 import { resultsContext, type Ctx } from "./results";
 
 export type BulletinSubject = {
@@ -295,7 +296,34 @@ export async function publishBulletins(
         before: null,
         after: { periodKey: periodId ?? ANNUAL, bulletins: bulletins.length },
       });
-      return bulletins.length;
+      return bulletins.map((b) => b.enrollmentId);
     }),
-  );
+  ).then(async (published) => {
+    // Message « bulletin disponible » à chaque famille (4d), après la publication.
+    const ctx2 = { schoolId: principal.schoolId as string, userId: principal.userId };
+    const cards = await withSchool(ctx2, (tx) =>
+      tx
+        .select({ id: reportCards.id, enrollmentId: reportCards.enrollmentId })
+        .from(reportCards)
+        .where(
+          and(
+            inArray(reportCards.enrollmentId, published),
+            periodKey === ANNUAL
+              ? eq(reportCards.kind, "annual")
+              : and(eq(reportCards.kind, "period"), eq(reportCards.periodId, periodKey)),
+          ),
+        ),
+    );
+    for (const card of cards) {
+      await scheduleNotice({
+        type: "bulletin",
+        ...ctx2,
+        enrollmentId: card.enrollmentId,
+        reportCardId: card.id,
+      }).catch((error: unknown) =>
+        console.error("Message de bulletin non programmé :", (error as Error).message),
+      );
+    }
+    return published.length;
+  });
 }

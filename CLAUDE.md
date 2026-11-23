@@ -28,6 +28,8 @@ Contraintes du terrain à garder en tête en permanence :
     d'environ 175 Ko (critère : 300 Ko) ; hypothèses H111 à H113 validées (D22)
   - ✅ 4c – Paiement en ligne (faux prestataire) : intention, confirmation signée et idempotente, interrogation,
     expiration, trop-perçu, réconciliation quotidienne ; hypothèses H114 à H118 validées (D23)
+  - ✅ 4d – Messages aux parents : canal SMS ou WhatsApp, modèles modifiables, coût journalisé, plafond mensuel ;
+    reçu de paiement et bulletin publié (`/parametres/notifications`) ; hypothèses H119 à H123 à valider
 - Phase 3 – Pédagogie (M4 + M5) : **terminée, jalon validé le 2026-11-23 (D19)** ; cas de référence construit accepté provisoirement, à confronter aux bulletins d'une vraie école au pilote
 - Plan : `docs/plan-phase-3.md` (validé, décision D11) — sous-étapes 3a → 3g
   - Règles de calcul par défaut tranchées par le porteur (décision D10, B3) : voir le plan.
@@ -208,6 +210,11 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
 - SMS : interface `src/server/sms/` (`SMS_PROVIDER`, faux prestataire par défaut) ; file pg-boss `notifications`
   (politique « short », clé `inscription:jour`, départ 30 min après l'appel) ; tâche `processAbsenceNotice` dans le
   worker ; `notifications` unique par élève, type et jour (un SMS par jour).
+- **Mise en œuvre (4d)** : `src/modules/notifications/` (`templates.ts` pur, `notices.ts` : `scheduleNotice` /
+  `processNotice`, `settings.ts`). Toute tâche de la file `notifications` a sa **clé** (politique « short » : une seule
+  tâche en attente par clé) : `inscription:jour` (absence), `receipt:<paiement>`, `bulletin:<fiche>:<inscription>`.
+  Canal, modèles et plafond dans `schools` ; chaque envoi a `channel`, `cost`, `reference_id`. Prestataires :
+  `getMessageProvider(channel)` (`SMS_PROVIDER`, `WHATSAPP_PROVIDER`).
 
 ### Espace parents
 - **Mise en œuvre (4a)** : connexion `requestParentCode` / `verifyParentCode` (code haché dans `users.otp_*`, réponse

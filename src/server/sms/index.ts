@@ -1,47 +1,73 @@
-// Envoi de SMS derrière une interface interne (décision D1) : faux prestataire de test pour l'instant,
-// le vrai prestataire sera branché au M6 (B5) sans toucher au reste de l'application.
+// Envoi de messages (SMS et WhatsApp) derrière une interface interne (décision D1) : faux prestataires
+// de test pour l'instant ; les vrais (B5) seront branchés sans toucher au reste de l'application.
 import { randomUUID } from "node:crypto";
 import { appendFileSync } from "node:fs";
 
+export type Channel = "sms" | "whatsapp";
+
 export interface SmsProvider {
-  /** Envoie un SMS ; lève une erreur si le prestataire refuse ou ne répond pas (nouvel essai). */
-  send(to: string, body: string): Promise<{ ref: string }>;
+  readonly channel: Channel;
+  /** Coût unitaire indicatif en FCFA (vérification du plafond avant l'envoi). */
+  readonly unitCost: number;
+  /** Envoie un message ; lève une erreur si le prestataire refuse ou ne répond pas (nouvel essai). */
+  send(to: string, body: string): Promise<{ ref: string; cost: number }>;
 }
 
-/** Faux prestataire : n'envoie rien, garde les messages en mémoire et les écrit dans le journal. */
+/**
+ * Faux prestataire : n'envoie rien, garde les messages en mémoire et les écrit dans le journal (ou
+ * dans le fichier `SMS_FAKE_OUTBOX`, lu par les tests de bout en bout). Coûts : hypothèse H120.
+ */
 export class FakeSmsProvider implements SmsProvider {
   readonly sent: { to: string; body: string; ref: string }[] = [];
   /** Pour les tests : le prochain envoi échoue. */
   failNext = false;
 
-  async send(to: string, body: string): Promise<{ ref: string }> {
+  constructor(
+    readonly channel: Channel = "sms",
+    readonly unitCost = channel === "sms" ? 25 : 15,
+  ) {}
+
+  async send(to: string, body: string): Promise<{ ref: string; cost: number }> {
     if (this.failNext) {
       this.failNext = false;
-      throw new Error("Prestataire SMS indisponible (simulation)");
+      throw new Error(`Prestataire ${this.channel.toUpperCase()} indisponible (simulation)`);
     }
     const ref = `fake-${randomUUID()}`;
     this.sent.push({ to, body, ref });
-    // Tests de bout en bout : boîte d'envoi lisible (jamais en production, où le vrai prestataire sert).
     const outbox = process.env.SMS_FAKE_OUTBOX;
     if (outbox) {
-      appendFileSync(outbox, `${JSON.stringify({ to, body, at: new Date().toISOString() })}\n`);
+      appendFileSync(
+        outbox,
+        `${JSON.stringify({ to, body, channel: this.channel, at: new Date().toISOString() })}\n`,
+      );
     } else {
-      console.log(`[sms factice] → ${to} : ${body}`);
+      console.log(`[${this.channel} factice] → ${to} : ${body}`);
     }
-    return { ref };
+    return { ref, cost: this.unitCost };
   }
 }
 
-let provider: SmsProvider | undefined;
+const providers: Partial<Record<Channel, SmsProvider>> = {};
 
-export function getSmsProvider(): SmsProvider {
-  if (provider) return provider;
-  const name = process.env.SMS_PROVIDER || "fake";
-  if (name !== "fake") throw new Error(`Prestataire SMS inconnu : ${name} (choix au M6)`);
-  provider = new FakeSmsProvider();
-  return provider;
+/** Prestataire d'un canal (SMS : codes de connexion et alertes ; WhatsApp : au choix de l'école). */
+export function getMessageProvider(channel: Channel): SmsProvider {
+  const existing = providers[channel];
+  if (existing) return existing;
+  const name =
+    (channel === "sms" ? process.env.SMS_PROVIDER : process.env.WHATSAPP_PROVIDER) || "fake";
+  if (name !== "fake") throw new Error(`Prestataire ${channel} inconnu : ${name} (choix B5)`);
+  providers[channel] = new FakeSmsProvider(channel);
+  return providers[channel];
 }
 
-export function setSmsProviderForTests(value: SmsProvider | undefined): void {
-  provider = value;
+export function getSmsProvider(): SmsProvider {
+  return getMessageProvider("sms");
+}
+
+export function setSmsProviderForTests(
+  value: SmsProvider | undefined,
+  channel: Channel = "sms",
+): void {
+  if (value) providers[channel] = value;
+  else delete providers[channel];
 }

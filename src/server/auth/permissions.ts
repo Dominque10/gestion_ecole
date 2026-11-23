@@ -37,6 +37,8 @@ const SCHOOL_ACTIONS = {
   "payments:pay-online": ["parent"],
   /** Espace parents : ses enfants seulement (vérifié aussi par la RLS) — 4a. */
   "parent:view": ["parent"],
+  /** Messages aux parents : canal, plafond, modèles, journal des envois (4d). */
+  "notifications:templates": ["director"],
   /** Clôture journalière de sa caisse ; réouverture par le directeur (tracée). */
   "cash:close": ["accountant"],
   "cash:reopen": ["director"],

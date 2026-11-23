@@ -22,6 +22,7 @@ import { isUniqueViolation } from "@/modules/settings/errors";
 import { readContext } from "@/modules/students/students";
 import { assertCashOpen } from "./closures";
 import { FinanceError } from "./errors";
+import { notifyReceipt } from "./receipt-notice";
 import { amountDue } from "./invoice-logic";
 import { paidOnInvoice } from "./invoices";
 import { allocate, formatReceiptNumber, OverpaymentError, type OpenInvoice } from "./payment-logic";
@@ -155,7 +156,7 @@ export async function collectPayment(
   if (data.method !== "cash" && !data.reference) throw new FinanceError("referenceRequired");
   const reference = data.method === "cash" ? null : data.reference;
   try {
-    return await withSchool(ctx, async (tx) => {
+    const result = await withSchool(ctx, async (tx) => {
       const [enrollment] = await tx
         .select({
           id: enrollments.id,
@@ -218,6 +219,14 @@ export async function collectPayment(
       const autoValidated = await autoValidate(tx, ctx.schoolId, enrollment.id, ctx.userId);
       return { paymentId: payment.id, receiptNumber, autoValidated };
     });
+    // Message de reçu au parent (4d), après l'enregistrement : un message manqué ne bloque jamais la caisse.
+    await notifyReceipt({
+      schoolId: ctx.schoolId,
+      userId: ctx.userId,
+      enrollmentId: data.enrollmentId,
+      paymentId: result.paymentId,
+    });
+    return result;
   } catch (error) {
     if (isUniqueViolation(error, "payments_reference"))
       throw new FinanceError("duplicateReference");

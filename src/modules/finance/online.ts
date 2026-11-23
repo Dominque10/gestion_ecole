@@ -35,6 +35,7 @@ import { amountDue } from "./invoice-logic";
 import { paidOnInvoice } from "./invoices";
 import { allocateOnline } from "./payment-logic";
 import { autoValidate, nextReceiptNumber, openInvoices } from "./payments";
+import { notifyReceipt } from "./receipt-notice";
 
 /** Délai avant d'interroger le prestataire, puis entre deux interrogations ; abandon après 1 h. */
 export const CHECK_DELAY_SECONDS = 10 * 60;
@@ -229,7 +230,8 @@ export async function settleIntent(
   event: PaymentEvent,
 ): Promise<SettleOutcome> {
   const cashier = await onlineCashier(schoolId);
-  return withSchool({ schoolId, userId: cashier }, async (tx) => {
+  let recorded: { enrollmentId: string; paymentId: string } | null = null;
+  const outcome = await withSchool({ schoolId, userId: cashier }, async (tx) => {
     const [intent] = await tx
       .select()
       .from(paymentIntents)
@@ -258,8 +260,17 @@ export async function settleIntent(
       }
       return "failed" as const;
     }
-    return recordPayment(tx, schoolId, cashier, intent, event);
+    const paymentId = await recordPayment(tx, schoolId, cashier, intent, event);
+    recorded = { enrollmentId: intent.enrollmentId, paymentId };
+    return "recorded" as const;
   });
+  if (recorded)
+    await notifyReceipt({
+      schoolId,
+      userId: cashier,
+      ...(recorded as { enrollmentId: string; paymentId: string }),
+    });
+  return outcome;
 }
 
 async function recordPayment(
@@ -268,7 +279,7 @@ async function recordPayment(
   cashier: string,
   intent: typeof paymentIntents.$inferSelect,
   event: PaymentEvent,
-): Promise<SettleOutcome> {
+): Promise<string> {
   // Montant réellement reçu (celui du prestataire s'il le donne).
   const amount = event.amount ?? intent.amount;
   const open = await openInvoices(tx, intent.enrollmentId);
@@ -330,7 +341,7 @@ async function recordPayment(
     },
   });
   await autoValidate(tx, schoolId, intent.enrollmentId, cashier);
-  return "recorded";
+  return payment.id;
 }
 
 /** École et intention d'une référence du prestataire (message reçu sans école de session). */

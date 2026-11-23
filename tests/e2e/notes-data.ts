@@ -16,7 +16,11 @@ export async function seedNotes(): Promise<NotesData> {
       ])
     ).rows[0].id;
     // Règles de calcul par défaut (un autre test a pu les changer).
-    await client.query("update schools set grading_rules = null where id = $1", [school]);
+    await client.query(
+      `update schools set grading_rules = null, notification_channel = 'sms',
+         notification_templates = null, notification_monthly_cap = null where id = $1`,
+      [school],
+    );
     const teacher = (
       await client.query<{ id: string }>("select id from users where phone = $1", [
         E2E_ACCOUNT.phone,

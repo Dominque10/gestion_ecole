@@ -11,6 +11,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { schools, users } from "./platform";
@@ -70,12 +71,19 @@ export const attendance = pgTable(
   ],
 );
 
-export const notificationKind = pgEnum("notification_kind", ["absence"]);
-export const notificationStatus = pgEnum("notification_status", ["sent", "failed"]);
+export const notificationKind = pgEnum("notification_kind", [
+  "absence",
+  "receipt",
+  "bulletin",
+  "announcement",
+]);
+/** skipped : pas envoyé (plafond mensuel de l'école atteint, 4d). */
+export const notificationStatus = pgEnum("notification_status", ["sent", "failed", "skipped"]);
+export const notificationChannel = pgEnum("notification_channel", ["sms", "whatsapp"]);
 
 /**
- * Messages envoyés aux parents (décision D15 pour les absences : un SMS par élève et par jour, au
- * responsable principal). La contrainte d'unicité garantit l'unique envoi du jour.
+ * Messages envoyés aux parents, journalisés avec leur coût (4d) : absence (D15 : un par élève et par
+ * jour), reçu de paiement, bulletin publié, annonce. Les contraintes d'unicité empêchent tout doublon.
  */
 export const notifications = pgTable(
   "notifications",
@@ -92,6 +100,11 @@ export const notifications = pgTable(
     phone: text("phone").notNull(),
     body: text("body").notNull(),
     status: notificationStatus("status").notNull(),
+    channel: notificationChannel("channel").notNull().default("sms"),
+    /** Coût de l'envoi en FCFA (refacturation ou plafond par école). */
+    cost: integer("cost").notNull().default(0),
+    /** Objet concerné : paiement (reçu), fiche de bulletin, annonce. */
+    referenceId: uuid("reference_id"),
     /** Référence donnée par le prestataire SMS. */
     providerRef: text("provider_ref"),
     error: text("error"),
@@ -105,7 +118,14 @@ export const notifications = pgTable(
       columns: [t.enrollmentId, t.schoolId],
       foreignColumns: [enrollments.id, enrollments.schoolId],
     }),
-    unique("notifications_one_per_day").on(t.enrollmentId, t.kind, t.date),
+    // Un seul message d'absence par élève et par jour ; un seul message par objet et par élève.
+    uniqueIndex("notifications_absence_day")
+      .on(t.enrollmentId, t.date)
+      .where(sql`${t.kind} = 'absence'`),
+    uniqueIndex("notifications_reference")
+      .on(t.kind, t.referenceId, t.enrollmentId)
+      .where(sql`${t.referenceId} is not null`),
+    check("notifications_cost", sql`${t.cost} >= 0`),
     index("notifications_school_idx").on(t.schoolId, t.createdAt),
   ],
 );

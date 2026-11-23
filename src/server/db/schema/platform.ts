@@ -37,6 +37,10 @@ export const schools = pgTable("schools", {
   siblingDiscountPercent: integer("sibling_discount_percent").notNull().default(0),
   /** Option B7 (désactivée par défaut) : le parent ne voit pas le bulletin tant qu'une échéance échue reste impayée. */
   blockBulletinsIfOverdue: boolean("block_bulletins_if_overdue").notNull().default(false),
+  /** Notifications (4d) : canal choisi par l'école, modèles modifiables (null = défaut), plafond mensuel en FCFA. */
+  notificationChannel: text("notification_channel").notNull().default("sms"),
+  notificationTemplates: jsonb("notification_templates"),
+  notificationMonthlyCap: integer("notification_monthly_cap"),
   /**
    * Règles de calcul des moyennes (décision D10), validées par `GradingRulesSchema`
    * (`src/modules/grading/rules.ts`). null = règles par défaut.

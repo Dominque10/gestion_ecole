@@ -53,6 +53,11 @@ const MENU: {
   { href: "/parametres/classes", label: "nav.classes", action: "settings:read" },
   { href: "/parametres/creneaux", label: "nav.timeSlots", action: "settings:read" },
   { href: "/parametres/frais", label: "nav.fees", action: "settings:read" },
+  {
+    href: "/parametres/notifications",
+    label: "nav.notifications",
+    action: "notifications:templates",
+  },
   { href: "/parametres/personnel", label: "nav.staff", action: "staff:manage" },
 ];
 

@@ -249,4 +249,16 @@ describe("Isolation : un parent ne voit que ses enfants", () => {
     );
     expect(rows.map((r) => r.table_name)).toEqual([]);
   });
+
+  it("la règle « parent » est calculée une fois par requête, pas à chaque ligne (performance)", async () => {
+    // Forme attendue : (SELECT app.current_user_is_parent_only()), migration 0042.
+    const { rows } = await adminQuery<{ policyname: string }>(
+      `select policyname from pg_policies
+       where schemaname = 'public'
+         and regexp_replace(coalesce(qual, '') || ' ' || coalesce(with_check, ''),
+               '\\( SELECT app\\.current_user_is_parent_only\\(\\) AS current_user_is_parent_only\\)', '', 'g')
+             like '%current_user_is_parent_only%'`,
+    );
+    expect(rows.map((r) => r.policyname)).toEqual([]);
+  });
 });

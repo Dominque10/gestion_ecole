@@ -25,6 +25,7 @@ const MENU: {
   action: Action;
   visible?: (p: Principal) => boolean;
 }[] = [
+  { href: "/tableau-de-bord", label: "nav.dashboard", action: "dashboard:finance" },
   { href: "/eleves", label: "nav.students", action: "students:read", visible: canBrowseStudents },
   {
     href: "/inscriptions",

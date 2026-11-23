@@ -6,12 +6,14 @@ import {
   foreignKey,
   index,
   integer,
+  jsonb,
   numeric,
   pgEnum,
   pgTable,
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { schools, users } from "./platform";
@@ -160,5 +162,61 @@ export const grades = pgTable(
     ),
     index("grades_enrollment_idx").on(t.enrollmentId),
     index("grades_school_idx").on(t.schoolId),
+  ],
+);
+
+export const reportCardKind = pgEnum("report_card_kind", ["period", "annual"]);
+/** Décision de fin d'année du conseil de classe (hypothèse H99). */
+export const councilDecision = pgEnum("council_decision", ["promoted", "repeat", "excluded"]);
+
+/**
+ * Fiche du conseil de classe (sous-étape 3f), une par élève et par période, plus une pour l'année :
+ * appréciations par matière (enseignants), appréciation générale (professeur principal ou directeur),
+ * mention et décision validées par le directeur. Le bulletin (3g) s'appuie dessus.
+ */
+export const reportCards = pgTable(
+  "report_cards",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    schoolId: uuid("school_id")
+      .notNull()
+      .references(() => schools.id),
+    academicYearId: uuid("academic_year_id").notNull(),
+    enrollmentId: uuid("enrollment_id").notNull(),
+    kind: reportCardKind("kind").notNull(),
+    /** Période (fiche de période) ; vide pour la fiche annuelle. */
+    periodId: uuid("period_id"),
+    /** Appréciation de chaque matière : { [matière]: { text, by, at } }. */
+    subjectComments: jsonb("subject_comments").notNull().default({}),
+    generalComment: text("general_comment"),
+    generalCommentBy: uuid("general_comment_by").references(() => users.id),
+    /** Mention retenue par le conseil (vide : la mention proposée selon les seuils). */
+    mention: text("mention"),
+    decision: councilDecision("decision"),
+    councilValidatedAt: timestamp("council_validated_at", { withTimezone: true }),
+    councilValidatedBy: uuid("council_validated_by").references(() => users.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    foreignKey({
+      name: "report_cards_enrollment_fk",
+      columns: [t.enrollmentId, t.academicYearId, t.schoolId],
+      foreignColumns: [enrollments.id, enrollments.academicYearId, enrollments.schoolId],
+    }),
+    foreignKey({
+      name: "report_cards_period_fk",
+      columns: [t.periodId, t.academicYearId, t.schoolId],
+      foreignColumns: [periods.id, periods.academicYearId, periods.schoolId],
+    }),
+    check("report_cards_kind_period", sql`(${t.kind} = 'period') = (${t.periodId} is not null)`),
+    check("report_cards_decision_annual", sql`${t.decision} is null or ${t.kind} = 'annual'`),
+    uniqueIndex("report_cards_one_per_period")
+      .on(t.enrollmentId, t.periodId)
+      .where(sql`${t.kind} = 'period'`),
+    uniqueIndex("report_cards_one_annual")
+      .on(t.enrollmentId)
+      .where(sql`${t.kind} = 'annual'`),
+    index("report_cards_school_idx").on(t.schoolId),
   ],
 );

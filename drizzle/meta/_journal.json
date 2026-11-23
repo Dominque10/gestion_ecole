@@ -218,6 +218,20 @@
       "when": 1795395114056,
       "tag": "0030_attendance_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1795396621137,
+      "tag": "0031_report_cards",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1795396623220,
+      "tag": "0032_report_cards_rls",
+      "breakpoints": true
     }
   ]
 }

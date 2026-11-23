@@ -44,6 +44,8 @@ const SCHOOL_ACTIONS = {
   /** Clôture d'une période pour une classe ; réouverture (motif obligatoire, tracée) — 3d. */
   "periods:close": ["director"],
   "grades:unlock": ["director"],
+  /** Validation du conseil de classe : mention et décision (3f). */
+  "reportcards:council": ["director"],
   "reportcards:publish": ["director"],
   "reportcards:read": ["director", "parent"],
   "attendance:write": ["director", "secretary", "teacher"],

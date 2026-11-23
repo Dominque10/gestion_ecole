@@ -15,6 +15,12 @@ export type GradingErrorCode =
   | "periodNotClosed"
   | "reopenReason"
   | "classNotFound"
+  | "commentTooLong"
+  | "councilValidated"
+  | "councilNotClosed"
+  | "decisionMissing"
+  | "mentionInvalid"
+  | "decisionInvalid"
   | GradeInputProblem;
 
 export class GradingError extends Error {

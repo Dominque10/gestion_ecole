@@ -36,10 +36,10 @@ import { loadGradingRules } from "./settings";
 
 const isUuid = (value: string) => z.uuid().safeParse(value).success;
 
-type Ctx = { schoolId: string; userId: string; director: boolean };
+export type Ctx = { schoolId: string; userId: string; director: boolean };
 
 /** Résultats : le directeur pour toute l'école, le professeur principal pour sa classe (H86). */
-function resultsContext(principal: Principal): Ctx {
+export function resultsContext(principal: Principal): Ctx {
   authorize(principal, "grades:write");
   return {
     schoolId: principal.schoolId as string,
@@ -79,7 +79,7 @@ export async function listResultClasses(principal: Principal): Promise<ResultCla
   );
 }
 
-type ClassRow = {
+export type ClassRow = {
   classId: string;
   className: string;
   levelId: string;
@@ -90,7 +90,7 @@ type ClassRow = {
   headTeacherId: string | null;
 };
 
-async function loadClass(tx: Tx, ctx: Ctx, classId: string): Promise<ClassRow> {
+export async function loadClass(tx: Tx, ctx: Ctx, classId: string): Promise<ClassRow> {
   if (!isUuid(classId)) throw new GradingError("classNotFound");
   const [row] = await tx
     .select({
@@ -115,7 +115,7 @@ async function loadClass(tx: Tx, ctx: Ctx, classId: string): Promise<ClassRow> {
 
 export type PeriodInfo = { id: string; label: string; position: number };
 
-async function loadPeriods(tx: Tx, yearId: string): Promise<PeriodInfo[]> {
+export async function loadPeriods(tx: Tx, yearId: string): Promise<PeriodInfo[]> {
   return tx
     .select({ id: periods.id, label: periods.label, position: periods.position })
     .from(periods)
@@ -123,7 +123,7 @@ async function loadPeriods(tx: Tx, yearId: string): Promise<PeriodInfo[]> {
     .orderBy(asc(periods.position));
 }
 
-type Loaded = {
+export type Loaded = {
   rules: GradingRules;
   scale: number;
   subjects: { subjectId: string; name: string; coefficient: number; optional: boolean }[];
@@ -131,7 +131,7 @@ type Loaded = {
 };
 
 /** Règles, matières de la classe (coefficients de la grille) et élèves inscrits. */
-async function loadSetup(tx: Tx, ctx: Ctx, c: ClassRow): Promise<Loaded> {
+export async function loadSetup(tx: Tx, ctx: Ctx, c: ClassRow): Promise<Loaded> {
   const rules = await loadGradingRules(tx, ctx.schoolId);
   const subjectRows = await tx
     .select({
@@ -169,7 +169,7 @@ async function loadSetup(tx: Tx, ctx: Ctx, c: ClassRow): Promise<Loaded> {
 }
 
 /** Calcul d'une période à partir de la base. */
-async function periodResults(
+export async function periodResults(
   tx: Tx,
   c: ClassRow,
   setup: Loaded,

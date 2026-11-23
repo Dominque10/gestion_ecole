@@ -68,6 +68,12 @@ async function Content({ params, searchParams }: Props) {
           periods={data.annual.periods}
           choice={ANNUAL}
         />
+        <Link
+          href={`/notes/resultats/${classId}/conseil?periode=annee`}
+          className="flex min-h-12 items-center rounded-md bg-blue-700 px-4 font-semibold text-white"
+        >
+          {t("council.annualLink")}
+        </Link>
         <AnnualView results={data.annual} />
       </>
     );
@@ -82,6 +88,12 @@ async function Content({ params, searchParams }: Props) {
         choice={results.period.id}
       />
       <ClosureBox results={results} principal={principal} />
+      <Link
+        href={`/notes/resultats/${results.classId}/conseil?periode=${results.period.id}`}
+        className="flex min-h-12 items-center rounded-md bg-blue-700 px-4 font-semibold text-white"
+      >
+        {t("council.link")}
+      </Link>
       <PeriodView results={results} />
     </>
   );

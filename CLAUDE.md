@@ -35,6 +35,8 @@ Contraintes du terrain à garder en tête en permanence :
     **Cas de référence réels du porteur toujours attendus** (critère du jalon) : un cas construit les remplace.
   - ✅ 3e – Appel (`/appel`, aussi hors connexion), SMS d'absence (décision D15, faux prestataire), justification
     (`/absences`) ; hypothèses H91 à H96 validées (D16). Appel de 60 élèves vérifié en E2E (bien sous la minute).
+  - ✅ 3f – Conseil de classe (`council.ts`, table `report_cards`) : appréciations par matière et générale,
+    mention, décision de fin d'année, totaux d'absences ; validation après clôture ; hypothèses H97 à H101 à valider
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
@@ -181,6 +183,10 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   Clôture par classe : `period_closures` (une ligne par période + classe, jamais supprimée) ; déclencheurs
   `app.forbid_*_in_closed_period` (GS008) ; après réouverture, chaque changement de note ou d'évaluation
   est écrit dans `audit_logs` (`grade.change_after_close`, `assessment.update_after_close`).
+- **Mise en œuvre (3f)** : `src/modules/grading/council.ts` ; `report_cards` = une fiche par élève et période, plus une
+  annuelle (`kind`). Appréciations de matière dans `subject_comments` (jsonb, une clé par matière, mise à jour
+  atomique `jsonb_set`). Validation (`reportcards:council`) seulement après clôture ; mention vide = proposée.
+  Totaux d'absences : `src/modules/attendance/totals.ts` (en créneaux).
 
 ### Appel et SMS
 - **Mise en œuvre (3e)** : `src/modules/attendance/` ; `attendance` garde une ligne par élève, jour et créneau

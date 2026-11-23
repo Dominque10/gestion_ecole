@@ -128,6 +128,12 @@ async function Content({ params, searchParams }: Props) {
 
           <section className="flex flex-col gap-3">
             <h2 className="text-xl font-semibold">{t("grading.assessmentsTitle")}</h2>
+            <Link
+              href={`/notes/${course.classId}/${course.subjectId}/appreciations?periode=${period?.id ?? ""}`}
+              className="flex min-h-12 items-center rounded-md border border-blue-700 px-4 font-medium text-blue-800"
+            >
+              {t("council.commentsLink")}
+            </Link>
             {shown.length === 0 ? (
               <p>{t("grading.noAssessment")}</p>
             ) : (

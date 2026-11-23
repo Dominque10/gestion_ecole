@@ -1,8 +1,8 @@
 import "server-only";
 import { PgBoss } from "pg-boss";
-import { DOCUMENTS_QUEUE, JOB_SCHEMA } from "@/server/db/setup";
+import { DOCUMENTS_QUEUE, JOB_SCHEMA, NOTIFICATIONS_QUEUE } from "@/server/db/setup";
 
-export { DOCUMENTS_QUEUE };
+export { DOCUMENTS_QUEUE, NOTIFICATIONS_QUEUE };
 
 const globalForJobs = globalThis as unknown as { __boss?: Promise<PgBoss> };
 

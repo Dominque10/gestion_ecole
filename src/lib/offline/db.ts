@@ -85,11 +85,59 @@ export type PendingCell = {
   updatedAt: number;
 };
 
+/** Copie d'une classe pour faire l'appel sans réseau (3e). */
+export type OfflineRollClass = {
+  key: string;
+  owner: Owner;
+  classId: string;
+  className: string;
+  slots: { id: string; label: string; startTime: string; endTime: string }[];
+  subjects: { classSubjectId: string; name: string }[];
+  students: OfflineStudent[];
+  yearStart: string;
+  yearEnd: string;
+  savedAt: number;
+};
+
+/** Appel connu du serveur pour une classe, un jour et un créneau (référence des conflits). */
+export type OfflineRollCall = {
+  key: string;
+  owner: Owner;
+  classId: string;
+  date: string;
+  slotId: string;
+  /** « present », « absent », « late » par inscription ; absent de la liste = appel pas fait. */
+  values: Record<string, string>;
+  savedAt: number;
+};
+
+/** Ligne d'appel saisie sur le téléphone, pas encore enregistrée sur le serveur. */
+export type PendingMark = {
+  key: string;
+  owner: Owner;
+  /** Appel concerné : `<propriétaire>|<classe>|<jour>|<créneau>`. */
+  callKey: string;
+  classId: string;
+  date: string;
+  slotId: string;
+  classSubjectId: string | null;
+  enrollmentId: string;
+  expected: string;
+  value: string;
+  state: "pending" | "conflict" | "error";
+  current?: string;
+  error?: string;
+  updatedAt: number;
+};
+
 export class OfflineDb extends Dexie {
   courses!: EntityTable<OfflineCourse, "key">;
   sheets!: EntityTable<OfflineSheet, "key">;
   assessments!: EntityTable<PendingAssessment, "id">;
   cells!: EntityTable<PendingCell, "key">;
+  rollClasses!: EntityTable<OfflineRollClass, "key">;
+  rollCalls!: EntityTable<OfflineRollCall, "key">;
+  marks!: EntityTable<PendingMark, "key">;
 
   constructor(name = "gestion-ecole-notes") {
     super(name);
@@ -99,6 +147,12 @@ export class OfflineDb extends Dexie {
       assessments: "&id, owner",
       cells: "&key, owner, [owner+assessmentId]",
     });
+    // 3e : appel hors connexion.
+    this.version(2).stores({
+      rollClasses: "&key, owner",
+      rollCalls: "&key, owner",
+      marks: "&key, owner, callKey",
+    });
   }
 }
 
@@ -107,6 +161,10 @@ export const courseKey = (owner: Owner, classId: string, subjectId: string) =>
 export const sheetKey = (owner: Owner, assessmentId: string) => `${owner}|${assessmentId}`;
 export const cellKey = (owner: Owner, assessmentId: string, enrollmentId: string) =>
   `${owner}|${assessmentId}|${enrollmentId}`;
+export const rollClassKey = (owner: Owner, classId: string) => `${owner}|${classId}`;
+export const callKey = (owner: Owner, classId: string, date: string, slotId: string) =>
+  `${owner}|${classId}|${date}|${slotId}`;
+export const markKey = (call: string, enrollmentId: string) => `${call}|${enrollmentId}`;
 
 let instance: OfflineDb | null = null;
 

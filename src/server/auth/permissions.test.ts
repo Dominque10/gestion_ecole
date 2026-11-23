@@ -42,6 +42,7 @@ const MATRIX: Record<SchoolAction, MembershipRole[]> = {
   "reportcards:publish": ["director"],
   "reportcards:read": ["director", "parent"],
   "attendance:write": ["director", "secretary", "teacher"],
+  "attendance:justify": ["director", "secretary"],
   "attendance:read": ["director", "secretary", "teacher", "parent"],
   "dashboard:school": ["director"],
   "dashboard:finance": ["director", "accountant"],

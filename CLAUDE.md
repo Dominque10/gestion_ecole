@@ -33,6 +33,8 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ 3d – Moyennes, rangs, mentions, moyenne annuelle (`averages.ts`), clôture des périodes par classe
     (`period_closures`, décision D13), page `/notes/resultats` ; hypothèses H86 à H90 validées (D14).
     **Cas de référence réels du porteur toujours attendus** (critère du jalon) : un cas construit les remplace.
+  - ✅ 3e – Appel (`/appel`, aussi hors connexion), SMS d'absence (décision D15, faux prestataire), justification
+    (`/absences`) ; hypothèses H91 à H96 à valider. Appel de 60 élèves vérifié en E2E (bien sous la minute).
 - Module en cours : **M4 + M5**
 - Dernier jalon validé : **Phase 2** (M2 + M3), validée le 2026-11-21 (décision D9) : import de
   1 000 élèves en ~20 s, clôture de caisse = somme des reçus ; hypothèses H38 à H68 validées (D8).
@@ -179,6 +181,14 @@ LMD/universités, cantine, transport, bibliothèque, application mobile native.
   Clôture par classe : `period_closures` (une ligne par période + classe, jamais supprimée) ; déclencheurs
   `app.forbid_*_in_closed_period` (GS008) ; après réouverture, chaque changement de note ou d'évaluation
   est écrit dans `audit_logs` (`grade.change_after_close`, `assessment.update_after_close`).
+
+### Appel et SMS
+- **Mise en œuvre (3e)** : `src/modules/attendance/` ; `attendance` garde une ligne par élève, jour et créneau
+  (présents compris : on sait que l'appel est fait). Même règle de conflit que les notes. Hors connexion : tables
+  Dexie `rollClasses`, `rollCalls`, `marks` (version 2), envoyées par `syncPending` (étape 3).
+- SMS : interface `src/server/sms/` (`SMS_PROVIDER`, faux prestataire par défaut) ; file pg-boss `notifications`
+  (politique « short », clé `inscription:jour`, départ 30 min après l'appel) ; tâche `processAbsenceNotice` dans le
+  worker ; `notifications` unique par élève, type et jour (un SMS par jour).
 
 ### Tâches de fond et documents
 - **Mise en œuvre (2f)** : file pg-boss (schéma `pgboss`, installée par `pnpm db:setup` via `setupJobQueue`,

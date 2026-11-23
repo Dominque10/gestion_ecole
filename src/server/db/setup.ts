@@ -69,6 +69,8 @@ export { databaseName, withDatabase };
 /** File d'attente des tâches de fond (pg-boss) : schéma « pgboss », dans la même base. */
 export const JOB_SCHEMA = "pgboss";
 export const DOCUMENTS_QUEUE = "documents";
+/** Messages aux parents (SMS d'absence, décision D15). */
+export const NOTIFICATIONS_QUEUE = "notifications";
 
 /**
  * Installe ou met à jour la file d'attente pg-boss avec le compte administrateur, puis donne au rôle
@@ -95,6 +97,18 @@ export async function setupJobQueue(adminUrl: string): Promise<void> {
         expireInSeconds: 120,
         retentionSeconds: 600,
         deleteAfterSeconds: 3600,
+      });
+    }
+    if (!(await boss.getQueue(NOTIFICATIONS_QUEUE))) {
+      // Prestataire SMS indisponible : 3 nouveaux essais, espacés de 5 min, le jour même.
+      // Une seule tâche en attente par élève et par jour (clé « inscription:jour »).
+      await boss.createQueue(NOTIFICATIONS_QUEUE, {
+        policy: "short",
+        retryLimit: 3,
+        retryDelay: 300,
+        expireInSeconds: 120,
+        retentionSeconds: 24 * 3600,
+        deleteAfterSeconds: 7 * 24 * 3600,
       });
     }
   } finally {

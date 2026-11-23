@@ -9,7 +9,9 @@ import {
   parseGradeInput,
   type GradeInputProblem,
 } from "@/modules/grading/grade-input";
-import { sheetKey, type AssessmentDraft, type OfflineDb, type Owner } from "./db";
+import type { RollCallKey, RollEntry, SaveRollResult } from "@/modules/attendance/roll";
+import { sheetKey, type AssessmentDraft, type OfflineDb, type Owner, type PendingMark } from "./db";
+import { withMark } from "./roll-store";
 import { withValue } from "./store";
 
 /** Réponse d'une action serveur de synchronisation (jamais de redirection). */
@@ -25,6 +27,7 @@ export type SyncApi = {
     input: AssessmentDraft;
   }): Promise<SyncReply<{ id: string }>>;
   saveGrades(assessmentId: string, entries: GradeEntry[]): Promise<SyncReply<SaveGradesResult>>;
+  saveRollCall(call: RollCallKey, entries: RollEntry[]): Promise<SyncReply<SaveRollResult>>;
 };
 
 export type SyncOutcome = {
@@ -133,6 +136,65 @@ export async function syncPending(db: OfflineDb, owner: Owner, api: SyncApi): Pr
         }
       }
       if (sheet) await db.sheets.put({ ...sheet, values });
+    });
+  }
+  // 3. Appels (3e), appel par appel.
+  const marks = (await db.marks.where("owner").equals(owner).toArray()).filter(
+    (m) => m.state === "pending",
+  );
+  const byCall = new Map<string, PendingMark[]>();
+  for (const m of marks) byCall.set(m.callKey, [...(byCall.get(m.callKey) ?? []), m]);
+  for (const [ck, group] of byCall) {
+    const first = group[0];
+    let reply: SyncReply<SaveRollResult>;
+    try {
+      reply = await api.saveRollCall(
+        {
+          classId: first.classId,
+          date: first.date,
+          slotId: first.slotId,
+          classSubjectId: first.classSubjectId,
+        },
+        group.map((m) => ({ enrollmentId: m.enrollmentId, expected: m.expected, value: m.value })),
+      );
+    } catch {
+      return { status: "offline", sent };
+    }
+    if (!reply.ok && reply.code === "session") return { status: "session", sent };
+    await db.transaction("rw", db.marks, db.rollCalls, async () => {
+      const copy = await db.rollCalls.get(ck);
+      let values = copy?.values ?? {};
+      const conflicts = reply.ok
+        ? new Map(reply.result.conflicts.map((c) => [c.enrollmentId, c.current as string]))
+        : new Map<string, string>();
+      for (const sentMark of group) {
+        const mark = await db.marks.get(sentMark.key);
+        if (!mark) continue;
+        const changedMeanwhile = mark.updatedAt !== sentMark.updatedAt;
+        if (!reply.ok) {
+          if (!changedMeanwhile)
+            await db.marks.update(mark.key, { state: "error", error: reply.message });
+        } else if (conflicts.has(mark.enrollmentId)) {
+          const current = conflicts.get(mark.enrollmentId) as string;
+          await db.marks.update(mark.key, { state: "conflict", current });
+          values = withMark(values, mark.enrollmentId, current);
+        } else {
+          values = withMark(values, mark.enrollmentId, sentMark.value);
+          if (changedMeanwhile) await db.marks.update(mark.key, { expected: sentMark.value });
+          else await db.marks.delete(mark.key);
+          sent++;
+        }
+      }
+      // Appel fait sans réseau : la copie du serveur naît ici.
+      await db.rollCalls.put({
+        key: ck,
+        owner,
+        classId: first.classId,
+        date: first.date,
+        slotId: first.slotId,
+        values,
+        savedAt: copy?.savedAt ?? Date.now(),
+      });
     });
   }
   return { status: "done", sent };

@@ -4,11 +4,12 @@
 // en relance un autre juste après (pour ne rien laisser de côté).
 import { offlineDb, type Owner } from "@/lib/offline/db";
 import { syncPending, type SyncApi, type SyncOutcome } from "@/lib/offline/sync";
-import { syncCreateAssessment, syncSaveGrades } from "../sync-actions";
+import { syncCreateAssessment, syncSaveGrades, syncSaveRollCall } from "../sync-actions";
 
 const api: SyncApi = {
   createAssessment: (op) => syncCreateAssessment(op),
   saveGrades: (assessmentId, entries) => syncSaveGrades(assessmentId, entries),
+  saveRollCall: (call, entries) => syncSaveRollCall(call, entries),
 };
 
 export type SyncState = { running: boolean; last: SyncOutcome | null };

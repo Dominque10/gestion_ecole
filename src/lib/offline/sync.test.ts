@@ -12,6 +12,8 @@ import {
   saveCourseCopy,
 } from "./store";
 import { syncPending, type SyncApi, type SyncReply } from "./sync";
+import { callKey, markKey } from "./db";
+import { discardMark, keepMyMark, recordMarks, saveRollCallCopy } from "./roll-store";
 
 const OWNER = "ecole:compte";
 const CLASS = "classe";
@@ -24,6 +26,7 @@ let db: OfflineDb;
 function fakeServer() {
   const grades = new Map<string, string>(); // `${assessment}|${enrollment}` → valeur
   const assessments = new Set<string>([A]);
+  const roll = new Map<string, string>(); // `classe|jour|créneau|inscription` → statut
   let offline = false;
   let session = true;
   const api: SyncApi = {
@@ -65,10 +68,29 @@ function fakeServer() {
         return { ok: true, result };
       },
     ),
+    saveRollCall: vi.fn(async (call, entries) => {
+      if (offline) throw new TypeError("Failed to fetch");
+      if (!session) return { ok: false, code: "session", message: "" } as const;
+      const conflicts: { enrollmentId: string; current: "" | "present" | "absent" | "late" }[] = [];
+      let saved = 0;
+      for (const e of entries) {
+        const key = `${call.classId}|${call.date}|${call.slotId}|${e.enrollmentId}`;
+        const now = roll.get(key) ?? "";
+        if (now === e.value) continue;
+        if (now !== e.expected) {
+          conflicts.push({ enrollmentId: e.enrollmentId, current: now as "present" });
+          continue;
+        }
+        roll.set(key, e.value);
+        saved++;
+      }
+      return { ok: true, result: { saved, conflicts } } as const;
+    }),
   };
   return {
     api,
     grades,
+    roll,
     goOffline: (v: boolean) => (offline = v),
     expireSession: () => (session = false),
   };
@@ -270,5 +292,66 @@ describe("Envoi au retour du réseau", () => {
     await recordCells(db, "autre:compte", A, [{ enrollmentId: "bob", value: "7" }]);
     expect(await syncPending(db, OWNER, server.api)).toEqual({ status: "done", sent: 0 });
     expect(await countPending(db, OWNER)).toMatchObject({ pending: 0 });
+  });
+});
+
+describe("Appel sur le téléphone (3e)", () => {
+  const CALL = { classId: CLASS, date: "2026-11-24", slotId: "matin", classSubjectId: null };
+  const CK = callKey(OWNER, CLASS, CALL.date, CALL.slotId);
+  const mark = (enrollmentId: string) => db.marks.get(markKey(CK, enrollmentId));
+
+  it("appel fait sans réseau : tout part au retour, et la copie du serveur garde les absents", async () => {
+    const server = fakeServer();
+    await recordMarks(db, OWNER, CALL, [
+      { enrollmentId: "ada", value: "present" },
+      { enrollmentId: "bob", value: "absent" },
+    ]);
+    expect(await countPending(db, OWNER)).toMatchObject({ pending: 2 });
+    server.goOffline(true);
+    expect(await syncPending(db, OWNER, server.api)).toEqual({ status: "offline", sent: 0 });
+    server.goOffline(false);
+    expect(await syncPending(db, OWNER, server.api)).toEqual({ status: "done", sent: 2 });
+    expect(server.roll.get(`${CLASS}|2026-11-24|matin|bob`)).toBe("absent");
+    expect(await db.marks.count()).toBe(0);
+    expect((await db.rollCalls.get(CK))?.values).toEqual({ ada: "present", bob: "absent" });
+  });
+
+  it("ligne changée sur le serveur : conflit, jamais envoyé seul ; l'enseignant tranche", async () => {
+    const server = fakeServer();
+    await saveRollCallCopy(db, OWNER, CALL, { bob: "absent" });
+    server.roll.set(`${CLASS}|2026-11-24|matin|bob`, "absent");
+    await recordMarks(db, OWNER, CALL, [{ enrollmentId: "bob", value: "late" }]);
+    server.roll.set(`${CLASS}|2026-11-24|matin|bob`, "present"); // le secrétariat corrige
+    await syncPending(db, OWNER, server.api);
+    expect(await mark("bob")).toMatchObject({
+      state: "conflict",
+      current: "present",
+      value: "late",
+    });
+    await syncPending(db, OWNER, server.api);
+    expect(server.roll.get(`${CLASS}|2026-11-24|matin|bob`)).toBe("present");
+
+    await keepMyMark(db, (await mark("bob"))!);
+    await syncPending(db, OWNER, server.api);
+    expect(server.roll.get(`${CLASS}|2026-11-24|matin|bob`)).toBe("late");
+
+    // Autre conflit, cette fois abandonné : la valeur du serveur reste.
+    await recordMarks(db, OWNER, CALL, [{ enrollmentId: "bob", value: "absent" }]);
+    server.roll.set(`${CLASS}|2026-11-24|matin|bob`, "present");
+    await syncPending(db, OWNER, server.api);
+    await discardMark(db, (await mark("bob"))!);
+    expect(await mark("bob")).toBeUndefined();
+    expect((await db.rollCalls.get(CK))?.values.bob).toBe("present");
+  });
+
+  it("revenir à la valeur du serveur annule la ligne ; la déconnexion garde les lignes en attente", async () => {
+    await saveRollCallCopy(db, OWNER, CALL, { ada: "present" });
+    await recordMarks(db, OWNER, CALL, [{ enrollmentId: "ada", value: "absent" }]);
+    await recordMarks(db, OWNER, CALL, [{ enrollmentId: "ada", value: "present" }]);
+    expect(await mark("ada")).toBeUndefined();
+    await recordMarks(db, OWNER, CALL, [{ enrollmentId: "ada", value: "late" }]);
+    await clearCopies(db, OWNER);
+    expect(await mark("ada")).toBeDefined();
+    expect(await db.rollCalls.get(CK)).toBeDefined();
   });
 });

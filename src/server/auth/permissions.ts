@@ -47,6 +47,8 @@ const SCHOOL_ACTIONS = {
   "reportcards:publish": ["director"],
   "reportcards:read": ["director", "parent"],
   "attendance:write": ["director", "secretary", "teacher"],
+  /** Justification des absences et retards (motif, pièce jointe) — 3e. */
+  "attendance:justify": ["director", "secretary"],
   "attendance:read": ["director", "secretary", "teacher", "parent"],
   "dashboard:school": ["director"],
   "dashboard:finance": ["director", "accountant"],

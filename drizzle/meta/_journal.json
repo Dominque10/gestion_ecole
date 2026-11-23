@@ -204,6 +204,20 @@
       "when": 1795393832490,
       "tag": "0028_period_closures_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1795395112492,
+      "tag": "0029_attendance",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1795395114056,
+      "tag": "0030_attendance_rls",
+      "breakpoints": true
     }
   ]
 }

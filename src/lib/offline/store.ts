@@ -187,7 +187,25 @@ export function withValue(
  * envoyées sont gardées, pour ne rien perdre (hypothèse H83).
  */
 export async function clearCopies(db: OfflineDb, owner: Owner): Promise<void> {
-  await db.transaction("rw", db.courses, db.sheets, db.assessments, db.cells, async () => {
+  const tables = [
+    db.courses,
+    db.sheets,
+    db.assessments,
+    db.cells,
+    db.rollClasses,
+    db.rollCalls,
+    db.marks,
+  ];
+  await db.transaction("rw", tables, async () => {
+    const pendingCalls = new Set(
+      (await db.marks.where("owner").equals(owner).toArray()).map((m) => m.callKey),
+    );
+    await db.rollClasses.where("owner").equals(owner).delete();
+    await db.rollCalls
+      .where("owner")
+      .equals(owner)
+      .filter((c) => !pendingCalls.has(c.key))
+      .delete();
     const pendingSheets = new Set([
       ...(await db.assessments.where("owner").equals(owner).primaryKeys()),
       ...(await db.cells.where("owner").equals(owner).toArray()).map((c) => c.assessmentId),
@@ -201,17 +219,19 @@ export async function clearCopies(db: OfflineDb, owner: Owner): Promise<void> {
   });
 }
 
-/** Nombre de saisies en attente pour ce compte (évaluations créées + cases). */
+/** Nombre de saisies en attente pour ce compte (évaluations créées, cases de notes, lignes d'appel). */
 export async function countPending(db: OfflineDb, owner: Owner) {
-  const [assessments, cells] = await Promise.all([
+  const [assessments, cells, marks] = await Promise.all([
     db.assessments.where("owner").equals(owner).toArray(),
     db.cells.where("owner").equals(owner).toArray(),
+    db.marks.where("owner").equals(owner).toArray(),
   ]);
+  const lines = [...cells, ...marks];
   return {
-    pending: cells.filter((c) => c.state === "pending").length,
-    conflicts: cells.filter((c) => c.state === "conflict").length,
+    pending: lines.filter((c) => c.state === "pending").length,
+    conflicts: lines.filter((c) => c.state === "conflict").length,
     errors:
-      cells.filter((c) => c.state === "error").length + assessments.filter((a) => a.error).length,
+      lines.filter((c) => c.state === "error").length + assessments.filter((a) => a.error).length,
     assessments: assessments.length,
   };
 }

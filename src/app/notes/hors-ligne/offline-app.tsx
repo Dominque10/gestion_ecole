@@ -5,7 +5,16 @@ import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { inputClass } from "@/components/styles";
 import { t } from "@/i18n";
 import { formatDay, todayInBrazzaville } from "@/lib/dates";
-import { courseKey, offlineDb, sheetKey, type OfflineCourse, type Owner } from "@/lib/offline/db";
+import {
+  courseKey,
+  offlineDb,
+  rollClassKey,
+  sheetKey,
+  type OfflineCourse,
+  type OfflineRollClass,
+  type Owner,
+} from "@/lib/offline/db";
+import { RollCallList } from "@/app/appel/roll-call-list";
 import { createLocalAssessment, discardLocalAssessment } from "@/lib/offline/store";
 import { ASSESSMENT_KINDS, type AssessmentKind } from "@/modules/grading/grade-input";
 import { GradeGrid } from "../grade-grid";
@@ -40,15 +49,134 @@ export function OfflineApp() {
   const params = new URLSearchParams(hash);
   const course = params.get("c");
   const assessment = params.get("e");
+  const roll = params.get("r");
   return (
     <>
       <SyncStatus owner={owner} />
-      {assessment ? (
+      {roll ? (
+        <RollView owner={owner} classId={roll} />
+      ) : assessment ? (
         <SheetView owner={owner} assessmentId={assessment} />
       ) : course ? (
         <CourseView owner={owner} classId={course.split(".")[0]} subjectId={course.split(".")[1]} />
       ) : (
-        <Home owner={owner} />
+        <>
+          <RollHome owner={owner} />
+          <Home owner={owner} />
+        </>
+      )}
+    </>
+  );
+}
+
+/** Classes gardées pour l'appel (ouvertes une fois avec du réseau dans « Appel »). */
+function RollHome({ owner }: { owner: Owner }) {
+  const list = useLiveQuery(
+    () => offlineDb().rollClasses.where("owner").equals(owner).sortBy("className"),
+    [owner],
+  );
+  if (!list || list.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-2">
+      <h2 className="text-xl font-semibold">{t("attendance.title")}</h2>
+      <ul className="flex flex-col gap-2">
+        {list.map((c) => (
+          <li key={c.key}>
+            <a
+              href={`#r=${c.classId}`}
+              className="flex min-h-12 items-center rounded-md border border-zinc-400 px-4 font-medium"
+            >
+              {t("attendance.classTitle", { classe: c.className })}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Créneau en cours (heure du téléphone), sinon le premier. */
+function currentSlot(slots: OfflineRollClass["slots"]): string {
+  const now = new Date().toTimeString().slice(0, 5);
+  return (
+    (slots.find((s) => s.startTime.slice(0, 5) <= now && now < s.endTime.slice(0, 5)) ?? slots[0])
+      ?.id ?? ""
+  );
+}
+
+/** Appel du jour sans réseau (hypothèse H92 : le jour même seulement). */
+function RollView({ owner, classId }: { owner: Owner; classId: string }) {
+  const copy = useLiveQuery(
+    async () => (await offlineDb().rollClasses.get(rollClassKey(owner, classId))) ?? null,
+    [owner, classId],
+  );
+  const [slotId, setSlotId] = useState<string | null>(null);
+  const [subjectId, setSubjectId] = useState("");
+  if (copy === undefined) return null;
+  if (copy === null) return <NotOnPhone />;
+  const today = todayInBrazzaville();
+  const slot = slotId ?? currentSlot(copy.slots);
+  return (
+    <>
+      <a href="#" className="text-blue-800 underline">
+        {t("offline.backHome")}
+      </a>
+      <h2 className="text-xl font-semibold">
+        {t("attendance.classTitle", { classe: copy.className })}
+      </h2>
+      <p>{formatDay(today)}</p>
+      {copy.slots.length === 0 ? (
+        <p>{t("attendance.noSlots")}</p>
+      ) : (
+        <>
+          <div className="flex flex-col gap-1">
+            <label htmlFor="offline-slot" className="font-medium">
+              {t("attendance.slot")}
+            </label>
+            <select
+              id="offline-slot"
+              value={slot}
+              onChange={(e) => setSlotId(e.target.value)}
+              className={`${inputClass} bg-white`}
+            >
+              {copy.slots.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          {copy.subjects.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <label htmlFor="offline-subject" className="font-medium">
+                {t("attendance.subject")}
+              </label>
+              <select
+                id="offline-subject"
+                value={subjectId}
+                onChange={(e) => setSubjectId(e.target.value)}
+                className={`${inputClass} bg-white`}
+              >
+                <option value="">{t("attendance.subjectNone")}</option>
+                {copy.subjects.map((s) => (
+                  <option key={s.classSubjectId} value={s.classSubjectId}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {copy.students.length === 0 ? (
+            <p>{t("grading.noStudents")}</p>
+          ) : (
+            <RollCallList
+              key={`${today}-${slot}`}
+              owner={owner}
+              call={{ classId, date: today, slotId: slot, classSubjectId: subjectId || null }}
+              students={copy.students}
+            />
+          )}
+        </>
       )}
     </>
   );

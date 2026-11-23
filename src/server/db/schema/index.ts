@@ -3,3 +3,4 @@ export * from "./settings";
 export * from "./students";
 export * from "./finance";
 export * from "./grading";
+export * from "./attendance";

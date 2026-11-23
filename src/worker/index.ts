@@ -1,9 +1,11 @@
 // Worker des tâches de fond (CLAUDE.md §5). Lancement : pnpm worker
-// Produit les documents PDF demandés par l'application (file « documents » de pg-boss).
+// Produit les documents PDF demandés par l'application (file « documents » de pg-boss) et envoie
+// les SMS d'absence aux parents (file « notifications », décision D15).
 import { existsSync } from "node:fs";
 import { PgBoss } from "pg-boss";
 import { closeDb } from "@/server/db/client";
-import { DOCUMENTS_QUEUE, JOB_SCHEMA } from "@/server/db/setup";
+import { DOCUMENTS_QUEUE, JOB_SCHEMA, NOTIFICATIONS_QUEUE } from "@/server/db/setup";
+import { processAbsenceNotice } from "@/modules/attendance/notices";
 import { renderDocument } from "@/modules/documents/documents";
 import { closePdfBrowser } from "@/modules/documents/pdf";
 
@@ -31,8 +33,10 @@ async function startQueue(): Promise<PgBoss> {
     queue.on("error", (error) => console.error("[worker] pg-boss :", error.message));
     try {
       await queue.start();
-      if (await queue.getQueue(DOCUMENTS_QUEUE)) return queue;
-      throw new Error(`file « ${DOCUMENTS_QUEUE} » absente`);
+      for (const name of [DOCUMENTS_QUEUE, NOTIFICATIONS_QUEUE]) {
+        if (!(await queue.getQueue(name))) throw new Error(`file « ${name} » absente`);
+      }
+      return queue;
     } catch (error) {
       await queue.stop({ graceful: false }).catch(() => undefined);
       if (attempt >= 60) throw error;
@@ -58,7 +62,17 @@ await boss.work(DOCUMENTS_QUEUE, { batchSize: 1, pollingIntervalSeconds: 1 }, as
     throw error;
   }
 });
-console.log("[worker] prêt : en attente de documents à produire");
+await boss.work(NOTIFICATIONS_QUEUE, { batchSize: 1, pollingIntervalSeconds: 5 }, async ([job]) => {
+  try {
+    const outcome = await processAbsenceNotice(job.data);
+    console.log(`[worker] SMS d'absence ${job.id} : ${outcome}`);
+    return { outcome };
+  } catch (error) {
+    console.error(`[worker] SMS d'absence ${job.id} en échec :`, (error as Error).message);
+    throw error;
+  }
+});
+console.log("[worker] prêt : en attente de documents à produire et de SMS à envoyer");
 
 async function shutdown() {
   console.log("[worker] arrêt…");

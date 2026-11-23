@@ -186,7 +186,7 @@ Plan validé : décision D20 (`docs/plan-phase-4.md`). Hypothèses complémentai
 | H121 | Modèles de 320 caractères au plus (2 SMS), avec seulement les champs prévus pour chaque message ; un modèle enregistré devenu invalide est remplacé par celui par défaut | 4d | ✅ |
 | H122 | Plafond mensuel facultatif (FCFA) : au-delà, le message n'est pas envoyé, il est noté « non envoyé (plafond) » et pas réessayé ; le mois est celui de Brazzaville | 4d | ✅ |
 | H123 | Si l'école choisit WhatsApp, tous ses messages partent par WhatsApp, sans repli automatique sur SMS (à revoir avec le vrai prestataire, B5) | 4d | ✅ |
-| H124 | Annonces publiées par le directeur ou le secrétariat (choix du porteur, D25), pour l'année active ; titre de 80 caractères au plus, texte de 300 au plus | 4e | ⏳ |
-| H125 | Case « Envoyer aussi par SMS ou WhatsApp » cochée par défaut (choix du porteur, D25) ; un seul message par famille (responsable principal), même avec plusieurs enfants concernés ; le message reprend titre et texte ; le plafond mensuel s'applique | 4e | ⏳ |
-| H126 | Un parent voit les annonces de l'année qui concernent l'un de ses enfants (toute l'école, son niveau ou sa classe) ; la page de l'enfant montre les 3 plus récentes | 4e | ⏳ |
-| H127 | Une annonce publiée ne se modifie ni ne se supprime : une correction se fait par une nouvelle annonce | 4e | ⏳ |
+| H124 | Annonces publiées par le directeur ou le secrétariat (choix du porteur, D25), pour l'année active ; titre de 80 caractères au plus, texte de 300 au plus | 4e | ✅ |
+| H125 | Case « Envoyer aussi par SMS ou WhatsApp » cochée par défaut (choix du porteur, D25) ; un seul message par famille (responsable principal), même avec plusieurs enfants concernés ; le message reprend titre et texte ; le plafond mensuel s'applique | 4e | ✅ |
+| H126 | Un parent voit les annonces de l'année qui concernent l'un de ses enfants (toute l'école, son niveau ou sa classe) ; la page de l'enfant montre les 3 plus récentes | 4e | ✅ |
+| H127 | Une annonce publiée ne se modifie ni ne se supprime : une correction se fait par une nouvelle annonce | 4e | ✅ |

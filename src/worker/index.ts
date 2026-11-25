@@ -16,10 +16,12 @@ import { processNotice } from "@/modules/notifications/notices";
 import { renderDocument } from "@/modules/documents/documents";
 import { closePdfBrowser } from "@/modules/documents/pdf";
 import { enforceProductionEnv } from "@/server/env";
+import { enforceWritableStorage } from "@/server/storage";
 import { WORKER_HEARTBEAT_SECONDS, recordWorkerHeartbeat } from "@/server/health";
 
 if (existsSync(".env")) process.loadEnvFile(".env");
 enforceProductionEnv("worker");
+await enforceWritableStorage("worker");
 
 const url = process.env.DATABASE_URL;
 if (!url) {

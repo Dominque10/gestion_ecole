@@ -37,7 +37,7 @@ describe("healthReport", () => {
   it("signale le worker en panne tant qu'il n'est jamais passé", async () => {
     expect(await healthReport()).toEqual({
       status: "degraded",
-      checks: { database: "ok", queue: "ok", worker: "down" },
+      checks: { database: "ok", queue: "ok", worker: "down", storage: "ok" },
     });
   });
 
@@ -50,7 +50,7 @@ describe("healthReport", () => {
     expect(rows[0].n).toBe(1);
     expect(await healthReport()).toEqual({
       status: "ok",
-      checks: { database: "ok", queue: "ok", worker: "ok" },
+      checks: { database: "ok", queue: "ok", worker: "ok", storage: "ok" },
     });
   });
 
@@ -60,6 +60,20 @@ describe("healthReport", () => {
       `update app.worker_heartbeat set last_seen_at = now() - interval '${WORKER_STALE_SECONDS + 60} seconds'`,
     );
     expect((await healthReport()).checks.worker).toBe("down");
+  });
+});
+
+describe("dossier des fichiers", () => {
+  it("signalé en panne s'il n'accepte pas l'écriture (volume mal monté)", async () => {
+    const previous = process.env.STORAGE_DIR;
+    // Un fichier existant à la place du dossier.
+    process.env.STORAGE_DIR = "package.json";
+    try {
+      expect((await healthReport()).checks.storage).toBe("down");
+    } finally {
+      if (previous === undefined) delete process.env.STORAGE_DIR;
+      else process.env.STORAGE_DIR = previous;
+    }
   });
 });
 

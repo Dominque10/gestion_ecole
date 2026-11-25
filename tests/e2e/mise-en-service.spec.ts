@@ -11,7 +11,7 @@ test("la route de santé répond « ok » quand la base, la file et le worker to
   const response = await request.get("/api/v1/health");
   expect(await response.json()).toEqual({
     status: "ok",
-    checks: { database: "ok", queue: "ok", worker: "ok" },
+    checks: { database: "ok", queue: "ok", worker: "ok", storage: "ok" },
   });
   expect(response.headers()["cache-control"]).toContain("no-store");
 });

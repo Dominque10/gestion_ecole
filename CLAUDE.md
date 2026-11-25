@@ -27,6 +27,9 @@ Contraintes du terrain à garder en tête en permanence :
     démarrage refusé si réglage manquant ou faux prestataire, sauf `DEMO_MODE=true` (bandeau) ; en-têtes de
     sécurité (`next.config.ts`) ; `/api/v1/health` (base, file, worker via `app.record_worker_heartbeat`,
     migration 0043) ; hypothèses H138 à H142 validées (D31)
+  - ✅ Sc – Stockage des fichiers sur le disque (D30) : écriture atomique, fichiers 0600, dossier vérifié au
+    démarrage et par `/api/v1/health` ; `pnpm storage:check [--delete-orphans]` compare fichiers et base
+    (`FILE_KEY_QUERY` : toute nouvelle colonne `*_key` y est ajoutée, test à l'appui) ; hypothèses H143 à H145 validées (D32)
 - Phase 4 – Parents et pilote : **terminée, jalon technique validé le 2026-11-23 (D29)** ; bilan d'une école pilote et test « parent sans aide » à faire dès qu'une école est disponible. Plan réalisé : `docs/plan-phase-4.md` (D20), sous-étapes 4a → 4g
   - ✅ 4a – Connexion des parents par code SMS (`src/server/auth/parent.ts`, pages `/parent`), sélecteur d'enfant
     toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 validées (D21)

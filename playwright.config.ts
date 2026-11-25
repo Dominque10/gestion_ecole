@@ -1,7 +1,10 @@
+import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 import { e2eDatabaseUrls } from "./tests/e2e/env";
 
 const port = 3100;
+// Fichiers envoyés pendant les tests : dossier jetable, ignoré par Git (chemin absolu, exigé en production).
+const storageDir = path.resolve("test-results/e2e-storage");
 const db = e2eDatabaseUrls();
 // Valeurs propres aux tests de bout en bout (jamais celles du .env de développement).
 const secrets = {
@@ -43,8 +46,7 @@ export default defineConfig({
       url: `http://localhost:${port}`,
       reuseExistingServer: false,
       timeout: 180_000,
-      // Fichiers envoyés pendant les tests : dossier jetable, ignoré par Git.
-      env: { DATABASE_URL: db.app, STORAGE_DIR: "test-results/e2e-storage", ...secrets },
+      env: { DATABASE_URL: db.app, STORAGE_DIR: storageDir, ...secrets },
     },
     {
       // Worker des tâches de fond (documents PDF), sur la même base de test.
@@ -54,7 +56,7 @@ export default defineConfig({
       wait: { stdout: /\[worker\] démarré/ },
       reuseExistingServer: false,
       timeout: 60_000,
-      env: { DATABASE_URL: db.app, STORAGE_DIR: "test-results/e2e-storage", ...secrets },
+      env: { DATABASE_URL: db.app, STORAGE_DIR: storageDir, ...secrets },
     },
   ],
 });

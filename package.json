@@ -18,6 +18,7 @@
     "db:migrate": "node scripts/db-setup.mts",
     "superadmin:create": "node scripts/create-superadmin.mts",
     "password:reset": "node scripts/reset-password.mts",
+    "storage:check": "node scripts/storage-check.mts",
     "worker": "node --import tsx --conditions=react-server src/worker/index.ts"
   },
   "dependencies": {

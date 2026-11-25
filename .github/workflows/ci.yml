@@ -85,6 +85,8 @@ jobs:
           echo "$headers" | grep -qi "^strict-transport-security:"
           echo "$headers" | grep -qi "^content-security-policy:.*frame-ancestors 'none'"
           echo "$headers" | grep -qi "^x-content-type-options: nosniff"
+      - name: Vérification du stockage des fichiers (dans les conteneurs)
+        run: $COMPOSE run --rm app node scripts/storage-check.mts
       - name: Démarrage refusé avec un faux prestataire hors démonstration
         run: |
           set +e

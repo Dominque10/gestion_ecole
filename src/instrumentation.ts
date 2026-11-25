@@ -5,4 +5,6 @@ export async function register() {
   if (process.env.NEXT_PHASE === "phase-production-build") return;
   const { enforceProductionEnv } = await import("./server/env");
   enforceProductionEnv("app");
+  const { enforceWritableStorage } = await import("./server/storage");
+  await enforceWritableStorage("app");
 }

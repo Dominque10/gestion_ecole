@@ -7,6 +7,7 @@ const demo = {
   DATABASE_URL: "postgres://app_user:mdp@db:5432/gestion_scolaire",
   AUTH_SECRET: "a".repeat(44),
   APP_URL: "https://ecole.exemple.cg",
+  STORAGE_DIR: "/app/storage",
   DEMO_MODE: "true",
 };
 
@@ -90,6 +91,15 @@ describe("productionEnvProblems", () => {
       /^APP_URL doit commencer par https/,
     );
     expect(productionEnvProblems({ ...demo, APP_URL: "http://localhost:3100" })).toEqual([]);
+  });
+
+  it("exige un dossier de stockage en chemin absolu", () => {
+    expect(productionEnvProblems({ ...demo, STORAGE_DIR: undefined })).toEqual([
+      "STORAGE_DIR manquant (dossier des fichiers, ex. /app/storage)",
+    ]);
+    expect(productionEnvProblems({ ...demo, STORAGE_DIR: "storage" })).toEqual([
+      "STORAGE_DIR doit être un chemin absolu (ex. /app/storage)",
+    ]);
   });
 
   it("refuse une valeur ambiguë pour DEMO_MODE", () => {

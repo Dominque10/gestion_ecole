@@ -1,9 +1,11 @@
 // État de santé du service (mise en service, Sb), pour /api/v1/health et la surveillance externe (Se).
 // Réponse publique : uniquement « ok » / « en panne » par élément, aucune donnée ni message d'erreur.
+// Éléments : base, file d'attente, worker (dernier passage), dossier des fichiers (écriture possible).
 import "server-only";
 import { sql } from "drizzle-orm";
 import { withPublic } from "@/server/db/client";
 import { DOCUMENTS_QUEUE, NOTIFICATIONS_QUEUE, PAYMENTS_QUEUE, getJobQueue } from "@/server/jobs";
+import { LocalDiskStorage, storageRoot } from "@/server/storage";
 
 /** Le worker signale son passage toutes les 30 s ; au-delà de 3 min sans nouvelles, il est en panne. */
 export const WORKER_HEARTBEAT_SECONDS = 30;
@@ -12,7 +14,7 @@ export const WORKER_STALE_SECONDS = 180;
 export type CheckStatus = "ok" | "down";
 export type HealthReport = {
   status: "ok" | "degraded";
-  checks: { database: CheckStatus; queue: CheckStatus; worker: CheckStatus };
+  checks: { database: CheckStatus; queue: CheckStatus; worker: CheckStatus; storage: CheckStatus };
 };
 
 /** Une vérification trop lente compte comme une panne (la surveillance ne doit pas rester bloquée). */
@@ -48,7 +50,7 @@ async function workerLastSeen(): Promise<Date | null> {
 }
 
 export async function healthReport(): Promise<HealthReport> {
-  const [database, queue, worker] = await Promise.all([
+  const [database, queue, worker, storage] = await Promise.all([
     check(async () => {
       await withPublic((tx) => tx.execute(sql`select 1`));
       return true;
@@ -61,8 +63,13 @@ export async function healthReport(): Promise<HealthReport> {
       return true;
     }),
     check(async () => workerIsAlive(await workerLastSeen())),
+    // Dossier des fichiers inscriptible (volume monté, disque pas plein, droits corrects).
+    check(async () => {
+      await new LocalDiskStorage(storageRoot()).probe();
+      return true;
+    }),
   ]);
-  const checks = { database, queue, worker };
+  const checks = { database, queue, worker, storage };
   return {
     status: Object.values(checks).every((s) => s === "ok") ? "ok" : "degraded",
     checks,

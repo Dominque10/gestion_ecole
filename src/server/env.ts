@@ -3,6 +3,7 @@
 // empêche le démarrage, avec la liste des problèmes : mieux vaut un service arrêté qu'un parent qui
 // « paie » sans que l'argent arrive (faux prestataire) ou des liens de reçus signés avec un secret faible.
 // Hors production (développement, tests), rien n'est exigé.
+import path from "node:path";
 import { z } from "zod";
 
 /** Prestataires disponibles aujourd'hui : uniquement les faux (choix B4, B5 à venir). */
@@ -13,6 +14,7 @@ const EnvSchema = z.object({
   DATABASE_URL: z.string().optional(),
   AUTH_SECRET: z.string().optional(),
   APP_URL: z.string().optional(),
+  STORAGE_DIR: z.string().optional(),
   DEMO_MODE: z.string().optional(),
   PAYMENT_PROVIDER: z.string().optional(),
   PAYMENT_WEBHOOK_SECRET: z.string().optional(),
@@ -72,6 +74,13 @@ export function productionEnvProblems(input: Env = process.env): string[] {
     else if (url.protocol !== "https:" && !isLocalHost(url.hostname)) {
       problems.push("APP_URL doit commencer par https:// (mots de passe et codes SMS chiffrés)");
     }
+  }
+
+  // Fichiers : chemin absolu, monté sur un volume sauvegardé (pas un dossier relatif au code).
+  if (!env.STORAGE_DIR) {
+    problems.push("STORAGE_DIR manquant (dossier des fichiers, ex. /app/storage)");
+  } else if (!path.isAbsolute(env.STORAGE_DIR)) {
+    problems.push("STORAGE_DIR doit être un chemin absolu (ex. /app/storage)");
   }
 
   const providers = [

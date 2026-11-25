@@ -58,6 +58,7 @@ jobs:
           APP_DB_PASSWORD=$(openssl rand -hex 24)
           AUTH_SECRET=$(openssl rand -base64 32)
           APP_VERSION=ci
+          DEMO_MODE=true
           EOF
       - name: Construction des images
         run: $COMPOSE build
@@ -76,6 +77,23 @@ jobs:
         run: |
           for i in $(seq 1 30); do $COMPOSE logs worker | grep -q "\[worker\] démarré" && exit 0; sleep 2; done
           $COMPOSE logs worker; exit 1
+      - name: Santé du service (base, file, worker) et en-têtes de sécurité
+        run: |
+          for i in $(seq 1 30); do curl -skf https://localhost/api/v1/health -o /dev/null && break; sleep 2; done
+          curl -skf https://localhost/api/v1/health | grep -q '"status":"ok"'
+          headers=$(curl -skI https://localhost/connexion)
+          echo "$headers" | grep -qi "^strict-transport-security:"
+          echo "$headers" | grep -qi "^content-security-policy:.*frame-ancestors 'none'"
+          echo "$headers" | grep -qi "^x-content-type-options: nosniff"
+      - name: Démarrage refusé avec un faux prestataire hors démonstration
+        run: |
+          set +e
+          out=$($COMPOSE run --rm --no-deps -e DEMO_MODE=false app node_modules/.bin/next start 2>&1)
+          code=$?
+          set -e
+          echo "$out"
+          test "$code" -ne 0
+          echo "$out" | grep -q "démarrage refusé"
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:

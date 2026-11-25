@@ -302,6 +302,13 @@
       "when": 1795410753340,
       "tag": "0042_parent_policies_initplan",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1795603460207,
+      "tag": "0043_worker_heartbeat",
+      "breakpoints": true
     }
   ]
 }

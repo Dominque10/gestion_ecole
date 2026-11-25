@@ -10,6 +10,8 @@ x-app-env: &app-env
   APP_URL: https://${APP_DOMAIN:?}
   APP_TIMEZONE: Africa/Brazzaville
   STORAGE_DIR: /app/storage
+  # Faux prestataires refusés en production, sauf démonstration (bandeau visible sur chaque page).
+  DEMO_MODE: ${DEMO_MODE:-false}
   PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-fake}
   PAYMENT_API_KEY: ${PAYMENT_API_KEY:-}
   PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET:-}

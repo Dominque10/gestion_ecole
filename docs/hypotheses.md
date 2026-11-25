@@ -200,3 +200,15 @@ Plan validé : décision D20 (`docs/plan-phase-4.md`). Hypothèses complémentai
 | H135 | Une page « Exports Excel et PDF » réunit toutes les listes, avec leurs filtres (année, classe, dates, période) ; des boutons Excel et PDF aussi sur les pages Impayés et Résultats | 4g | ✅ |
 | H136 | Excel : montants en nombres (additionnables) au format « 150 000 FCFA », dates JJ/MM/AAAA, ligne de total, en-tête figé ; une saisie qui ressemble à une formule est neutralisée. PDF : A4 avec l'en-tête de l'école, paysage pour les tableaux larges, en-tête de tableau répété sur chaque page | 4g | ✅ |
 | H137 | Encaissements et absences : période d'un an au plus (par défaut, du 1er du mois à aujourd'hui) ; les annulations figurent en lignes négatives et le total est net | 4g | ✅ |
+
+## Mise en service
+
+Plan validé : décision D30 (`docs/plan-mise-en-service.md`). Hypothèses complémentaires :
+
+| # | Hypothèse | Où | Statut |
+|---|---|---|---|
+| H138 | En production, l'application et le worker **refusent de démarrer** si un réglage manque ou n'est pas sûr (base sans app_user, secret de moins de 32 caractères, adresse publique sans HTTPS, faux prestataire, secret des confirmations de paiement absent), avec la liste des problèmes dans le journal | Sb | ✅ |
+| H139 | Le mode démonstration s'active par `DEMO_MODE=true` (valeur exacte) ; il autorise les faux prestataires en production et affiche sur chaque page un bandeau jaune « Démonstration : aucun paiement ni message n'est réellement envoyé » | Sb | ✅ |
+| H140 | Route `/api/v1/health` publique, sans donnée : base, file d'attente et worker, chacun « ok » ou « down » ; réponse 200 si tout va bien, 503 sinon ; une vérification de plus de 5 s compte comme une panne | Sb | ✅ |
+| H141 | Le worker signale son passage toutes les 30 s ; il est déclaré en panne après **3 minutes** sans nouvelles | Sb | ✅ |
+| H142 | En-têtes de sécurité sur toutes les pages : HTTPS obligatoire pendant 1 an (HSTS), affichage dans le cadre d'un autre site interdit, contenus du seul site lui-même (scripts intégrés autorisés, faute de compatibilité des jetons avec le pré-rendu partiel), ni caméra, ni micro, ni position. À revoir quand le vrai prestataire de paiement sera choisi (B4), s'il impose une page ou un script externe | Sb | ✅ |

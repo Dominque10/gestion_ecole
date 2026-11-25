@@ -11,6 +11,8 @@ const secrets = {
   SMS_FAKE_OUTBOX: "test-results/sms-outbox.jsonl",
   // Faux prestataire de paiement : secret des messages de confirmation signés.
   PAYMENT_WEBHOOK_SECRET: "secret-e2e-des-paiements",
+  // « pnpm start » tourne en production : les faux prestataires n'y sont acceptés qu'en démonstration.
+  DEMO_MODE: "true",
 };
 
 export default defineConfig({

@@ -15,8 +15,11 @@ import { todayInBrazzaville } from "@/lib/dates";
 import { processNotice } from "@/modules/notifications/notices";
 import { renderDocument } from "@/modules/documents/documents";
 import { closePdfBrowser } from "@/modules/documents/pdf";
+import { enforceProductionEnv } from "@/server/env";
+import { WORKER_HEARTBEAT_SECONDS, recordWorkerHeartbeat } from "@/server/health";
 
 if (existsSync(".env")) process.loadEnvFile(".env");
+enforceProductionEnv("worker");
 
 const url = process.env.DATABASE_URL;
 if (!url) {
@@ -103,11 +106,23 @@ async function reconcileYesterday() {
 const reconcileTimer = setInterval(() => void reconcileYesterday(), 3600 * 1000);
 void reconcileYesterday();
 
+// Signal de vie, lu par /api/v1/health (mise en service, Sb).
+async function heartbeat() {
+  try {
+    await recordWorkerHeartbeat();
+  } catch (error) {
+    console.error("[worker] signal de vie en échec :", (error as Error).message);
+  }
+}
+const heartbeatTimer = setInterval(() => void heartbeat(), WORKER_HEARTBEAT_SECONDS * 1000);
+await heartbeat();
+
 console.log("[worker] prêt : documents, SMS et paiements en ligne");
 
 async function shutdown() {
   console.log("[worker] arrêt…");
   clearInterval(reconcileTimer);
+  clearInterval(heartbeatTimer);
   await boss.stop({ graceful: true, timeout: 10_000 });
   await closePdfBrowser();
   await closeDb();

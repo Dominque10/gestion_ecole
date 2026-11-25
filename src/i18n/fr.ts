@@ -5,6 +5,9 @@ export const fr = {
     name: "Gestion scolaire",
     description: "Gestion des élèves, des frais de scolarité et des bulletins",
   },
+  demo: {
+    banner: "Démonstration : aucun paiement ni message n'est réellement envoyé",
+  },
   home: {
     placeholder: "La plateforme est en cours de construction.",
     login: "Se connecter",

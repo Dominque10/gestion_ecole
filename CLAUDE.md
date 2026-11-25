@@ -38,6 +38,9 @@ Contraintes du terrain à garder en tête en permanence :
   - ✅ Se – Supervision (D35) : extérieure, UptimeRobot sur `/api/v1/health` (+ élément `disk`, panne sous 10 % libre)
     et Healthchecks.io pour les sauvegardes (`BACKUP_PING_URL`) ; journaux limités (10 × 20 Mo par service) ;
     réglages dans `docs/exploitation.md` ; hypothèses H151 à H154 validées (D36)
+  - ✅ Sf – Guide d'exploitation complet (`docs/exploitation.md`, chapitres 1 à 7), `deploy/install.sh` (aussi lancé par
+    la CI : `--skip-system --non-interactive`), `deploy/update.sh`, `.env.production.example` ; hypothèses H155 à H158
+    validées (D37). **Jalon restant : installation chronométrée sur un vrai VPS vide** (essai local : 6 min 28 s, hors système)
 - Phase 4 – Parents et pilote : **terminée, jalon technique validé le 2026-11-23 (D29)** ; bilan d'une école pilote et test « parent sans aide » à faire dès qu'une école est disponible. Plan réalisé : `docs/plan-phase-4.md` (D20), sous-étapes 4a → 4g
   - ✅ 4a – Connexion des parents par code SMS (`src/server/auth/parent.ts`, pages `/parent`), sélecteur d'enfant
     toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 validées (D21)

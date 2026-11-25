@@ -49,27 +49,22 @@ jobs:
       SMOKE_SUPERADMIN_PASSWORD: Mot-de-passe-ci-2026
     steps:
       - uses: actions/checkout@v4
-      - name: Réglages de production de test
+      - name: Installation par le script d'installation (sans question, système déjà prêt)
+        run: sudo -E bash deploy/install.sh --skip-system --non-interactive
+        env:
+          COMPOSE_EXTRA_FILE: deploy/ci/backup-local-repo.yml
+          APP_DOMAIN: localhost
+          ACME_EMAIL: ci@exemple.cg
+          DEMO_MODE: "true"
+          BACKUP_REPOSITORY: /repo
+          SUPERADMIN_EMAIL: ${{ env.SMOKE_SUPERADMIN_EMAIL }}
+          SUPERADMIN_NAME: Admin CI
+          SUPERADMIN_PASSWORD: ${{ env.SMOKE_SUPERADMIN_PASSWORD }}
+      - name: Réglages créés par l'installation, lisibles par root seul
         run: |
-          cat > .env.production <<EOF
-          APP_DOMAIN=localhost
-          ACME_EMAIL=ci@exemple.cg
-          POSTGRES_PASSWORD=$(openssl rand -hex 24)
-          APP_DB_PASSWORD=$(openssl rand -hex 24)
-          AUTH_SECRET=$(openssl rand -base64 32)
-          APP_VERSION=ci
-          DEMO_MODE=true
-          BACKUP_REPOSITORY=/repo
-          BACKUP_PASSWORD=$(openssl rand -base64 32)
-          EOF
-      - name: Construction des images
-        run: $COMPOSE build
-      - name: Démarrage
-        run: $COMPOSE up -d
-      - name: Création du super-admin (script d'installation)
-        run: >
-          $COMPOSE run --rm -e SUPERADMIN_PASSWORD=$SMOKE_SUPERADMIN_PASSWORD app
-          node scripts/create-superadmin.mts --email $SMOKE_SUPERADMIN_EMAIL --name "Admin CI"
+          test "$(stat -c %a .env.production)" = "600"
+          sudo chmod 644 .env.production
+          grep -q '^BACKUP_PASSWORD=[0-9a-f]\{4\}-' .env.production
       - name: Le site répond en HTTPS, HTTP redirige
         run: |
           for i in $(seq 1 60); do curl -skf https://localhost/connexion -o /dev/null && break; sleep 3; done

@@ -80,3 +80,4 @@
 | 2026-11-25 | **D34 — Hypothèses H146 à H150 (étape Sd, sauvegardes) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-25 | **D35 — Supervision (Se)** : surveillance par des services extérieurs gratuits (UptimeRobot pour `/api/v1/health`, Healthchecks.io pour les sauvegardes), qui envoient eux-mêmes les e-mails ; alertes vers une adresse dédiée, redirigée vers le porteur du projet (conseil accepté, H154). | Porteur du projet |
 | 2026-11-25 | **D36 — Hypothèses H151 à H154 (étape Se, supervision) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
+| 2026-11-25 | **D37 — Hypothèses H155 à H158 (étape Sf, installation et guide d'exploitation) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |

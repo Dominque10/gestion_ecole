@@ -1,0 +1,6 @@
+# CI uniquement : dépôt de sauvegarde dans un dossier de la machine de CI (au lieu de Backblaze B2),
+# pour tester sauvegarde → effacement complet → restauration (mise en service, Sd).
+services:
+  backup:
+    volumes:
+      - ./ci-backup-repo:/repo

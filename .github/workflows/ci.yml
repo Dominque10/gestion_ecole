@@ -44,7 +44,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     env:
-      COMPOSE: docker compose -f docker-compose.prod.yml --env-file .env.production
+      COMPOSE: docker compose -f docker-compose.prod.yml -f deploy/ci/backup-local-repo.yml --env-file .env.production
       SMOKE_SUPERADMIN_EMAIL: admin@exemple.cg
       SMOKE_SUPERADMIN_PASSWORD: Mot-de-passe-ci-2026
     steps:
@@ -59,6 +59,8 @@ jobs:
           AUTH_SECRET=$(openssl rand -base64 32)
           APP_VERSION=ci
           DEMO_MODE=true
+          BACKUP_REPOSITORY=/repo
+          BACKUP_PASSWORD=$(openssl rand -base64 32)
           EOF
       - name: Construction des images
         run: $COMPOSE build
@@ -107,6 +109,27 @@ jobs:
         run: pnpm exec playwright test -c playwright.smoke.config.ts
         env:
           SMOKE_URL: https://localhost
+      - name: "Sauvegarde puis restauration complète sur une base neuve : données identiques"
+        run: |
+          set -o pipefail
+          # Un fichier référencé par la base (logo de l'école créée par le test de fumée).
+          $COMPOSE exec -T app sh -c 'mkdir -p /app/storage/schools/ci && printf PNG > /app/storage/schools/ci/logo-1.png'
+          $COMPOSE exec -T db psql -U postgres -d gestion_scolaire -c             "update schools set logo_key = 'schools/ci/logo-1.png' where lower(code) = 'verif'" | grep -q "UPDATE 1"
+          $COMPOSE stop app worker
+          $COMPOSE exec -T db psql -U postgres -d gestion_scolaire -At -f - < deploy/backup/fingerprint.sql > fp-avant.txt
+          $COMPOSE run --rm backup backup
+          # Tout effacer (base, fichiers), sauf le dépôt de sauvegarde.
+          $COMPOSE down -v
+          $COMPOSE up -d db
+          $COMPOSE run --rm backup restore latest --confirmer | tee restauration.log
+          grep -E '^[a-z_]+ [0-9]+ [0-9a-f]{32}$' restauration.log > fp-apres.txt
+          diff fp-avant.txt fp-apres.txt
+          test "$(wc -l < fp-apres.txt)" -gt 30
+          grep -q "^schools 1 " fp-apres.txt
+          $COMPOSE up -d
+          $COMPOSE run --rm app node scripts/storage-check.mts
+          for i in $(seq 1 30); do curl -skf https://localhost/api/v1/health -o /dev/null && break; sleep 3; done
+          curl -skf https://localhost/api/v1/health | grep -q '"status":"ok"'
       - name: Journaux en cas d'échec
         if: failure()
         run: $COMPOSE ps -a && $COMPOSE logs --tail 200

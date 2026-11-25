@@ -42,3 +42,4 @@ Thumbs.db
 
 # Fichiers envoyés en local (logos, cachets, signatures)
 /storage/
+/ci-backup-repo/

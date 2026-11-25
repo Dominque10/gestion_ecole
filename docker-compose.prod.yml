@@ -65,6 +65,34 @@ services:
     depends_on:
       migrate: { condition: service_completed_successfully }
 
+  # Sauvegardes (Sd, décision D33) : base + fichiers chaque nuit, chiffrées (restic), copiées chez
+  # Backblaze B2 (tout stockage compatible S3 convient). Sauvegarde immédiate :
+  #   docker compose ... run --rm backup backup        Restauration : voir docs/exploitation.md
+  backup:
+    build: { context: ./deploy/backup }
+    image: gestion-scolaire-backup:${APP_VERSION:-latest}
+    restart: unless-stopped
+    environment:
+      TZ: Africa/Brazzaville
+      BACKUP_TIME: ${BACKUP_TIME:-02:30}
+      PGHOST: db
+      PGUSER: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD:?}
+      PGDATABASE: gestion_scolaire
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?}
+      # Ex. s3:https://s3.eu-central-003.backblazeb2.com/<bucket>/gestion-scolaire
+      RESTIC_REPOSITORY: ${BACKUP_REPOSITORY:?}
+      # Clé de chiffrement : gardée aussi par le porteur du projet (gestionnaire + copie papier).
+      RESTIC_PASSWORD: ${BACKUP_PASSWORD:?}
+      AWS_ACCESS_KEY_ID: ${BACKUP_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${BACKUP_SECRET_ACCESS_KEY:-}
+    volumes:
+      - storage:/data/storage
+      - backup-status:/status
+      - backup-cache:/root/.cache/restic
+    depends_on:
+      db: { condition: service_healthy }
+
   # Proxy HTTPS : certificat Let's Encrypt obtenu et renouvelé automatiquement pour APP_DOMAIN.
   caddy:
     image: caddy:2-alpine
@@ -85,5 +113,7 @@ services:
 volumes:
   db-data:
   storage:
+  backup-status:
+  backup-cache:
   caddy-data:
   caddy-config:

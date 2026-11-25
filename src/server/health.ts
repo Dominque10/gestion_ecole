@@ -1,7 +1,9 @@
 // État de santé du service (mise en service, Sb), pour /api/v1/health et la surveillance externe (Se).
 // Réponse publique : uniquement « ok » / « en panne » par élément, aucune donnée ni message d'erreur.
-// Éléments : base, file d'attente, worker (dernier passage), dossier des fichiers (écriture possible).
+// Éléments : base, file d'attente, worker (dernier passage), dossier des fichiers (écriture possible),
+// place libre sur le disque. Interrogée toutes les 5 min par UptimeRobot (Se), qui envoie les alertes.
 import "server-only";
+import { statfs } from "node:fs/promises";
 import { sql } from "drizzle-orm";
 import { withPublic } from "@/server/db/client";
 import { DOCUMENTS_QUEUE, NOTIFICATIONS_QUEUE, PAYMENTS_QUEUE, getJobQueue } from "@/server/jobs";
@@ -11,10 +13,22 @@ import { LocalDiskStorage, storageRoot } from "@/server/storage";
 export const WORKER_HEARTBEAT_SECONDS = 30;
 export const WORKER_STALE_SECONDS = 180;
 
+/**
+ * Disque : en panne sous 10 % de place libre. Le volume des fichiers est sur le même disque que la
+ * base et les journaux (volumes Docker du serveur) : sa place libre vaut pour tout le serveur.
+ */
+export const MIN_FREE_DISK_RATIO = 0.1;
+
 export type CheckStatus = "ok" | "down";
 export type HealthReport = {
   status: "ok" | "degraded";
-  checks: { database: CheckStatus; queue: CheckStatus; worker: CheckStatus; storage: CheckStatus };
+  checks: {
+    database: CheckStatus;
+    queue: CheckStatus;
+    worker: CheckStatus;
+    storage: CheckStatus;
+    disk: CheckStatus;
+  };
 };
 
 /** Une vérification trop lente compte comme une panne (la surveillance ne doit pas rester bloquée). */
@@ -39,6 +53,12 @@ export function workerIsAlive(lastSeen: Date | null, now: Date = new Date()): bo
   return now.getTime() - lastSeen.getTime() <= WORKER_STALE_SECONDS * 1000;
 }
 
+/** Assez de place libre sur le disque ? Testée. */
+export function diskHasRoom(stats: { bavail: number; blocks: number }): boolean {
+  if (stats.blocks <= 0) return false;
+  return stats.bavail / stats.blocks >= MIN_FREE_DISK_RATIO;
+}
+
 async function workerLastSeen(): Promise<Date | null> {
   const rows = await withPublic((tx) =>
     tx.execute<{ last_seen: string | Date | null }>(
@@ -50,7 +70,7 @@ async function workerLastSeen(): Promise<Date | null> {
 }
 
 export async function healthReport(): Promise<HealthReport> {
-  const [database, queue, worker, storage] = await Promise.all([
+  const [database, queue, worker, storage, disk] = await Promise.all([
     check(async () => {
       await withPublic((tx) => tx.execute(sql`select 1`));
       return true;
@@ -68,8 +88,9 @@ export async function healthReport(): Promise<HealthReport> {
       await new LocalDiskStorage(storageRoot()).probe();
       return true;
     }),
+    check(async () => diskHasRoom(await statfs(storageRoot()))),
   ]);
-  const checks = { database, queue, worker, storage };
+  const checks = { database, queue, worker, storage, disk };
   return {
     status: Object.values(checks).every((s) => s === "ok") ? "ok" : "degraded",
     checks,

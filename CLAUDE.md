@@ -35,6 +35,9 @@ Contraintes du terrain à garder en tête en permanence :
     (app et worker arrêtés) ; empreinte des tables `deploy/backup/fingerprint.sql` ; scénario complet testé en CI
     (sauvegarde → effacement → restauration → empreintes identiques) ; hypothèses H146 à H150 validées (D34).
     Docker fonctionne sur cette machine-ci (pas sur l'autre) : tester les images en local avec un projet séparé (`-p`)
+  - ✅ Se – Supervision (D35) : extérieure, UptimeRobot sur `/api/v1/health` (+ élément `disk`, panne sous 10 % libre)
+    et Healthchecks.io pour les sauvegardes (`BACKUP_PING_URL`) ; journaux limités (10 × 20 Mo par service) ;
+    réglages dans `docs/exploitation.md` ; hypothèses H151 à H154 validées (D36)
 - Phase 4 – Parents et pilote : **terminée, jalon technique validé le 2026-11-23 (D29)** ; bilan d'une école pilote et test « parent sans aide » à faire dès qu'une école est disponible. Plan réalisé : `docs/plan-phase-4.md` (D20), sous-étapes 4a → 4g
   - ✅ 4a – Connexion des parents par code SMS (`src/server/auth/parent.ts`, pages `/parent`), sélecteur d'enfant
     toutes écoles confondues, règles RLS « parent » ; hypothèses H107 à H110 validées (D21)

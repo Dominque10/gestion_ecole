@@ -2,6 +2,14 @@
 #   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 # Voir docs/exploitation.md (guide pas à pas) et .env.production.example (réglages).
 
+# Journaux (Se) : format compact de Docker, 10 fichiers de 20 Mo au plus par service, les plus
+# anciens supprimés d'abord ; ils ne peuvent pas remplir le disque. Lecture : docker compose ... logs.
+x-logging: &logging
+  driver: local
+  options:
+    max-size: 20m
+    max-file: "10"
+
 x-app-env: &app-env
   NODE_ENV: production
   DATABASE_URL: postgres://app_user:${APP_DB_PASSWORD:?}@db:5432/gestion_scolaire
@@ -21,6 +29,7 @@ x-app-env: &app-env
 
 services:
   db:
+    logging: *logging
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -38,6 +47,7 @@ services:
 
   # Crée le rôle app_user et applique les migrations, puis s'arrête. L'app attend sa réussite.
   migrate:
+    logging: *logging
     build: { context: ., target: app }
     image: gestion-scolaire-app:${APP_VERSION:-latest}
     command: ["node", "scripts/db-setup.mts"]
@@ -47,6 +57,7 @@ services:
     restart: "no"
 
   app:
+    logging: *logging
     image: gestion-scolaire-app:${APP_VERSION:-latest}
     restart: unless-stopped
     environment: *app-env
@@ -56,6 +67,7 @@ services:
       migrate: { condition: service_completed_successfully }
 
   worker:
+    logging: *logging
     build: { context: ., target: worker }
     image: gestion-scolaire-worker:${APP_VERSION:-latest}
     restart: unless-stopped
@@ -69,6 +81,7 @@ services:
   # Backblaze B2 (tout stockage compatible S3 convient). Sauvegarde immédiate :
   #   docker compose ... run --rm backup backup        Restauration : voir docs/exploitation.md
   backup:
+    logging: *logging
     build: { context: ./deploy/backup }
     image: gestion-scolaire-backup:${APP_VERSION:-latest}
     restart: unless-stopped
@@ -86,6 +99,8 @@ services:
       RESTIC_PASSWORD: ${BACKUP_PASSWORD:?}
       AWS_ACCESS_KEY_ID: ${BACKUP_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${BACKUP_SECRET_ACCESS_KEY:-}
+      # Supervision (Se) : adresse de contrôle Healthchecks.io (alerte si échec ou absence de sauvegarde).
+      BACKUP_PING_URL: ${BACKUP_PING_URL:-}
     volumes:
       - storage:/data/storage
       - backup-status:/status
@@ -95,6 +110,7 @@ services:
 
   # Proxy HTTPS : certificat Let's Encrypt obtenu et renouvelé automatiquement pour APP_DOMAIN.
   caddy:
+    logging: *logging
     image: caddy:2-alpine
     restart: unless-stopped
     ports:

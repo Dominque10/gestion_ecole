@@ -1,7 +1,9 @@
 #!/bin/sh
 # Sauvegarde de la base et des fichiers, chiffrée, copiée hors du serveur (décision D33).
 # Rétention : 7 quotidiennes, 4 hebdomadaires, 12 mensuelles. État de la dernière sauvegarde dans
-# /status/last.json (lu par la supervision, Se).
+# /status/last.json.
+# Supervision (Se) : si BACKUP_PING_URL est réglé (adresse de contrôle Healthchecks.io), signal au
+# début, à la réussite et à l'échec (avec l'étape) ; sans signal pendant 25 h, Healthchecks.io alerte.
 set -euo pipefail
 : "${RESTIC_REPOSITORY:?RESTIC_REPOSITORY manquant}"
 : "${RESTIC_PASSWORD:?RESTIC_PASSWORD manquant (clé de chiffrement des sauvegardes)}"
@@ -13,6 +15,12 @@ STATUS=/status/last.json
 mkdir -p "$WORK" /status
 
 log() { echo "[sauvegarde] $(date -u +%Y-%m-%dT%H:%M:%SZ) $*"; }
+# Un signal qui n'arrive pas ne doit jamais faire échouer la sauvegarde elle-même.
+ping() {
+  [ -n "${BACKUP_PING_URL:-}" ] || return 0
+  wget -q -T 10 -O /dev/null --post-data "$2" "${BACKUP_PING_URL%/}$1" 2>/dev/null \
+    || log "signal de supervision non envoyé (${1:-réussite})"
+}
 step=""
 finish() {
   code=$?
@@ -20,11 +28,13 @@ finish() {
   if [ "$code" -ne 0 ]; then
     log "ÉCHEC à l'étape : $step"
     printf '{"status":"failed","at":"%s","step":"%s"}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$step" > "$STATUS"
+    ping /fail "Sauvegarde en échec à l'étape : $step"
   fi
 }
 trap finish EXIT
 
 started=$(date +%s)
+ping /start ""
 step="dépôt de sauvegarde"
 if ! restic cat config > /dev/null 2>&1; then
   log "premier passage : création du dépôt chiffré"
@@ -53,3 +63,4 @@ fi
 printf '{"status":"ok","at":"%s","snapshot":"%s","seconds":%s}\n' \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$snapshot" "$(( $(date +%s) - started ))" > "$STATUS"
 log "terminée : instantané ${snapshot} en $(( $(date +%s) - started )) s"
+ping "" "Instantané ${snapshot} en $(( $(date +%s) - started )) s"

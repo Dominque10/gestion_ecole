@@ -3,6 +3,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { closeDb } from "@/server/db/client";
 import {
   WORKER_STALE_SECONDS,
+  diskHasRoom,
   healthReport,
   recordWorkerHeartbeat,
   workerIsAlive,
@@ -33,11 +34,19 @@ describe("workerIsAlive", () => {
   });
 });
 
+describe("diskHasRoom", () => {
+  it("en panne sous 10 % de place libre", () => {
+    expect(diskHasRoom({ bavail: 100, blocks: 1000 })).toBe(true);
+    expect(diskHasRoom({ bavail: 99, blocks: 1000 })).toBe(false);
+    expect(diskHasRoom({ bavail: 0, blocks: 0 })).toBe(false);
+  });
+});
+
 describe("healthReport", () => {
   it("signale le worker en panne tant qu'il n'est jamais passé", async () => {
     expect(await healthReport()).toEqual({
       status: "degraded",
-      checks: { database: "ok", queue: "ok", worker: "down", storage: "ok" },
+      checks: { database: "ok", queue: "ok", worker: "down", storage: "ok", disk: "ok" },
     });
   });
 
@@ -50,7 +59,7 @@ describe("healthReport", () => {
     expect(rows[0].n).toBe(1);
     expect(await healthReport()).toEqual({
       status: "ok",
-      checks: { database: "ok", queue: "ok", worker: "ok", storage: "ok" },
+      checks: { database: "ok", queue: "ok", worker: "ok", storage: "ok", disk: "ok" },
     });
   });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isDemoMode, productionEnvProblems } from "./env";
+import { isDemoMode, isDemoSite, productionEnvProblems } from "./env";
 
 /** Configuration de production complète, avec un vrai prestataire imaginaire remplacé par « fake ». */
 const demo = {
@@ -102,6 +102,21 @@ describe("productionEnvProblems", () => {
     ]);
   });
 
+  it("site de démonstration : DEMO_SITE vaut true ou false, et exige DEMO_MODE=true", () => {
+    expect(productionEnvProblems({ ...demo, DEMO_SITE: "true" })).toEqual([]);
+    expect(productionEnvProblems({ ...demo, DEMO_SITE: "oui" })[0]).toMatch(
+      /^DEMO_SITE doit valoir « true » ou « false »/,
+    );
+    expect(
+      productionEnvProblems({
+        ...demo,
+        DEMO_MODE: "false",
+        DEMO_SITE: "true",
+        PAYMENT_WEBHOOK_SECRET: "s".repeat(32),
+      }),
+    ).toContain("DEMO_SITE=true exige DEMO_MODE=true (site de démonstration : faux prestataires)");
+  });
+
   it("refuse une valeur ambiguë pour DEMO_MODE", () => {
     expect(productionEnvProblems({ ...demo, DEMO_MODE: "oui" })[0]).toMatch(
       /^DEMO_MODE doit valoir « true » ou « false »/,
@@ -115,5 +130,14 @@ describe("isDemoMode", () => {
     expect(isDemoMode({ DEMO_MODE: "false" })).toBe(false);
     expect(isDemoMode({ DEMO_MODE: "1" })).toBe(false);
     expect(isDemoMode({})).toBe(false);
+  });
+});
+
+describe("isDemoSite", () => {
+  it("n'est actif qu'avec DEMO_SITE=true et DEMO_MODE=true : jamais sur une vraie école", () => {
+    expect(isDemoSite({ DEMO_SITE: "true", DEMO_MODE: "true" })).toBe(true);
+    expect(isDemoSite({ DEMO_SITE: "true", DEMO_MODE: "false" })).toBe(false);
+    expect(isDemoSite({ DEMO_MODE: "true" })).toBe(false);
+    expect(isDemoSite({ DEMO_SITE: "1", DEMO_MODE: "true" })).toBe(false);
   });
 });

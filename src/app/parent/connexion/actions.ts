@@ -6,6 +6,8 @@ import { t } from "@/i18n";
 import { formatTime } from "@/lib/dates";
 import { requestParentCode, verifyParentCode } from "@/server/auth/parent";
 import { setSessionCookie } from "@/server/auth/session";
+import { isDemoSite } from "@/server/env";
+import { FakeSmsProvider } from "@/server/sms";
 
 export type ParentLoginState = {
   step: "phone" | "code";
@@ -19,7 +21,9 @@ export async function requestCodeAction(
   formData: FormData,
 ): Promise<ParentLoginState> {
   const phone = String(formData.get("telephone") ?? "").slice(0, 30);
-  const result = await requestParentCode(phone);
+  // Site de démonstration : le code n'est pas envoyé mais affiché (faux prestataire, décision D38).
+  const demo = isDemoSite() ? new FakeSmsProvider() : undefined;
+  const result = await requestParentCode(phone, demo);
   if (!result.ok) {
     return {
       step: "phone",
@@ -28,7 +32,9 @@ export async function requestCodeAction(
       error: t(result.reason === "phone" ? "parent.phoneInvalid" : "parent.sendingFailed"),
     };
   }
-  return { step: "code", phone, message: t("parent.codeSent"), error: null };
+  const demoCode = demo?.sent[0]?.body.match(/\d{6}/)?.[0];
+  const message = demoCode ? t("demo.parentCode", { code: demoCode }) : t("parent.codeSent");
+  return { step: "code", phone, message, error: null };
 }
 
 export async function verifyCodeAction(

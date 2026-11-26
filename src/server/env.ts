@@ -16,6 +16,7 @@ const EnvSchema = z.object({
   APP_URL: z.string().optional(),
   STORAGE_DIR: z.string().optional(),
   DEMO_MODE: z.string().optional(),
+  DEMO_SITE: z.string().optional(),
   PAYMENT_PROVIDER: z.string().optional(),
   PAYMENT_WEBHOOK_SECRET: z.string().optional(),
   SMS_PROVIDER: z.string().optional(),
@@ -27,6 +28,16 @@ type Env = Record<string, string | undefined>;
 /** Mode démonstration : faux prestataires acceptés en production, bandeau visible sur chaque page. */
 export function isDemoMode(env: Env = process.env): boolean {
   return env.DEMO_MODE === "true";
+}
+
+/**
+ * Site de démonstration public (Sg, décision D38) : école fictive remise à neuf chaque nuit, comptes
+ * affichés sur la page de connexion, code des parents affiché à l'écran. Exige aussi DEMO_MODE=true.
+ * Distinct de DEMO_MODE : une vraie école peut tourner en mode démonstration (faux prestataires, en
+ * attendant B4 et B5) sans jamais exposer ses comptes ni perdre ses données (hypothèse H159).
+ */
+export function isDemoSite(env: Env = process.env): boolean {
+  return env.DEMO_SITE === "true" && isDemoMode(env);
 }
 
 function isLocalHost(hostname: string): boolean {
@@ -49,6 +60,18 @@ export function productionEnvProblems(input: Env = process.env): string[] {
     !["true", "false"].includes(env.DEMO_MODE)
   ) {
     problems.push(`DEMO_MODE doit valoir « true » ou « false » (reçu : « ${env.DEMO_MODE} »)`);
+  }
+
+  if (
+    env.DEMO_SITE !== undefined &&
+    env.DEMO_SITE !== "" &&
+    !["true", "false"].includes(env.DEMO_SITE)
+  ) {
+    problems.push(`DEMO_SITE doit valoir « true » ou « false » (reçu : « ${env.DEMO_SITE} »)`);
+  } else if (env.DEMO_SITE === "true" && !demo) {
+    problems.push(
+      "DEMO_SITE=true exige DEMO_MODE=true (site de démonstration : faux prestataires)",
+    );
   }
 
   if (!env.DATABASE_URL) {
@@ -113,6 +136,9 @@ export function enforceProductionEnv(service: string, env: Env = process.env): v
   if (problems.length === 0) {
     if (env.NODE_ENV === "production" && isDemoMode(env)) {
       console.warn(`[${service}] MODE DÉMONSTRATION : aucun paiement ni message réel`);
+      if (isDemoSite(env)) {
+        console.warn(`[${service}] SITE DE DÉMONSTRATION : données fictives effacées chaque nuit`);
+      }
     }
     return;
   }

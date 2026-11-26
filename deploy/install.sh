@@ -5,7 +5,7 @@
 # Options :
 #   --skip-system       ne touche pas au système (Docker, pare-feu, swap déjà en place ; utilisé par la CI)
 #   --non-interactive   aucune question : les réponses viennent des variables d'environnement
-#                       (APP_DOMAIN, ACME_EMAIL, BACKUP_REPOSITORY, SUPERADMIN_EMAIL, SUPERADMIN_PASSWORD…)
+#                       (APP_DOMAIN, ACME_EMAIL, DEMO_SITE, BACKUP_REPOSITORY, SUPERADMIN_EMAIL…)
 # Le script peut être relancé : il garde le fichier .env.production existant et ses secrets.
 set -euo pipefail
 
@@ -89,7 +89,13 @@ else
   [ -n "$APP_DOMAIN" ] || fail "nom de domaine obligatoire"
   ask ACME_EMAIL "Adresse e-mail des alertes (certificat HTTPS)"
   [ -n "$ACME_EMAIL" ] || fail "adresse e-mail obligatoire"
-  ask DEMO_MODE "Mode démonstration, faux paiements et faux SMS (true/false)" "true"
+  ask DEMO_SITE "Site de démonstration public, école fictive remise à neuf chaque nuit (true/false)" "false"
+  [[ "$DEMO_SITE" =~ ^(true|false)$ ]] || fail "répondre true ou false"
+  if [ "$DEMO_SITE" = true ]; then
+    DEMO_MODE=true
+  else
+    ask DEMO_MODE "Mode démonstration, faux paiements et faux SMS (true/false)" "true"
+  fi
   ask BACKUP_REPOSITORY "Dépôt des sauvegardes B2 (s3:https://…/<bucket>/gestion-scolaire)"
   [ -n "$BACKUP_REPOSITORY" ] || fail "dépôt des sauvegardes obligatoire"
   ask BACKUP_ACCESS_KEY_ID "Clé d'application B2 : keyID" ""
@@ -113,6 +119,8 @@ POSTGRES_PASSWORD=$POSTGRES_PASSWORD
 APP_DB_PASSWORD=$APP_DB_PASSWORD
 AUTH_SECRET=$AUTH_SECRET
 DEMO_MODE=$DEMO_MODE
+DEMO_SITE=$DEMO_SITE
+$( [ "$DEMO_SITE" = true ] && echo "COMPOSE_PROFILES=demo" )
 PAYMENT_PROVIDER=fake
 PAYMENT_WEBHOOK_SECRET=$PAYMENT_WEBHOOK_SECRET
 SMS_PROVIDER=fake
@@ -189,6 +197,10 @@ elapsed=$(( $(date +%s) - started ))
 echo
 echo "=== Installation terminée en $(( elapsed / 60 )) min $(( elapsed % 60 )) s ==="
 echo "Site : https://$APP_DOMAIN"
+if grep -q '^DEMO_SITE=true' "$ENV_FILE"; then
+  echo "Site de démonstration : l'école fictive se crée en une minute environ (« ${COMPOSE[*]} logs demo »)."
+  echo "Comptes affichés sur la page de connexion ; remise à neuf chaque nuit à 03:30."
+fi
 if [ -n "$NEW_BACKUP_KEY" ]; then
   cat <<EOF
 

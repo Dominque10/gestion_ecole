@@ -81,3 +81,5 @@
 | 2026-11-25 | **D35 — Supervision (Se)** : surveillance par des services extérieurs gratuits (UptimeRobot pour `/api/v1/health`, Healthchecks.io pour les sauvegardes), qui envoient eux-mêmes les e-mails ; alertes vers une adresse dédiée, redirigée vers le porteur du projet (conseil accepté, H154). | Porteur du projet |
 | 2026-11-25 | **D36 — Hypothèses H151 à H154 (étape Se, supervision) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
 | 2026-11-25 | **D37 — Hypothèses H155 à H158 (étape Sf, installation et guide d'exploitation) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |
+| 2026-11-26 | **D38 — Site de démonstration (Sg)** : comptes de démonstration affichés dans un encadré de la page de connexion ; code du parent affiché à l'écran (aucun SMS) ; remise à neuf **automatique chaque nuit** ; le 1er trimestre de l'année en cours est présenté comme clôturé, bulletins publiés. | Porteur du projet |
+| 2026-11-26 | **D39 — Hypothèses H159 à H163 (étape Sg, site de démonstration) validées** par le porteur du projet (`docs/hypotheses.md`). | Porteur du projet |

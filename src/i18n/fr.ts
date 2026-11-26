@@ -7,6 +7,17 @@ export const fr = {
   },
   demo: {
     banner: "Démonstration : aucun paiement ni message n'est réellement envoyé",
+    accountsTitle: "Comptes de démonstration",
+    accountsIntro:
+      "École fictive, remise à neuf chaque nuit. Code de l'école : {code} ; mot de passe : {password}",
+    roles: {
+      director: "Direction",
+      secretary: "Secrétariat",
+      accountant: "Caisse",
+      teacher: "Enseignant",
+    },
+    parentAccount: "Espace parents : numéro {phone} (le code s'affiche à l'écran)",
+    parentCode: "Démonstration : aucun SMS n'est envoyé. Votre code est {code}.",
   },
   home: {
     placeholder: "La plateforme est en cours de construction.",

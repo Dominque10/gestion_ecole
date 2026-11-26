@@ -20,6 +20,9 @@ x-app-env: &app-env
   STORAGE_DIR: /app/storage
   # Faux prestataires refusés en production, sauf démonstration (bandeau visible sur chaque page).
   DEMO_MODE: ${DEMO_MODE:-false}
+  # Site de démonstration public (Sg) : école fictive, comptes affichés, remise à neuf chaque nuit.
+  # Jamais sur l'installation d'une vraie école. Active aussi le service « demo » (COMPOSE_PROFILES=demo).
+  DEMO_SITE: ${DEMO_SITE:-false}
   PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-fake}
   PAYMENT_API_KEY: ${PAYMENT_API_KEY:-}
   PAYMENT_WEBHOOK_SECRET: ${PAYMENT_WEBHOOK_SECRET:-}
@@ -72,6 +75,23 @@ services:
     image: gestion-scolaire-worker:${APP_VERSION:-latest}
     restart: unless-stopped
     environment: *app-env
+    volumes:
+      - storage:/app/storage
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  # Site de démonstration (Sg, décision D38) : crée l'école fictive au démarrage, puis la remet à neuf
+  # chaque nuit (DEMO_RESET_TIME, heure de Brazzaville). Lancé seulement avec COMPOSE_PROFILES=demo.
+  demo:
+    logging: *logging
+    profiles: ["demo"]
+    image: gestion-scolaire-worker:${APP_VERSION:-latest}
+    command:
+      ["node", "--import", "tsx", "--conditions=react-server", "scripts/demo-seed.mts", "--nightly"]
+    restart: unless-stopped
+    environment:
+      <<: *app-env
+      DEMO_RESET_TIME: ${DEMO_RESET_TIME:-03:30}
     volumes:
       - storage:/app/storage
     depends_on:

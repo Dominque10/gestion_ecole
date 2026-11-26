@@ -125,6 +125,19 @@ jobs:
           $COMPOSE run --rm app node scripts/storage-check.mts
           for i in $(seq 1 30); do curl -skf https://localhost/api/v1/health -o /dev/null && break; sleep 3; done
           curl -skf https://localhost/api/v1/health | grep -q '"status":"ok"'
+      - name: "Site de démonstration : refus hors démonstration, école fictive créée, comptes affichés"
+        run: |
+          # Installation ordinaire (DEMO_SITE absent) : le service demo refuse d'effacer quoi que ce soit.
+          ! $COMPOSE run --rm -T demo node --import tsx --conditions=react-server scripts/demo-seed.mts --reset
+          test "$($COMPOSE exec -T db psql -U postgres -d gestion_scolaire -Atc "select count(*) from schools where code = 'verif'")" = 1
+          export DEMO_SITE=true
+          $COMPOSE up -d app demo
+          for i in $(seq 1 60); do $COMPOSE logs demo | grep -q "Démonstration prête" && break; sleep 5; done
+          $COMPOSE logs demo
+          $COMPOSE logs demo | grep -q "Démonstration prête"
+          test "$($COMPOSE exec -T db psql -U postgres -d gestion_scolaire -Atc "select count(*) from enrollments")" = 146
+          for i in $(seq 1 30); do curl -skf https://localhost/api/v1/health -o /dev/null && break; sleep 3; done
+          curl -skf https://localhost/connexion | grep -q "Comptes de démonstration"
       - name: Journaux en cas d'échec
         if: failure()
         run: $COMPOSE ps -a && $COMPOSE logs --tail 200
